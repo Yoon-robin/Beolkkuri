@@ -1,0 +1,1665 @@
+import ast
+import os
+import shutil
+import json
+import zipfile
+import tempfile
+from datetime import datetime
+import re
+
+try:
+    from .settings_defaults import (
+        BLOOMS_AI_PATTERN,
+        DEFAULT_AFB,
+        DEFAULT_AI_PATTERN_PRESETS,
+        DEFAULT_AUTO_PLANTERS,
+        DEFAULT_BLENDER,
+        DEFAULT_CURRENT_PROFILE,
+        DEFAULT_FIELDS,
+        DEFAULT_ROBIN_AI_GATHER_PATTERN_PRESET,
+        DEFAULT_BLOOMS_AI_PATTERN_PRESET,
+        DEFAULT_ROBIN_AI_TOKEN_RANKING,
+        DEFAULT_ROBIN_AI_TOKEN_RANKINGS,
+        DEFAULT_GENERAL_SETTINGS,
+        DEFAULT_HOTBAR_TIMINGS,
+        DEFAULT_HOURLY_REPORT_BG,
+        DEFAULT_HOURLY_REPORT_HISTORY,
+        DEFAULT_HOURLY_REPORT_MAIN,
+        DEFAULT_MANUAL_PLANTERS,
+        DEFAULT_PROFILE_SETTINGS,
+        DEFAULT_STICKER_STACK,
+        DEFAULT_TIMINGS,
+        FIELD_PATTERN_PRESETS_KEY,
+        ROBIN_AI_GATHER_PATTERN,
+        ROBIN_AI_RUNTIME_DEFAULTS,
+        deepcopy_default,
+    )
+except ImportError:
+    # discordBot (and similar) historically import this module as a top-level
+    # `settingsManager` via sys.path, so relative imports have no parent package.
+    from settings_defaults import (
+        BLOOMS_AI_PATTERN,
+        DEFAULT_AFB,
+        DEFAULT_AI_PATTERN_PRESETS,
+        DEFAULT_AUTO_PLANTERS,
+        DEFAULT_BLENDER,
+        DEFAULT_CURRENT_PROFILE,
+        DEFAULT_FIELDS,
+        DEFAULT_ROBIN_AI_GATHER_PATTERN_PRESET,
+        DEFAULT_BLOOMS_AI_PATTERN_PRESET,
+        DEFAULT_ROBIN_AI_TOKEN_RANKING,
+        DEFAULT_ROBIN_AI_TOKEN_RANKINGS,
+        DEFAULT_GENERAL_SETTINGS,
+        DEFAULT_HOTBAR_TIMINGS,
+        DEFAULT_HOURLY_REPORT_BG,
+        DEFAULT_HOURLY_REPORT_HISTORY,
+        DEFAULT_HOURLY_REPORT_MAIN,
+        DEFAULT_MANUAL_PLANTERS,
+        DEFAULT_PROFILE_SETTINGS,
+        DEFAULT_STICKER_STACK,
+        DEFAULT_TIMINGS,
+        FIELD_PATTERN_PRESETS_KEY,
+        ROBIN_AI_GATHER_PATTERN,
+        ROBIN_AI_RUNTIME_DEFAULTS,
+        deepcopy_default,
+    )
+
+#returns a dictionary containing the settings
+profileName = DEFAULT_CURRENT_PROFILE
+# Track profile changes for running macro processes
+_profile_change_counter = 0
+_settings_key_file_cache = None
+
+# File to store current profile persistence (defined after getProjectRoot)
+CURRENT_PROFILE_FILE = None
+
+def loadCurrentProfile():
+    """Load the current profile from persistent storage"""
+    global profileName
+    try:
+        if os.path.exists(CURRENT_PROFILE_FILE):
+            with open(CURRENT_PROFILE_FILE, "r") as f:
+                saved_profile = f.read().strip()
+                if saved_profile and os.path.exists(getProfilePath(saved_profile)):
+                    profileName = saved_profile
+    except Exception as e:
+        print(f"Warning: Could not load current profile: {e}")
+
+def saveCurrentProfile():
+    """Save the current profile to persistent storage"""
+    try:
+        with open(CURRENT_PROFILE_FILE, "w") as f:
+            f.write(profileName)
+    except Exception as e:
+        print(f"Warning: Could not save current profile: {e}")
+
+# Load the current profile when the module is imported (called at the end of the file)
+
+# Get the project root directory (4 levels up from this file: src/modules/misc/settingsManager.py)
+def getProjectRoot():
+    """Get the project root directory path"""
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# File to store current profile persistence
+CURRENT_PROFILE_FILE = os.path.join(getProjectRoot(), "src", "data", "user", "current_profile.txt")
+ROBIN_AI_TOKEN_RANKINGS_FILE = os.path.join(getProjectRoot(), "src", "data", "user", "robin_ai_token_rankings.json")
+
+# Helper functions for common paths
+def getProfilesDir():
+    """Get the profiles directory path"""
+    return os.path.join(getProjectRoot(), "settings", "profiles")
+
+def getProfilePath(profile_name=None):
+    """Get the path to a specific profile directory"""
+    if profile_name is None:
+        profile_name = profileName
+    return os.path.join(getProfilesDir(), profile_name)
+
+def getUserDataDir():
+    """Get the runtime user data directory path."""
+    return os.path.join(getProjectRoot(), "src", "data", "user")
+
+def getUserDataPath(filename):
+    """Get an absolute path under the runtime user data directory."""
+    return os.path.join(getUserDataDir(), filename)
+
+def getDefaultSettingsPath():
+    """Deprecated: defaults now live in settings_defaults.py."""
+    return os.path.join(getProjectRoot(), "src", "data", "default_settings")
+
+def getDefaultProfileSettings():
+    """Return a deep copy of hardcoded profile settings defaults."""
+    return deepcopy_default(DEFAULT_PROFILE_SETTINGS)
+
+def getDefaultGeneralSettings():
+    """Return a deep copy of hardcoded general settings defaults."""
+    return deepcopy_default(DEFAULT_GENERAL_SETTINGS)
+
+def getSettingsDir():
+    """Get the settings directory path"""
+    return os.path.join(getProjectRoot(), "settings")
+
+def getPatternsDir():
+    """Get the patterns directory path"""
+    return os.path.join(getProjectRoot(), "settings", "patterns")
+
+def getRobinAIModelPath(model_filename):
+    """Get the fixed Robin AI model path under src/data/models."""
+    return os.path.join(getProjectRoot(), "src", "data", "models", model_filename)
+
+def resolveProjectPath(path_value):
+    """Resolve a path relative to the project root."""
+    if path_value is None:
+        return None
+
+    path_text = str(path_value).strip()
+    if not path_text:
+        return None
+
+    if os.path.isabs(path_text):
+        return os.path.normpath(path_text)
+
+    return os.path.normpath(os.path.join(getProjectRoot(), path_text))
+
+def loadDefaultFields():
+    """Load default field settings from hardcoded defaults."""
+    return deepcopy_default(DEFAULT_FIELDS)
+
+def _writeTextFile(path, content):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(content if content.endswith("\n") or content == "" else content + "\n")
+
+def _writeLiteralFile(path, value):
+    _writeTextFile(path, str(value))
+
+def _writeJsonFile(path, value):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(value, f, indent=3)
+        f.write("\n")
+
+def _writeFieldsFile(path, fields_data):
+    _writeTextFile(path, str(fields_data))
+
+def ensureProfileFiles(profile_name=None):
+    """Create missing profile settings/general/fields files from hardcoded defaults."""
+    if profile_name is None:
+        profile_name = profileName or DEFAULT_CURRENT_PROFILE
+    profile_path = getProfilePath(profile_name)
+    os.makedirs(profile_path, exist_ok=True)
+
+    settings_path = os.path.join(profile_path, "settings.txt")
+    general_path = os.path.join(profile_path, "generalsettings.txt")
+    fields_path = os.path.join(profile_path, "fields.txt")
+
+    if not os.path.exists(settings_path):
+        saveDict(settings_path, getDefaultProfileSettings())
+    if not os.path.exists(general_path):
+        saveDict(general_path, getDefaultGeneralSettings())
+    if not os.path.exists(fields_path):
+        _writeFieldsFile(fields_path, loadDefaultFields())
+
+def ensureUserFile(filename):
+    """Create a single runtime user file from hardcoded defaults if missing."""
+    path = getUserDataPath(filename)
+    if os.path.exists(path):
+        return path
+
+    os.makedirs(getUserDataDir(), exist_ok=True)
+    writers = {
+        "timings.txt": lambda: saveDict(path, deepcopy_default(DEFAULT_TIMINGS)),
+        "AFB.txt": lambda: saveDict(path, deepcopy_default(DEFAULT_AFB)),
+        "blender.txt": lambda: _writeLiteralFile(path, deepcopy_default(DEFAULT_BLENDER)),
+        "sticker_stack.txt": lambda: _writeTextFile(path, str(DEFAULT_STICKER_STACK)),
+        "hotbar_timings.txt": lambda: _writeLiteralFile(path, deepcopy_default(DEFAULT_HOTBAR_TIMINGS)),
+        "manualplanters.txt": lambda: _writeTextFile(path, DEFAULT_MANUAL_PLANTERS),
+        "auto_planters.json": lambda: _writeJsonFile(path, deepcopy_default(DEFAULT_AUTO_PLANTERS)),
+        "current_profile.txt": lambda: _writeTextFile(path, DEFAULT_CURRENT_PROFILE),
+        "hourly_report_history.txt": lambda: _writeLiteralFile(path, deepcopy_default(DEFAULT_HOURLY_REPORT_HISTORY)),
+        "hourly_report_main.txt": lambda: saveDict(path, deepcopy_default(DEFAULT_HOURLY_REPORT_MAIN)),
+        "hourly_report_bg.txt": lambda: saveDict(path, deepcopy_default(DEFAULT_HOURLY_REPORT_BG)),
+        "robin_ai_token_rankings.json": lambda: _writeJsonFile(path, deepcopy_default(DEFAULT_ROBIN_AI_TOKEN_RANKINGS)),
+    }
+    writer = writers.get(filename)
+    if writer is None:
+        raise ValueError(f"No hardcoded default registered for user file: {filename}")
+    writer()
+    return path
+
+def ensureRuntimeData():
+    """Create user/profile runtime directories and missing seed files."""
+    os.makedirs(getUserDataDir(), exist_ok=True)
+    os.makedirs(getProfilesDir(), exist_ok=True)
+
+    for filename in (
+        "timings.txt",
+        "AFB.txt",
+        "blender.txt",
+        "sticker_stack.txt",
+        "hotbar_timings.txt",
+        "manualplanters.txt",
+        "auto_planters.json",
+        "hourly_report_history.txt",
+        "hourly_report_main.txt",
+        "hourly_report_bg.txt",
+        "robin_ai_token_rankings.json",
+    ):
+        ensureUserFile(filename)
+
+    profiles = listProfiles()
+    if not profiles:
+        # Fresh install: create the default profile only when none exist.
+        ensureProfileFiles(DEFAULT_CURRENT_PROFILE)
+        if not os.path.exists(CURRENT_PROFILE_FILE):
+            _writeTextFile(CURRENT_PROFILE_FILE, DEFAULT_CURRENT_PROFILE)
+    else:
+        # Repair the active/persisted profile if its trio is incomplete.
+        # Never recreate a missing default profile while another profile exists.
+        target = profileName if os.path.isdir(getProfilePath(profileName)) else None
+        if target is None and os.path.exists(CURRENT_PROFILE_FILE):
+            try:
+                with open(CURRENT_PROFILE_FILE, "r") as f:
+                    saved = f.read().strip()
+                if saved and os.path.isdir(getProfilePath(saved)):
+                    target = saved
+            except Exception:
+                target = None
+        if target is None:
+            # Prefer an existing "default" profile when present, else first profile.
+            target = DEFAULT_CURRENT_PROFILE if DEFAULT_CURRENT_PROFILE in profiles else profiles[0]
+        ensureProfileFiles(target)
+        if not os.path.exists(CURRENT_PROFILE_FILE):
+            _writeTextFile(CURRENT_PROFILE_FILE, target)
+
+def loadUserSettingsFile(filename):
+    """Load a key=value user settings file, creating it from defaults if needed."""
+    return readSettingsFile(ensureUserFile(filename))
+
+def saveUserSettingsFile(filename, data):
+    saveDict(getUserDataPath(filename), data)
+
+def loadUserJson(filename):
+    path = ensureUserFile(filename)
+    with open(path, "r") as f:
+        return json.load(f)
+
+def saveUserJson(filename, data):
+    _writeJsonFile(getUserDataPath(filename), data)
+
+def loadUserText(filename):
+    path = ensureUserFile(filename)
+    with open(path, "r") as f:
+        return f.read()
+
+def saveUserText(filename, text):
+    _writeTextFile(getUserDataPath(filename), str(text))
+
+def loadUserLiteral(filename):
+    path = ensureUserFile(filename)
+    with open(path, "r") as f:
+        raw = f.read().strip()
+    if not raw:
+        if filename == "manualplanters.txt":
+            return []
+        if filename == "hourly_report_history.txt":
+            return []
+        return None
+    return ast.literal_eval(raw)
+
+def saveUserLiteral(filename, value):
+    _writeLiteralFile(getUserDataPath(filename), value)
+
+def _defaultsForSettingsPath(path):
+    """Resolve hardcoded defaults for known settings-style files."""
+    name = os.path.basename(path)
+    if name == "settings.txt":
+        return getDefaultProfileSettings()
+    if name == "generalsettings.txt":
+        return getDefaultGeneralSettings()
+    if name == "timings.txt":
+        return deepcopy_default(DEFAULT_TIMINGS)
+    if name == "AFB.txt":
+        return deepcopy_default(DEFAULT_AFB)
+    if name == "hourly_report_main.txt":
+        return deepcopy_default(DEFAULT_HOURLY_REPORT_MAIN)
+    if name == "hourly_report_bg.txt":
+        return deepcopy_default(DEFAULT_HOURLY_REPORT_BG)
+    return None
+
+def _stripAIGatherFieldKeys(settings):
+    if not isinstance(settings, dict):
+        return {}
+    return {key: value for key, value in settings.items() if not str(key).startswith("robin_ai_")}
+
+def _buildDefaultAIPatternPreset(pattern, settings=None):
+    """Build a starter AI pattern preset, keeping field-specific gather limits."""
+    defaults = DEFAULT_AI_PATTERN_PRESETS.get(pattern)
+    if not defaults:
+        return {}
+    base = _fieldSettingsWithoutPatternPresets(settings) if isinstance(settings, dict) else {}
+    return {**base, **defaults}
+
+def _ensureDefaultAIPatternPresets(settings):
+    """Insert default AI Gathering / BloomsAI pattern presets when a field is missing them."""
+    if not isinstance(settings, dict):
+        return {}
+
+    presets = _getFieldPatternPresets(settings)
+    missing = [pattern for pattern in DEFAULT_AI_PATTERN_PRESETS if pattern not in presets]
+    if not missing:
+        return settings
+
+    ensured = dict(settings)
+    for pattern in missing:
+        presets[pattern] = _buildDefaultAIPatternPreset(pattern, ensured)
+    ensured[FIELD_PATTERN_PRESETS_KEY] = presets
+    return ensured
+
+def normalizeFieldSettings(field_name, settings, default_fields=None):
+    """Merge bundled defaults into a field settings object."""
+    if default_fields is None:
+        default_fields = loadDefaultFields()
+
+    normalized = {}
+
+    default_field_settings = default_fields.get(field_name)
+    if isinstance(default_field_settings, dict):
+        normalized.update(
+            _stripAIGatherFieldKeys(_fieldSettingsWithoutPatternPresets(default_field_settings))
+        )
+
+    if isinstance(settings, dict):
+        normalized.update(
+            _stripAIGatherFieldKeys(_fieldSettingsWithoutPatternPresets(settings))
+        )
+
+    # Merge pattern presets. Settings win. Do not inherit bundled AI pattern presets
+    # onto existing fields — ensure builds those from the field's current values.
+    default_presets = {
+        pattern: preset
+        for pattern, preset in _getFieldPatternPresets(
+            default_field_settings if isinstance(default_field_settings, dict) else {}
+        ).items()
+        if pattern not in DEFAULT_AI_PATTERN_PRESETS
+    }
+    settings_presets = _getFieldPatternPresets(settings if isinstance(settings, dict) else {})
+    merged_presets = {**default_presets, **settings_presets}
+    if merged_presets:
+        normalized[FIELD_PATTERN_PRESETS_KEY] = merged_presets
+
+    return _ensureDefaultAIPatternPresets(normalized)
+
+def _getFieldPatternPresets(settings):
+    if not isinstance(settings, dict):
+        return {}
+    presets = settings.get(FIELD_PATTERN_PRESETS_KEY, {})
+    if isinstance(presets, dict):
+        return {
+            str(pattern): dict(preset)
+            for pattern, preset in presets.items()
+            if isinstance(preset, dict)
+        }
+    return {}
+
+def _fieldSettingsWithoutPatternPresets(settings):
+    if not isinstance(settings, dict):
+        return {}
+    return {
+        key: value
+        for key, value in settings.items()
+        if key != FIELD_PATTERN_PRESETS_KEY
+    }
+
+def _saveFieldPatternPreset(presets, pattern, settings):
+    if not pattern:
+        return
+    preset = _fieldSettingsWithoutPatternPresets(settings)
+    preset["shape"] = pattern
+    presets[pattern] = preset
+
+def getDefaultRobinAIGatherPatternPreset():
+    """Return a copy of the default AI Gathering pattern preset for the UI."""
+    return dict(DEFAULT_ROBIN_AI_GATHER_PATTERN_PRESET)
+
+def getDefaultBloomsAIPatternPreset():
+    """Return a copy of the default BloomsAI pattern preset for the UI."""
+    return dict(DEFAULT_BLOOMS_AI_PATTERN_PRESET)
+
+def _applyFieldPatternPresets(existing_settings, incoming_settings):
+    incoming_shape = incoming_settings.get("shape")
+    existing_shape = (
+        existing_settings.get("shape") if isinstance(existing_settings, dict) else None
+    )
+
+    presets = _getFieldPatternPresets(existing_settings)
+    presets.update(_getFieldPatternPresets(incoming_settings))
+    source_settings = incoming_settings if isinstance(incoming_settings, dict) else existing_settings
+    for pattern in DEFAULT_AI_PATTERN_PRESETS:
+        if pattern not in presets:
+            presets[pattern] = _buildDefaultAIPatternPreset(pattern, source_settings)
+
+    if existing_shape and existing_shape != incoming_shape:
+        _saveFieldPatternPreset(presets, existing_shape, existing_settings)
+
+    if existing_shape != incoming_shape and incoming_shape in presets:
+        merged_settings = {
+            **incoming_settings,
+            **presets[incoming_shape],
+            "shape": incoming_shape,
+        }
+    else:
+        merged_settings = dict(incoming_settings)
+
+    _saveFieldPatternPreset(presets, incoming_shape, merged_settings)
+    merged_settings[FIELD_PATTERN_PRESETS_KEY] = presets
+    return merged_settings
+
+def _fieldSettingsWithCurrentPatternPreset(settings):
+    if not isinstance(settings, dict):
+        return {}
+
+    exported_settings = dict(settings)
+    presets = _getFieldPatternPresets(exported_settings)
+    current_shape = exported_settings.get("shape")
+
+    if current_shape in presets:
+        exported_settings[FIELD_PATTERN_PRESETS_KEY] = {
+            current_shape: dict(presets[current_shape])
+        }
+    else:
+        exported_settings.pop(FIELD_PATTERN_PRESETS_KEY, None)
+
+    return exported_settings
+
+def _tokenRankingDefaults():
+    return {
+        "preferred_tokens": DEFAULT_ROBIN_AI_TOKEN_RANKING["preferred_tokens"],
+        "ignored_tokens": DEFAULT_ROBIN_AI_TOKEN_RANKING["ignored_tokens"],
+    }
+
+def loadRobinAITokenRankings():
+    """Load per-field AI Gathering token rankings from src/data/user."""
+    try:
+        path = ensureUserFile("robin_ai_token_rankings.json")
+        with open(path, "r") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return data
+    except Exception as e:
+        print(f"Warning: Could not load AI token rankings: {e}")
+    return deepcopy_default(DEFAULT_ROBIN_AI_TOKEN_RANKINGS)
+
+def saveRobinAITokenRankings(data):
+    os.makedirs(os.path.dirname(ROBIN_AI_TOKEN_RANKINGS_FILE), exist_ok=True)
+    with open(ROBIN_AI_TOKEN_RANKINGS_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+def _normalizeRobinAIModel(model):
+    value = str(model or "standard").strip().lower()
+    return value if value in ("standard", "light", "mini") else "standard"
+
+def loadRobinAITokenRanking(field_name, model="standard"):
+    rankings = loadRobinAITokenRankings()
+    field_rankings = rankings.get(field_name, {})
+    model = _normalizeRobinAIModel(model)
+    defaults = _tokenRankingDefaults()
+    if not isinstance(field_rankings, dict):
+        field_rankings = {}
+
+    # Existing files stored one flat ranking per field. Preserve it as Standard.
+    if "preferred_tokens" in field_rankings or "ignored_tokens" in field_rankings:
+        ranking = field_rankings if model == "standard" else {}
+    else:
+        ranking = field_rankings.get(model, {})
+    if not isinstance(ranking, dict):
+        ranking = {}
+    return {
+        "preferred_tokens": ranking.get("preferred_tokens") or defaults["preferred_tokens"],
+        "ignored_tokens": ranking.get("ignored_tokens") or defaults["ignored_tokens"],
+    }
+
+def saveRobinAITokenRanking(field_name, ranking, model="standard"):
+    rankings = loadRobinAITokenRankings()
+    model = _normalizeRobinAIModel(model)
+    field_rankings = rankings.get(field_name, {})
+    if not isinstance(field_rankings, dict):
+        field_rankings = {}
+    if "preferred_tokens" in field_rankings or "ignored_tokens" in field_rankings:
+        field_rankings = {"standard": field_rankings}
+
+    current = loadRobinAITokenRanking(field_name, model)
+    if isinstance(ranking, dict):
+        current["preferred_tokens"] = str(ranking.get("preferred_tokens", current["preferred_tokens"]))
+        current["ignored_tokens"] = str(ranking.get("ignored_tokens", current["ignored_tokens"]))
+    field_rankings[model] = current
+    rankings[field_name] = field_rankings
+    saveRobinAITokenRankings(rankings)
+    return current
+
+def getMacroVersion():
+    """Get the macro version from version.txt file"""
+    try:
+        destination = os.getcwd().replace("/src", "")
+        version_file = os.path.join(destination, "src", "webapp", "version.txt")
+        if os.path.exists(version_file):
+            with open(version_file, "r") as f:
+                version = f.read().strip()
+                return version if version else "1.0"
+    except Exception as e:
+        print(f"Warning: Could not read version.txt: {e}")
+    return "1.0"
+
+def listProfiles():
+    """List all available profiles"""
+    profiles_dir = getProfilesDir()
+    if os.path.exists(profiles_dir):
+        profiles = [d for d in os.listdir(profiles_dir) 
+                   if os.path.isdir(os.path.join(profiles_dir, d)) and not d.startswith('.')]
+        return sorted(profiles)
+    return []
+
+def getCurrentProfile():
+    """Get the current profile name"""
+    global profileName
+    return profileName
+
+def getProfileChangeCounter():
+    """Get the profile change counter for detecting profile switches"""
+    global _profile_change_counter
+    return _profile_change_counter
+
+def switchProfile(name):
+    """Switch to a different profile"""
+    global profileName
+    profiles_dir = getProfilesDir()
+    profile_path = os.path.join(profiles_dir, name)
+
+    if not os.path.exists(profile_path) or not os.path.isdir(profile_path):
+        return False, f"Profile '{name}' not found"
+
+    # Seed any missing required profile files from hardcoded defaults
+    ensureProfileFiles(name)
+
+    profileName = name
+    # Save the profile selection persistently
+    saveCurrentProfile()
+    # Increment the change counter to notify running processes
+    global _profile_change_counter
+    _profile_change_counter += 1
+
+    # Sync the new profile's field settings to general settings
+    initializeFieldSync()
+
+    return True, f"Switched to profile: {name}"
+
+def createProfile(name):
+    """Create a new profile using hardcoded default settings."""
+    global profileName
+    profiles_dir = getProfilesDir()
+
+    # Sanitize the profile name
+    name = name.strip().replace(' ', '_').lower()
+    if not name:
+        return False, "Profile name cannot be empty"
+
+    # Check if profile already exists
+    new_profile_path = os.path.join(profiles_dir, name)
+    if os.path.exists(new_profile_path):
+        return False, f"Profile '{name}' already exists"
+
+    # Create the new profile directory
+    try:
+        os.makedirs(new_profile_path, exist_ok=True)
+        ensureProfileFiles(name)
+        return True, f"Created profile: {name}"
+    except Exception as e:
+        # Clean up partial profile if creation failed
+        if os.path.exists(new_profile_path):
+            shutil.rmtree(new_profile_path)
+        return False, f"Failed to create profile: {str(e)}"
+
+def deleteProfile(name):
+    """Delete a profile (cannot delete current or last profile)"""
+    global profileName
+    profiles_dir = getProfilesDir()
+    
+    # Cannot delete current profile
+    if name == profileName:
+        return False, "Cannot delete the currently active profile"
+    
+    # Cannot delete if it's the only profile
+    profiles = listProfiles()
+    if len(profiles) <= 1:
+        return False, "Cannot delete the only remaining profile"
+    
+    profile_path = os.path.join(profiles_dir, name)
+    if not os.path.exists(profile_path):
+        return False, f"Profile '{name}' not found"
+    
+    try:
+        shutil.rmtree(profile_path)
+        return True, f"Deleted profile: {name}"
+    except Exception as e:
+        return False, f"Failed to delete profile: {str(e)}"
+
+def renameProfile(old_name, new_name):
+    """Rename a profile"""
+    global profileName
+    profiles_dir = getProfilesDir()
+    
+    # Sanitize the new name
+    new_name = new_name.strip().replace(' ', '_').lower()
+    if not new_name:
+        return False, "New profile name cannot be empty"
+    
+    old_path = os.path.join(profiles_dir, old_name)
+    new_path = os.path.join(profiles_dir, new_name)
+    
+    if not os.path.exists(old_path):
+        return False, f"Profile '{old_name}' not found"
+    
+    if os.path.exists(new_path):
+        return False, f"Profile '{new_name}' already exists"
+    
+    try:
+        os.rename(old_path, new_path)
+        # If we renamed the current profile, update the reference
+        if old_name == profileName:
+            profileName = new_name
+            saveCurrentProfile()
+        return True, f"Renamed profile from '{old_name}' to '{new_name}'"
+    except Exception as e:
+        return False, f"Failed to rename profile: {str(e)}"
+
+def duplicateProfile(source_name, new_name):
+    """Duplicate an existing profile with a new name"""
+    profiles_dir = getProfilesDir()
+    
+    # Sanitize the new name
+    new_name = new_name.strip().replace(' ', '_').lower()
+    if not new_name:
+        return False, "New profile name cannot be empty"
+    
+    source_path = os.path.join(profiles_dir, source_name)
+    new_path = os.path.join(profiles_dir, new_name)
+    
+    if not os.path.exists(source_path):
+        return False, f"Source profile '{source_name}' not found"
+    
+    if os.path.exists(new_path):
+        return False, f"Profile '{new_name}' already exists"
+    
+    try:
+        shutil.copytree(source_path, new_path)
+        return True, f"Duplicated profile '{source_name}' as '{new_name}'"
+    except Exception as e:
+        return False, f"Failed to duplicate profile: {str(e)}"
+
+def readSettingsFile(path, defaults=None):
+    #get each line
+    #read the file, format it to:
+    #[[key, value], [key, value]]
+    if not os.path.exists(path):
+        resolved = defaults if defaults is not None else _defaultsForSettingsPath(path)
+        if resolved is not None:
+            data = deepcopy_default(resolved)
+            saveDict(path, data)
+            return data
+        raise FileNotFoundError(f"[Errno 2] No such file or directory: {path!r}")
+
+    with open(path) as f:
+        raw = f.read()
+
+    # If `max_convert_time=` was accidentally concatenated onto the previous line,
+    # insert a newline before it so it becomes its own setting line.
+    raw = re.sub(r'(?<!\n)max_convert_time=', r'\nmax_convert_time=', raw)
+
+    data = [[x.strip() for x in y.split("=", 1)] for y in raw.split("\n") if y]
+    #convert to a dict
+    resolved_defaults = defaults if defaults is not None else _defaultsForSettingsPath(path)
+    out = {}
+    for k, v in data:
+        parsed = _parseSettingValue(v)
+        # Keep string-typed settings as strings (tokens, snowflake IDs, URLs, etc.)
+        # even when the raw value looks numeric.
+        if resolved_defaults is not None:
+            default_val = resolved_defaults.get(k)
+            if isinstance(default_val, str) and not isinstance(parsed, str):
+                parsed = "" if parsed is None else str(parsed)
+        out[k] = parsed
+    return out
+
+def _parseSettingValue(value):
+    """Parse a settings-file value while preserving unquoted strings."""
+    try:
+        return ast.literal_eval(value)
+    except Exception:
+        if value.isdigit():
+            return int(value)
+        if value.replace(".", "", 1).isdigit():
+            return float(value)
+        return value
+
+def _coerceScalarValue(value):
+    """Normalize numeric strings loaded from legacy profile files."""
+    if isinstance(value, str):
+        return _parseSettingValue(value)
+    return value
+
+def _coerceNestedValues(value):
+    if isinstance(value, dict):
+        return {k: _coerceNestedValues(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_coerceNestedValues(v) for v in value]
+    return _coerceScalarValue(value)
+
+def _chooseRepairValue(existing_value, incoming_value, default_value):
+    """Prefer explicit user values over defaults when repairing misplaced keys."""
+    if existing_value is None:
+        return incoming_value
+    if existing_value == incoming_value:
+        return existing_value
+    if existing_value == default_value and incoming_value != default_value:
+        return incoming_value
+    return existing_value
+
+def _getDefaultSettingsKeySets():
+    """Return known keys for profile and general settings defaults."""
+    global _settings_key_file_cache
+
+    if _settings_key_file_cache is not None:
+        return _settings_key_file_cache
+
+    _settings_key_file_cache = {
+        "profile": set(DEFAULT_PROFILE_SETTINGS.keys()),
+        "general": set(DEFAULT_GENERAL_SETTINGS.keys()),
+    }
+    return _settings_key_file_cache
+
+def _resolveSettingsFileType(setting, requested_type):
+    """Prefer the file that owns this setting in defaults, falling back to the requested type."""
+    key_sets = _getDefaultSettingsKeySets()
+
+    if setting in key_sets["profile"] and setting not in key_sets["general"]:
+        return "profile"
+    if setting in key_sets["general"] and setting not in key_sets["profile"]:
+        return "general"
+    return requested_type
+
+def saveDict(path, data):
+    out = "\n".join([f"{k}={v}" for k,v in data.items()])
+    # Ensure file ends with a newline to avoid accidental concatenation
+    if not out.endswith("\n"):
+        out = out + "\n"
+    abs_path = os.path.abspath(path)
+    directory = os.path.dirname(abs_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    # Write to a temp file then replace, so a concurrent reader never sees a
+    # truncated/empty settings file mid-save.
+    fd, tmp_path = tempfile.mkstemp(prefix=".settings_", suffix=".tmp", dir=directory or None)
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(out)
+        os.replace(tmp_path, abs_path)
+    except Exception:
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
+
+#update one property of a setting
+def saveSettingFile(setting,value, path):
+    #get the dictionary, creating from defaults when possible
+    if os.path.exists(path):
+        data = readSettingsFile(path)
+    else:
+        defaults = _defaultsForSettingsPath(path)
+        data = deepcopy_default(defaults) if defaults is not None else {}
+    #update the dictionary
+    data[setting] = value
+    #write it
+    saveDict(path, data)
+
+def removeSettingFile(setting, path):
+    #get the dictionary
+    data = readSettingsFile(path)
+    #remove the setting if it exists
+    if setting in data:
+        del data[setting]
+        #write it back
+        saveDict(path, data)
+
+def _readFieldsFile(fields_path):
+    if not os.path.exists(fields_path):
+        return loadDefaultFields()
+    with open(fields_path) as f:
+        raw = f.read().strip()
+    if not raw:
+        return loadDefaultFields()
+    return ast.literal_eval(raw)
+
+def _repairFieldsData(fields_data, default_fields):
+    repaired = _coerceNestedValues(fields_data)
+    updated = False
+
+    for field_name, default_field_settings in default_fields.items():
+        if field_name not in repaired or not isinstance(repaired[field_name], dict):
+            repaired[field_name] = dict(default_field_settings)
+            updated = True
+            continue
+
+        field_settings = repaired[field_name]
+        for key, default_value in default_field_settings.items():
+            if key not in field_settings:
+                field_settings[key] = default_value
+                updated = True
+
+    return repaired, updated
+
+def _loadFieldsFile(fields_path, repair=True):
+    if not os.path.exists(fields_path):
+        fields_data = loadDefaultFields()
+        _writeFieldsFile(fields_path, fields_data)
+        if not repair:
+            return fields_data
+    else:
+        fields_data = _readFieldsFile(fields_path)
+
+    if not repair:
+        return _coerceNestedValues(fields_data)
+
+    default_fields = loadDefaultFields()
+    fields_data, updated = _repairFieldsData(fields_data, default_fields)
+    if updated:
+        _writeFieldsFile(fields_path, fields_data)
+    return fields_data
+
+def loadFields():
+    ensureProfileFiles()
+    fields_path = os.path.join(getProfilePath(), "fields.txt")
+    out = _loadFieldsFile(fields_path)
+
+    default_fields = loadDefaultFields()
+    fieldsUpdated = False
+    for field, settings in out.items():
+        normalized = normalizeFieldSettings(field, settings, default_fields)
+        if normalized != settings:
+            out[field] = normalized
+            fieldsUpdated = True
+
+    if fieldsUpdated:
+        _writeFieldsFile(fields_path, out)
+
+    return out
+
+def saveField(field, settings):
+    fieldsData = loadFields()
+    existingSettings = fieldsData.get(field, {})
+    normalizedSettings = normalizeFieldSettings(field, settings)
+    fieldsData[field] = _applyFieldPatternPresets(existingSettings, normalizedSettings)
+    fields_path = os.path.join(getProfilePath(), "fields.txt")
+    _writeFieldsFile(fields_path, fieldsData)
+
+def exportFieldSettings(field_name):
+    """Export field settings as JSON string with metadata"""
+    fields_data = loadFields()
+    if field_name in fields_data:
+        field_settings = _fieldSettingsWithCurrentPatternPreset(fields_data[field_name])
+        # Create export data with metadata
+        export_data = {
+            "metadata": {
+                "field_name": field_name,
+                "macro_version": getMacroVersion(),
+                "export_date": datetime.now().isoformat()
+            },
+            "settings": field_settings
+        }
+        return json.dumps(export_data, indent=2)
+    else:
+        raise ValueError(f"Field '{field_name}' not found in current profile")
+
+def importFieldSettings(field_name, json_settings):
+    """Import field settings from JSON string with backward compatibility"""
+    try:
+        data = json.loads(json_settings)
+        
+        # Handle new format with metadata
+        if isinstance(data, dict) and "metadata" in data and "settings" in data:
+            settings = data["settings"]
+            metadata = data.get("metadata", {})
+            exported_field = metadata.get("field_name", "unknown")
+            macro_version = metadata.get("macro_version", "unknown")
+        # Handle old format (direct settings object)
+        else:
+            settings = data
+            exported_field = "unknown"
+            macro_version = "unknown"
+        
+        # Validate that settings is a dictionary
+        if not isinstance(settings, dict):
+            raise ValueError("Invalid JSON format: expected object")
+
+        imported_token_ranking = None
+        if "robin_ai_preferred_tokens" in settings or "robin_ai_ignored_tokens" in settings:
+            imported_token_ranking = {
+                "preferred_tokens": settings.get("robin_ai_preferred_tokens"),
+                "ignored_tokens": settings.get("robin_ai_ignored_tokens"),
+            }
+
+        settings = normalizeFieldSettings(field_name, settings)
+
+        # Check for missing patterns and replace with defaults
+        missing_patterns = []
+        warnings = []
+        available_patterns = getAvailablePatterns()
+
+        if "shape" in settings:
+            requested_pattern = settings["shape"]
+            if requested_pattern not in available_patterns:
+                # Replace with first available pattern (default)
+                default_pattern = available_patterns[0] if available_patterns else "cornerxe_lol"
+                settings["shape"] = default_pattern
+                missing_patterns.append(f"'{requested_pattern}' → '{default_pattern}'")
+
+        if settings.get("shape") in ("robin_ai_gather", "blooms_ai"):
+            token_model = getRobinAIModelPath("token_detection_standard.mlmodelc")
+            token_model_onnx = getRobinAIModelPath("token_detection_standard.onnx")
+            sprinkler_model = getRobinAIModelPath("sprinkler_detection_standard.mlmodelc")
+            sprinkler_model_onnx = getRobinAIModelPath("sprinkler_detection_standard.onnx")
+            if settings.get("shape") == "robin_ai_gather" and not os.path.exists(token_model) and not os.path.exists(token_model_onnx):
+                warnings.append("Missing token model: src/data/models/token_detection_standard.mlmodelc or src/data/models/token_detection_standard.onnx")
+            if settings.get("shape") == "blooms_ai":
+                blooms_model_names = {
+                    "standard": (
+                        "bloom_detection_standard.mlmodelc",
+                        "bloom_detection_standard.onnx",
+                    ),
+                    "light": (
+                        "bloom_detection_light.mlmodelc",
+                        "bloom_detection_light.onnx",
+                    ),
+                    "mini": (
+                        "bloom_detection_mini.mlmodelc",
+                        "bloom_detection_mini.onnx",
+                    ),
+                }
+                selected_blooms_model = str(settings.get("blooms_ai_model", "Standard")).strip().lower()
+                blooms_coreml, blooms_onnx = blooms_model_names.get(
+                    selected_blooms_model, blooms_model_names["standard"]
+                )
+                if not os.path.exists(getRobinAIModelPath(blooms_coreml)) and not os.path.exists(
+                    getRobinAIModelPath(blooms_onnx)
+                ):
+                    warnings.append(
+                        f"Missing BloomsAI model: src/data/models/{blooms_coreml} or src/data/models/{blooms_onnx}"
+                    )
+            if not os.path.exists(sprinkler_model) and not os.path.exists(sprinkler_model_onnx):
+                warnings.append("Missing sprinkler model: src/data/models/sprinkler_detection_standard.mlmodelc or src/data/models/sprinkler_detection_standard.onnx")
+
+        # Save the imported settings
+        saveField(field_name, settings)
+        if imported_token_ranking is not None:
+            saveRobinAITokenRanking(field_name, imported_token_ranking)
+
+        # Return success with information about any pattern replacements and metadata
+        result = {
+            "success": True,
+            "missing_patterns": missing_patterns,
+            "warnings": warnings,
+            "imported_from_field": exported_field,
+            "macro_version": macro_version
+        }
+        return result
+
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+def _isPlanterSettingKey(key):
+    """Return True when a profile setting belongs to the planters tab."""
+    if key in {
+        "planters_mode",
+        "manual_planters_collect_every",
+        "manual_planters_collect_full",
+        "manual_planters_check",
+        "planters_collect_loot",
+        "auto_planters_collect_every",
+        "auto_planters_collect_full",
+        "auto_planters_collect_auto",
+        "auto_planters_check",
+        "auto_max_planters",
+        "auto_preset",
+    }:
+        return True
+
+    if re.match(r"^cycle\d+_\d+_(planter|field|gather|glitter)$", key):
+        return True
+
+    if re.match(r"^auto_priority_\d+_(nectar|min)$", key):
+        return True
+
+    return (
+        key.startswith("auto_field_")
+        or key.startswith("auto_planter_")
+        or key.startswith("planter_hotbar_")
+    )
+
+def _getAutoPlanterUserPath():
+    return os.path.join(getProjectRoot(), "src", "data", "user", "auto_planters.json")
+
+def _readAutoPlanterGatherFlag():
+    try:
+        with open(_getAutoPlanterUserPath(), "r") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return bool(data.get("gather", False))
+    except Exception:
+        pass
+    return False
+
+def _writeAutoPlanterGatherFlag(value):
+    path = _getAutoPlanterUserPath()
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            data = {}
+    except Exception:
+        data = {}
+
+    data["gather"] = bool(value)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=3)
+
+def exportPlanterSettings():
+    """Export planter profile settings as JSON string with metadata."""
+    settings = loadSettings()
+    planter_settings = {
+        key: value
+        for key, value in settings.items()
+        if _isPlanterSettingKey(key)
+    }
+
+    export_data = {
+        "metadata": {
+            "settings_type": "planters",
+            "macro_version": getMacroVersion(),
+            "export_date": datetime.now().isoformat()
+        },
+        "settings": planter_settings,
+        "user_settings": {
+            "auto_planters_gather": _readAutoPlanterGatherFlag()
+        }
+    }
+    return json.dumps(export_data, indent=2)
+
+def importPlanterSettings(json_settings):
+    """Import planter settings from JSON string with backward compatibility."""
+    try:
+        data = json.loads(json_settings)
+
+        if isinstance(data, dict) and "metadata" in data and "settings" in data:
+            settings = data["settings"]
+            user_settings = data.get("user_settings", {})
+            metadata = data.get("metadata", {})
+            macro_version = metadata.get("macro_version", "unknown")
+        else:
+            settings = data
+            user_settings = data if isinstance(data, dict) else {}
+            macro_version = "unknown"
+
+        if not isinstance(settings, dict):
+            raise ValueError("Invalid JSON format: expected object")
+
+        planter_settings = {
+            key: _coerceNestedValues(value)
+            for key, value in settings.items()
+            if _isPlanterSettingKey(key)
+        }
+
+        if not planter_settings and "auto_planters_gather" not in user_settings:
+            raise ValueError("No planter settings found in JSON")
+
+        if planter_settings:
+            saveDictProfileSettings(planter_settings)
+
+        if isinstance(user_settings, dict) and "auto_planters_gather" in user_settings:
+            _writeAutoPlanterGatherFlag(user_settings["auto_planters_gather"])
+
+        return {
+            "success": True,
+            "imported_settings_count": len(planter_settings),
+            "macro_version": macro_version
+        }
+
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+def getAvailablePatterns():
+    """Get list of available pattern names"""
+    patterns_dir = getPatternsDir()
+    if os.path.exists(patterns_dir):
+        out = []
+        for filename in os.listdir(patterns_dir):
+            root, ext = os.path.splitext(filename)
+            if ext.lower() in (".py", ".ahk"):
+                out.append(root)
+        return sorted(out)
+    return []
+
+def syncFieldSettings(setting, value):
+    """Synchronize field settings from profile to general settings"""
+    try:
+        # Update the general settings file
+        generalSettingsPath = os.path.join(getProfilePath(), "generalsettings.txt")
+        generalData = readSettingsFile(generalSettingsPath)
+        generalData[setting] = value
+        saveDict(generalSettingsPath, generalData)
+    except Exception as e:
+        print(f"Warning: Could not sync field settings to general settings: {e}")
+
+def syncFieldSettingsToProfile(setting, value):
+    """Synchronize field settings from general to profile settings"""
+    try:
+        # Update the profile settings file
+        profileSettingsPath = os.path.join(getProfilePath(), "settings.txt")
+        profileData = readSettingsFile(profileSettingsPath)
+        profileData[setting] = value
+        saveDict(profileSettingsPath, profileData)
+    except Exception as e:
+        print(f"Warning: Could not sync field settings to profile settings: {e}")
+
+def saveProfileSetting(setting, value):
+    if _resolveSettingsFileType(setting, "profile") == "general":
+        saveGeneralSetting(setting, value)
+        return
+
+    settings_path = os.path.join(getProfilePath(), "settings.txt")
+    saveSettingFile(setting, value, settings_path)
+    # Synchronize field settings with general settings
+    if setting in ["fields", "fields_enabled"]:
+        syncFieldSettings(setting, value)
+
+def saveDictProfileSettings(dict):
+    settings_path = os.path.join(getProfilePath(), "settings.txt")
+    saveDict(settings_path, {**readSettingsFile(settings_path), **dict})
+
+#increment a setting, and return the dictionary for the setting
+def incrementProfileSetting(setting, incrValue):
+    #get the dictionary
+    settings_path = os.path.join(getProfilePath(), "settings.txt")
+    data = readSettingsFile(settings_path)
+    #update the dictionary
+    data[setting] += incrValue
+    #write it
+    saveDict(settings_path, data)
+    return data
+
+def saveGeneralSetting(setting, value):
+    if _resolveSettingsFileType(setting, "general") == "profile":
+        saveProfileSetting(setting, value)
+        return
+
+    generalsettings_path = os.path.join(getProfilePath(), "generalsettings.txt")
+    saveSettingFile(setting, value, generalsettings_path)
+    # Synchronize field settings with profile settings
+    if setting in ["fields", "fields_enabled"]:
+        syncFieldSettingsToProfile(setting, value)
+
+def removeGeneralSetting(setting):
+    generalsettings_path = os.path.join(getProfilePath(), "generalsettings.txt")
+    removeSettingFile(setting, generalsettings_path)
+
+def _moveMisplacedSettings(settings_path, generalsettings_path):
+    """Move settings written to the wrong file back to their expected owner."""
+    key_sets = _getDefaultSettingsKeySets()
+    default_profile_settings = getDefaultProfileSettings()
+    default_general_settings = getDefaultGeneralSettings()
+
+    changed = False
+
+    try:
+        settings_data = readSettingsFile(settings_path, defaults=default_profile_settings)
+    except FileNotFoundError:
+        settings_data = dict(default_profile_settings)
+        changed = True
+
+    try:
+        general_data = readSettingsFile(generalsettings_path, defaults=default_general_settings)
+    except FileNotFoundError:
+        general_data = dict(default_general_settings)
+        changed = True
+
+    for key in list(general_data.keys()):
+        if key not in key_sets["profile"] or key in key_sets["general"]:
+            continue
+        moved_value = general_data.pop(key)
+        settings_data[key] = _chooseRepairValue(
+            settings_data.get(key),
+            moved_value,
+            default_profile_settings.get(key),
+        )
+        changed = True
+
+    for key in list(settings_data.keys()):
+        if key not in key_sets["general"] or key in key_sets["profile"]:
+            continue
+        moved_value = settings_data.pop(key)
+        general_data[key] = _chooseRepairValue(
+            general_data.get(key),
+            moved_value,
+            default_general_settings.get(key),
+        )
+        changed = True
+
+    for key, value in default_profile_settings.items():
+        if key not in settings_data:
+            settings_data[key] = value
+            changed = True
+
+    for key, value in default_general_settings.items():
+        if key not in general_data:
+            general_data[key] = value
+            changed = True
+
+    if changed:
+        saveDict(settings_path, settings_data)
+        saveDict(generalsettings_path, general_data)
+
+def loadSettings():
+    ensureProfileFiles()
+    settings_path = os.path.join(getProfilePath(), "settings.txt")
+    generalsettings_path = os.path.join(getProfilePath(), "generalsettings.txt")
+    _moveMisplacedSettings(settings_path, generalsettings_path)
+    # Read the profile settings if present (capture raw profile to detect legacy keys)
+    try:
+        profile_raw = readSettingsFile(settings_path, defaults=getDefaultProfileSettings())
+        settings = profile_raw.copy()
+    except FileNotFoundError:
+        profile_raw = {}
+        print(f"Warning: Profile '{profileName}' settings file not found, using defaults")
+        # Fall back to default settings if profile file is missing
+        settings = getDefaultProfileSettings()
+
+    # Read default settings and ensure profile contains any missing keys
+    defaultSettings = getDefaultProfileSettings()
+    merged_new_keys = False
+    for k, v in defaultSettings.items():
+        if k not in settings:
+            settings[k] = v
+            merged_new_keys = True
+
+    taskPriorityOrder = settings.get("task_priority_order", [])
+    if isinstance(taskPriorityOrder, list) and "collect_sprouts" not in taskPriorityOrder:
+        insertIndex = taskPriorityOrder.index("collect_sticker_printer") + 1 if "collect_sticker_printer" in taskPriorityOrder else len(taskPriorityOrder)
+        taskPriorityOrder.insert(insertIndex, "collect_sprouts")
+        settings["task_priority_order"] = taskPriorityOrder
+        merged_new_keys = True
+    if isinstance(taskPriorityOrder, list) and "collect_sticker_sprout" not in taskPriorityOrder:
+        insertIndex = taskPriorityOrder.index("collect_sprouts") + 1 if "collect_sprouts" in taskPriorityOrder else len(taskPriorityOrder)
+        taskPriorityOrder.insert(insertIndex, "collect_sticker_sprout")
+        settings["task_priority_order"] = taskPriorityOrder
+        merged_new_keys = True
+
+    # Migrate legacy global quest gather override to per-quest keys on first load
+    try:
+        legacy_present = any(k in profile_raw for k in ("quest_gather_mins", "quest_gather_return"))
+        if legacy_present:
+            legacy_mins = profile_raw.get("quest_gather_mins", None)
+            legacy_return = profile_raw.get("quest_gather_return", None)
+            # Only migrate if legacy values differ from defaults (i.e., the user had configured them)
+            default_mins = defaultSettings.get("quest_gather_mins")
+            default_return = defaultSettings.get("quest_gather_return")
+            do_migrate = False
+            if legacy_mins is not None and legacy_mins != default_mins:
+                do_migrate = True
+            if legacy_return is not None and legacy_return != default_return:
+                do_migrate = True
+
+            if do_migrate:
+                per_quests = ["polar_bear", "brown_bear", "black_bear", "honey_bee", "bucko_bee", "riley_bee"]
+                for q in per_quests:
+                    mins_key = f"{q}_quest_gather_mins"
+                    return_key = f"{q}_quest_gather_return"
+                    if legacy_mins is not None:
+                        settings[mins_key] = legacy_mins
+                    if legacy_return is not None:
+                        settings[return_key] = legacy_return
+                # Remove old global keys so migration happens only once
+                if "quest_gather_mins" in settings:
+                    del settings["quest_gather_mins"]
+                if "quest_gather_return" in settings:
+                    del settings["quest_gather_return"]
+                merged_new_keys = True
+    except Exception:
+        # If migration fails for any reason, skip without blocking startup
+        pass
+
+    # Ensure fields and fields_enabled arrays have 5 elements
+    defaultFields = defaultSettings.get("fields", ['pine tree', 'sunflower', 'dandelion', 'pine tree', 'sunflower'])
+    defaultFieldsEnabled = defaultSettings.get("fields_enabled", [True, False, False, False, False])
+    
+    fields = settings.get("fields", [])
+    fieldsEnabled = settings.get("fields_enabled", [])
+    
+    # Extend arrays to 5 elements if needed
+    updated = False
+    while len(fields) < 5:
+        fields.append(defaultFields[len(fields)] if len(fields) < len(defaultFields) else defaultFields[-1])
+        updated = True
+    while len(fieldsEnabled) < 5:
+        fieldsEnabled.append(defaultFieldsEnabled[len(fieldsEnabled)] if len(fieldsEnabled) < len(defaultFieldsEnabled) else False)
+        updated = True
+
+    if updated:
+        settings["fields"] = fields
+        settings["fields_enabled"] = fieldsEnabled
+
+    # Persist settings if we added default keys or extended arrays
+    if merged_new_keys or updated:
+        try:
+            saveDict(settings_path, settings)
+        except Exception:
+            pass
+
+    return settings
+
+#return a dict containing all settings except field (general, profile, planters)
+def loadAllSettings():
+    # Ensure current profile is reloaded from persistent storage so other processes
+    # (like the Discord bot) can change the active profile and have the main
+    # GUI process pick it up immediately.
+    try:
+        loadCurrentProfile()
+    except Exception:
+        pass
+
+    ensureRuntimeData()
+
+    # Auto-migrate profiles to have their own generalsettings.txt files
+    migrateProfilesToGeneralSettings()
+
+    generalsettings_path = os.path.join(getProfilePath(), "generalsettings.txt")
+    settings_path = os.path.join(getProfilePath(), "settings.txt")
+    _moveMisplacedSettings(settings_path, generalsettings_path)
+    try:
+        generalSettings = readSettingsFile(generalsettings_path, defaults=getDefaultGeneralSettings())
+    except FileNotFoundError:
+        print(f"Warning: Profile '{profileName}' generalsettings file not found, using defaults")
+        generalSettings = getDefaultGeneralSettings()
+
+    # Merge any new default general settings keys into the profile.
+    merged_general_keys = False
+    try:
+        defaultGeneralSettings = getDefaultGeneralSettings()
+        for k, v in defaultGeneralSettings.items():
+            if k not in generalSettings:
+                generalSettings[k] = v
+                merged_general_keys = True
+    except Exception:
+        pass
+
+    # Migrate old boolean flags to new macro_mode setting
+    migrated = False
+    field_only = generalSettings.get("field_only_mode", False)
+    quest_only = generalSettings.get("quest_only_mode", False)
+
+    # Check if old settings exist (regardless of their value)
+    if "field_only_mode" in generalSettings or "quest_only_mode" in generalSettings:
+        if field_only and quest_only:
+            # If both are somehow true, prioritize field mode
+            generalSettings["macro_mode"] = "field"
+        elif field_only:
+            generalSettings["macro_mode"] = "field"
+        elif quest_only:
+            generalSettings["macro_mode"] = "quest"
+        else:
+            generalSettings["macro_mode"] = "normal"
+
+        # Remove old settings
+        if "field_only_mode" in generalSettings:
+            del generalSettings["field_only_mode"]
+            migrated = True
+        if "quest_only_mode" in generalSettings:
+            del generalSettings["quest_only_mode"]
+            migrated = True
+
+        # Save the migrated settings back to file
+        if migrated:
+            saveDict(generalsettings_path, generalSettings)
+            print("Migrated old field_only_mode/quest_only_mode settings to new macro_mode setting")
+
+    if merged_general_keys:
+        try:
+            saveDict(generalsettings_path, generalSettings)
+        except Exception:
+            pass
+
+    return {**loadSettings(), **generalSettings}
+
+def initializeFieldSync():
+    """Initialize field synchronization between profile and general settings"""
+    try:
+        settings_path = os.path.join(getProfilePath(), "settings.txt")
+        generalsettings_path = os.path.join(getProfilePath(), "generalsettings.txt")
+        try:
+            profileData = readSettingsFile(settings_path)
+        except FileNotFoundError:
+            print(f"Warning: Profile '{profileName}' settings file not found during sync, skipping")
+            return
+
+        generalData = readSettingsFile(generalsettings_path)
+
+        # Check if field settings exist in both files
+        profileFields = profileData.get("fields", [])
+        generalFields = generalData.get("fields", [])
+
+        # If general settings has different fields, sync from profile to general
+        if profileFields != generalFields and profileFields:
+            generalData["fields"] = profileFields
+            saveDict(generalsettings_path, generalData)
+
+        # Sync fields_enabled as well
+        profileFieldsEnabled = profileData.get("fields_enabled", [])
+        generalFieldsEnabled = generalData.get("fields_enabled", [])
+
+        if profileFieldsEnabled != generalFieldsEnabled and profileFieldsEnabled:
+            generalData["fields_enabled"] = profileFieldsEnabled
+            saveDict(generalsettings_path, generalData)
+            
+    except Exception as e:
+        print(f"Warning: Could not initialize field synchronization: {e}")
+
+def exportProfile(profile_name):
+    """Export a profile to JSON content for browser download"""
+    profiles_dir = getProfilesDir()
+    profile_path = os.path.join(profiles_dir, profile_name)
+
+    if not os.path.exists(profile_path):
+        return False, f"Profile '{profile_name}' not found"
+
+    # Read profile data
+    try:
+        settings_file = os.path.join(profile_path, "settings.txt")
+        fields_file = os.path.join(profile_path, "fields.txt")
+        generalsettings_file = os.path.join(profile_path, "generalsettings.txt")
+
+        if not os.path.exists(settings_file) or not os.path.exists(fields_file) or not os.path.exists(generalsettings_file):
+            return False, f"Profile '{profile_name}' is missing required files"
+
+        _moveMisplacedSettings(settings_file, generalsettings_file)
+        settings_data = readSettingsFile(settings_file)
+        fields_data = loadFields() if profile_name == getCurrentProfile() else _loadFieldsFile(fields_file)
+        generalsettings_data = readSettingsFile(generalsettings_file)
+
+        # Ensure sensitive fields are removed from export
+        sensitive_keys = ("discord_bot_token", "webhook_link", "private_server_link")
+        route_sensitive_keys = [
+            key for key in generalsettings_data.keys()
+            if str(key).startswith("route_") and str(generalsettings_data.get(key, "")).startswith("https://")
+        ]
+        for k in list(sensitive_keys) + route_sensitive_keys:
+            if k in settings_data:
+                settings_data[k] = ""
+            if k in generalsettings_data:
+                generalsettings_data[k] = ""
+
+        # Create export data structure
+        export_data = {
+            "profile_name": profile_name,
+            "export_date": datetime.now().isoformat(),
+            "version": getMacroVersion(),
+            "settings": settings_data,
+            "fields": fields_data,
+            "generalsettings": generalsettings_data
+        }
+
+        # Generate filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"profile_{profile_name}_{timestamp}.json"
+
+        # Return JSON content and filename
+        json_content = json.dumps(export_data, indent=2, ensure_ascii=False)
+        return True, json_content, filename
+
+    except Exception as e:
+        return False, f"Failed to export profile: {str(e)}"
+
+def importProfile(import_path, new_profile_name=None):
+    """Import a profile from a JSON file"""
+    if not os.path.exists(import_path):
+        return False, f"Import file '{import_path}' not found"
+
+    try:
+        # Read and validate import data
+        with open(import_path, 'r', encoding='utf-8') as f:
+            import_data = json.load(f)
+
+        return _importProfileData(import_data, new_profile_name)
+    except Exception as e:
+        return False, f"Failed to import profile: {str(e)}"
+
+def importProfileContent(json_content, new_profile_name=None):
+    """Import a profile from JSON content string"""
+    try:
+        import_data = json.loads(json_content)
+        return _importProfileData(import_data, new_profile_name)
+    except json.JSONDecodeError:
+        return False, "Invalid JSON content"
+    except Exception as e:
+        return False, f"Failed to import profile: {str(e)}"
+
+def _importProfileData(import_data, new_profile_name=None):
+    """Internal function to import profile data"""
+    try:
+        # Validate structure
+        required_keys = ["profile_name", "settings", "fields", "generalsettings"]
+        for key in required_keys:
+            if key not in import_data:
+                return False, f"Invalid import file: missing '{key}' key"
+
+        # Determine new profile name
+        if new_profile_name is None:
+            original_name = import_data["profile_name"]
+            new_profile_name = original_name
+            counter = 1
+            while os.path.exists(os.path.join(getProfilesDir(), new_profile_name)):
+                new_profile_name = f"{original_name}_imported_{counter}"
+                counter += 1
+
+        # Sanitize profile name
+        new_profile_name = new_profile_name.strip().replace(' ', '_').lower()
+        if not new_profile_name:
+            return False, "Profile name cannot be empty"
+
+        # Check if profile already exists
+        new_profile_path = os.path.join(getProfilesDir(), new_profile_name)
+        if os.path.exists(new_profile_path):
+            return False, f"Profile '{new_profile_name}' already exists"
+
+        # Create profile directory
+        os.makedirs(new_profile_path)
+
+        # Write settings file
+        settings_file = os.path.join(new_profile_path, "settings.txt")
+        saveDict(settings_file, import_data["settings"])
+
+        # Write fields file
+        fields_file = os.path.join(new_profile_path, "fields.txt")
+        with open(fields_file, 'w') as f:
+            f.write(str(import_data["fields"]))
+
+        # Write generalsettings file
+        generalsettings_file = os.path.join(new_profile_path, "generalsettings.txt")
+        saveDict(generalsettings_file, import_data["generalsettings"])
+
+        return True, f"Profile imported successfully as '{new_profile_name}'"
+
+    except Exception as e:
+        return False, f"Failed to import profile: {str(e)}"
+
+# Seed runtime/profile files, then load the current profile when the module is imported
+ensureRuntimeData()
+loadCurrentProfile()
+# Re-ensure after profile load in case the selected profile still needs files.
+ensureProfileFiles()
+
+#clear a file
+def clearFile(filePath):
+    directory = os.path.dirname(os.path.abspath(filePath))
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    open(filePath, 'w').close()
+
+def migrateProfilesToGeneralSettings():
+    """Migrate existing profiles to have their own generalsettings.txt files"""
+    profiles_dir = getProfilesDir()
+    global_generalsettings = os.path.join(getSettingsDir(), "generalsettings.txt")
+
+    # Check if global generalsettings exists - if not, migration is already complete
+    if not os.path.exists(global_generalsettings):
+        return
+
+    if not os.path.exists(profiles_dir):
+        return
+
+    # Read global generalsettings
+    try:
+        global_data = readSettingsFile(global_generalsettings)
+    except FileNotFoundError:
+        print("Warning: Global generalsettings.txt not found, cannot migrate profiles")
+        return
+
+    migration_performed = False
+
+    # Iterate through all profiles
+    for profile_name in listProfiles():
+        profile_path = os.path.join(profiles_dir, profile_name)
+        generalsettings_file = os.path.join(profile_path, "generalsettings.txt")
+
+        # Skip if profile already has generalsettings.txt
+        if os.path.exists(generalsettings_file):
+            continue
+
+        # Copy global generalsettings to profile
+        try:
+            shutil.copy2(global_generalsettings, generalsettings_file)
+            print(f"Migrated generalsettings.txt for profile: {profile_name}")
+            migration_performed = True
+        except Exception as e:
+            print(f"Warning: Failed to migrate generalsettings.txt for profile '{profile_name}': {e}")
+
+    # Only print completion message and delete old file if migration was actually performed
+    if migration_performed:
+        print("Profile migration completed")
+
+        # Delete the old global generalsettings file since all profiles now have their own copies
+        try:
+            os.remove(global_generalsettings)
+            print("Removed old global generalsettings.txt file")
+        except Exception as e:
+            print(f"Warning: Failed to remove old global generalsettings.txt file: {e}")

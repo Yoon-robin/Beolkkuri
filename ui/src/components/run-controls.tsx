@@ -1,0 +1,54 @@
+import { Loader2Icon, PlayIcon, SquareIcon } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useI18n } from "@/i18n"
+import { cn } from "@/lib/utils"
+import { useRun } from "@/state/run-state"
+import { useSetting } from "@/state/settings"
+
+import { keybindDisplay } from "./settings/keybind"
+
+export function RunStatusBadge({ className }: { className?: string }) {
+  const { t } = useI18n()
+  const { status } = useRun()
+  const tone = {
+    running: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+    paused: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+    stopping: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30",
+    stopped: "bg-muted text-muted-foreground",
+  }[status]
+  return (
+    <Badge variant="outline" className={cn("gap-1.5", tone, className)}>
+      <span className={cn("size-1.5 rounded-full bg-current", status === "running" && "animate-pulse")} />
+      {t(`run.status.${status}`)}
+    </Badge>
+  )
+}
+
+export function RunButton({ size = "default", className }: { size?: "default" | "lg"; className?: string }) {
+  const { t } = useI18n()
+  const { status, start, stop } = useRun()
+  const startKey = keybindDisplay(useSetting<string>("start_keybind", "F1") || "F1")
+  const pauseKey = keybindDisplay(useSetting<string>("pause_keybind", "F2") || "F2")
+  const stopKey = keybindDisplay(useSetting<string>("stop_keybind", "F3") || "F3")
+  const big = size === "lg"
+
+  if (status === "running" || status === "stopping") {
+    return (
+      <Button variant="destructive" size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", className)} onClick={stop} disabled={status === "stopping"}>
+        {status === "stopping" ? <Loader2Icon className="animate-spin" /> : <SquareIcon className="fill-current" />}
+        {status === "stopping" ? t("run.stopping") : t("run.stop")}
+        {status !== "stopping" && <kbd className="ml-1 rounded bg-background/40 px-1.5 font-mono text-[0.7em]">{stopKey}</kbd>}
+      </Button>
+    )
+  }
+  const paused = status === "paused"
+  return (
+    <Button size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", className)} onClick={start}>
+      <PlayIcon className="fill-current" />
+      {paused ? t("run.resume") : t("run.start")}
+      <kbd className="ml-1 rounded bg-background/25 px-1.5 font-mono text-[0.7em]">{paused ? pauseKey : startKey}</kbd>
+    </Button>
+  )
+}

@@ -1,0 +1,1357 @@
+{
+  "settings": {
+    "gather_boosted": {
+      "title": "부스트된 필드에서 채집",
+      "desc": "필드 부스터로 부스트된 필드에서 채집해요."
+    },
+    "boost_seperate": {
+      "title": "부스터 간격 (X분)",
+      "desc": "필드 부스터를 받을 때 X분씩 간격을 둬요."
+    },
+    "field_booster_glitter_extend_enabled": {
+      "title": "글리터로 연장",
+      "desc": "필드 부스터가 감지될 때마다 14:55에 글리터를 써서 부스트 시간을 늘려요."
+    },
+    "field_booster_glitter_slot": {
+      "title": "글리터 핫바 칸",
+      "desc": "모든 글리터 설정에 함께 적용돼요. 0으로 두면 인벤토리에서 글리터를 찾아요."
+    },
+    "blue_booster": {
+      "title": "파란 부스터",
+      "desc": "파란 HQ에 있는 파란 필드 부스터를 받아요."
+    },
+    "red_booster": {
+      "title": "빨간 부스터",
+      "desc": "빨간 HQ에 있는 빨간 필드 부스터를 받아요."
+    },
+    "mountain_booster": {
+      "title": "산 정상 부스터",
+      "desc": "산 정상 필드에 있는 흰색 필드 부스터를 받아요."
+    },
+    "AFB-reset": {
+      "title": "주사위·글리터 타이머 초기화",
+      "desc": "AFB에 쓰이는 매크로의 기록 데이터를 초기화해요."
+    },
+    "Auto_Field_Boost": {
+      "title": "AFB (자동 필드 부스트)",
+      "desc": "자동 필드 부스트를 켜요. <br> 채집 말고 다른 작업은 꺼 두는 걸 추천해요."
+    },
+    "AFB_wait": {
+      "title": "대기 시간",
+      "desc": "채집이 중단된 뒤 AFB를 시작하기 전까지 기다리는 시간이에요."
+    },
+    "AFB_rebuff": {
+      "title": "재버프 주기",
+      "desc": "X분마다 버프를 다시 걸어요. <br> 0으로는 설정하지 마세요."
+    },
+    "AFB_field": {
+      "title": "필드",
+      "desc": "AFB를 사용할 필드예요."
+    },
+    "AFB_dice": {
+      "title": "필드 주사위",
+      "desc": "사용할 필드 주사위 종류예요."
+    },
+    "AFB_slotD": {
+      "title": "주사위 칸",
+      "desc": "주사위가 있는 핫바 칸이에요. <br> 0으로 두면 인벤토리에서 찾아요."
+    },
+    "AFB_attempts": {
+      "title": "주사위 시도 횟수",
+      "desc": "필드 주사위를 굴리는 최대 횟수예요."
+    },
+    "AFB_glitter": {
+      "title": "글리터",
+      "desc": "버프를 유지하는 데 글리터도 사용해요."
+    },
+    "AFB_slotG": {
+      "title": "글리터 칸",
+      "desc": "글리터가 있는 핫바 칸이에요. <br> 0으로 두면 인벤토리에서 찾아요."
+    },
+    "AFB_limit_on": {
+      "title": "시간 제한 사용",
+      "desc": "정해 둔 시간이 지나면 AFB 사용을 멈춰요."
+    },
+    "AFB_limit": {
+      "title": "시간 제한 길이",
+      "desc": "X시간이 지나면 AFB를 꺼요."
+    },
+    "sticker_stack": {
+      "title": "작업 켜기",
+      "desc": "스티커 스택을 활성화해요."
+    },
+    "sticker_stack_item": {
+      "title": "사용할 아이템",
+      "desc": "스티커 스택을 활성화할 때 쓸 아이템(스티커/티켓)이에요.<br>참고: 스티커를 고르면 매크로가 귀한 스티커를 써 버리지 않도록 부계정으로 미리 옮겨 두는 걸 추천해요."
+    },
+    "hive_skin": {
+      "title": "벌집 스킨 사용",
+      "desc": "스티커 스택에 벌집 스킨도 사용해요."
+    },
+    "sticker_stack_interrupt_gathering": {
+      "title": "스티커 스택으로 채집 중단",
+      "desc": "채집 중에 스티커 스택이 준비되면 채집을 멈추고 활성화하러 가요."
+    },
+    "tad_alt_sync_enabled": {
+      "title": "TAD 부계정 동기화 켜기",
+      "desc": "부스터를 받은 뒤, 켜 둔 TAD 부계정들을 감지된 필드로 옮겨요."
+    },
+    "tad_alt_1_enabled": {
+      "title": "TAD 부계정 1",
+      "desc": "첫 번째 부계정을 사용해요."
+    },
+    "tad_alt_1_webhook": {
+      "title": "부계정 1 원격 제어 웹후크",
+      "desc": "첫 번째 부계정의 디스코드 봇이 볼 수 있는 채널의 웹후크예요."
+    },
+    "tad_alt_2_enabled": {
+      "title": "TAD 부계정 2",
+      "desc": "두 번째 부계정을 사용해요."
+    },
+    "tad_alt_2_webhook": {
+      "title": "부계정 2 원격 제어 웹후크",
+      "desc": "두 번째 부계정의 디스코드 봇이 볼 수 있는 채널의 웹후크예요."
+    },
+    "tad_alt_default_field": {
+      "title": "부계정 기본 필드",
+      "desc": "부스트가 끝나면 돌아갈 필드예요."
+    },
+    "tad_alt_copy_field_settings": {
+      "title": "내 필드 설정 가져오기",
+      "desc": "선택한 부계정 기본 필드에 대한 본계정의 현재 설정을 부계정 채집 프리셋으로 복사해요."
+    },
+    "tad_alt_gather_shape": {
+      "title": "기본 필드 패턴",
+      "desc": "부계정이 부계정 기본 필드에서 쓰는 패턴이에요. 커스텀 패턴은 각 부계정에도 똑같이 있어야 해요."
+    },
+    "tad_alt_gather_size": {
+      "title": "패턴 크기",
+      "desc": "부계정 패턴이 커버하는 범위예요."
+    },
+    "tad_alt_gather_width": {
+      "title": "패턴 너비",
+      "desc": "패턴을 반복하는 횟수예요."
+    },
+    "tad_alt_gather_shift_lock": {
+      "title": "시프트 락 사용",
+      "desc": "부계정이 채집하는 동안 시프트 락을 켜요."
+    },
+    "tad_alt_gather_drift_compensation": {
+      "title": "위치 보정",
+      "desc": "패턴 한 바퀴가 끝날 때마다 부계정 위치를 다시 맞춰요."
+    },
+    "tad_alt_gather_invert_lr": {
+      "title": "좌우 반전",
+      "desc": "패턴의 좌우 움직임을 뒤집어요."
+    },
+    "tad_alt_gather_invert_fb": {
+      "title": "앞뒤 반전",
+      "desc": "패턴의 앞뒤 움직임을 뒤집어요."
+    },
+    "tad_alt_gather_turn": {
+      "title": "카메라 회전",
+      "desc": "채집 전에 카메라를 돌려요."
+    },
+    "tad_alt_gather_turn_times": {
+      "title": "카메라 회전 횟수",
+      "desc": "카메라를 돌리는 횟수예요."
+    },
+    "tad_alt_gather_start_location": {
+      "title": "시작 위치",
+      "desc": "부계정이 기본 필드의 어느 부분에서 채집을 시작할지 정해요."
+    },
+    "tad_alt_gather_distance": {
+      "title": "시작 거리",
+      "desc": "선택한 시작 위치 쪽으로 이동하는 거리예요."
+    },
+    "tad_alt_gather_goo": {
+      "title": "구(goo) 사용",
+      "desc": "부계정이 채집하는 동안 구(goo)를 써요."
+    },
+    "tad_alt_gather_goo_interval": {
+      "title": "구(goo) 사용 간격",
+      "desc": "구(goo)를 쓰는 간격(초)이에요."
+    },
+    "tad_alt_restart_delay": {
+      "title": "재시작 대기",
+      "desc": "부계정 매크로를 멈춘 뒤 필드를 바꾸기 전까지 기다릴 시간(초)이에요."
+    },
+    "tad_alt_boost_duration": {
+      "title": "부스트 지속 시간",
+      "desc": "부계정을 기본 필드로 돌려보내기까지의 시간(초)이에요. (900 = 15분)"
+    },
+    "tad_alt_glitter_extend_enabled": {
+      "title": "글리터로 연장",
+      "desc": "TAD 부계정 부스트가 끝나기 5초 전에 본계정이 글리터를 쓰고, 부스트 지속 시간이 한 번 더 지나면 부계정을 돌려보내요. (부스트 지속 시간이 900이면 총 30분)"
+    },
+    "tad_alt_glitter_slot": {
+      "title": "글리터 핫바 칸",
+      "desc": "모든 글리터 설정에 함께 적용돼요. 0으로 두면 인벤토리에서 글리터를 찾아요."
+    },
+    "wealth_clock": {
+      "title": "부의 시계",
+      "desc": "부의 시계를 수집해요."
+    },
+    "honey_dispenser": {
+      "title": "꿀 디스펜서",
+      "desc": "내 벌집 근처의 꿀 디스펜서를 수집해요."
+    },
+    "blueberry_dispenser": {
+      "title": "블루베리 디스펜서",
+      "desc": "파란 HQ의 블루베리 디스펜서를 수집해요."
+    },
+    "strawberry_dispenser": {
+      "title": "딸기 디스펜서",
+      "desc": "빨간 HQ의 딸기 디스펜서를 수집해요."
+    },
+    "coconut_dispenser": {
+      "title": "코코넛 디스펜서",
+      "desc": "코코넛 동굴의 코코넛 디스펜서를 수집해요. <br> 참고: 코코넛 게는 언제든 다시 나타날 수 있으니, 안전하게 수집할 수 있는지 꼭 확인하세요."
+    },
+    "royal_jelly_dispenser": {
+      "title": "(무료) 로얄 젤리 디스펜서",
+      "desc": "스타 홀에 있는 무료 로얄 젤리 디스펜서를 수집해요."
+    },
+    "ant_pass_dispenser": {
+      "title": "(무료) 개미 패스 디스펜서",
+      "desc": "무료 개미 패스 디스펜서를 수집해요."
+    },
+    "buy_ant_pass": {
+      "title": "개미 패스 구매",
+      "desc": "개미 패스 디스펜서에서 티켓을 써서 구매해요. (보유 한도는 무료와 같아요)"
+    },
+    "robo_pass_dispenser": {
+      "title": "(무료) 로보 패스 디스펜서",
+      "desc": "무료 로보 패스 디스펜서를 수집해요."
+    },
+    "treat_dispenser": {
+      "title": "간식 디스펜서",
+      "desc": "프로 상점 앞의 간식 디스펜서를 수집해요."
+    },
+    "honeystorm": {
+      "title": "꿀 폭풍",
+      "desc": "꿀 폭풍을 소환해요."
+    },
+    "glue_dispenser": {
+      "title": "글루 디스펜서",
+      "desc": "구미 베어의 굴에 있는 글루 디스펜서를 수집해요."
+    },
+    "glue_dispenser_use_gumdrop_slot": {
+      "title": "검드롭 칸 사용",
+      "desc": "검드롭을 쓸 때 인벤토리를 뒤지지 않고 검드롭 단축 칸을 사용해요."
+    },
+    "sticker_printer": {
+      "title": "작업 켜기",
+      "desc": "산 정상의 스티커 프린터로 스티커를 뽑아요."
+    },
+    "sticker_printer_egg": {
+      "title": "알",
+      "desc": "프린터에 넣을 알 종류예요."
+    },
+    "mondo_buff": {
+      "title": "작업 켜기",
+      "desc": "몬도에게 데미지를 조금 줘서 몬도 버프를 받아요. 몬도가 죽을 때까지 기다리거나 드롭을 줍지는 않아요.<br>참고: 매크로는 매시 정각부터 10분 안에만 몬도에게 가요."
+    },
+    "mondo_buff_wait": {
+      "title": "몬도 공격 시간 (분)",
+      "desc": "몬도를 공격할 시간이에요. 소수점도 쓸 수 있어요. 예: 1.5분 = 90초"
+    },
+    "mondo_buff_loot": {
+      "title": "몬도 전리품 줍기",
+      "desc": "몬도를 처치하면 전리품을 주워요.<br>'몬도 공격 시간' 설정은 무시돼요."
+    },
+    "mondo_loot_times": {
+      "title": "반복 횟수",
+      "desc": "'몬도 전리품 줍기'가 켜져 있어야 해요. <br>전리품을 주울 때 몇 번 왕복할지 정해요.<br>한 번 올라갔다 내려오는 게 1회예요.<br>1~2회를 추천해요."
+    },
+    "mondo_collect_token": {
+      "title": "벌 토큰 줍기",
+      "desc": "몇 초마다 움직여서 벌들이 만든 토큰을 주워요. <br> Cub Buddy가 없다면 켜는 걸 추천해요.<br>참고: 캐릭터가 조금씩 움직이면서 벽에서 멀어질 수 있어요.<br> 미세한 움직임이 적은 애니메이션을 쓰는 걸 추천해요."
+    },
+    "mondo_buff_interrupt_gathering": {
+      "title": "몬도 버프로 채집 중단",
+      "desc": "채집 중에 몬도가 다시 나타나면 채집을 멈추고 버프를 받으러 가요."
+    },
+    "memory_match": {
+      "title": "메모리 매치",
+      "desc": "프로 상점 앞의 메모리 매치를 진행해요."
+    },
+    "mega_memory_match": {
+      "title": "메가 메모리 매치",
+      "desc": "배지 베어러 길드 안의 메모리 매치를 진행해요."
+    },
+    "extreme_memory_match": {
+      "title": "익스트림 메모리 매치",
+      "desc": "고추 필드 근처의 메모리 매치를 진행해요."
+    },
+    "winter_memory_match": {
+      "title": "겨울 메모리 매치",
+      "desc": "꿀벌(Honey Bee) 근처의 메모리 매치를 진행해요."
+    },
+    "memory_match_rewards": {
+      "title": "우선 보상",
+      "desc": "보상을 하나라도 고르면, 그 보상이 나오는 것으로 알려진 짝을 먼저 맞춰요. 타일 배지는 각 보상이 나올 수 있는 곳을 보여 줘요: N = 일반, M = 메가, E = 익스트림, W = 겨울. 비워 두면 평소대로 풀어요."
+    },
+    "wind_shrine": {
+      "title": "작업 켜기",
+      "desc": "바람 신전에 아이템을 바쳐요."
+    },
+    "wind_shrine_item": {
+      "title": "바칠 아이템",
+      "desc": "바람 신전에 바칠 아이템이에요."
+    },
+    "wind_shrine_quantity": {
+      "title": "수량",
+      "desc": "바칠 수량이에요."
+    },
+    "guiding_star_announcements": {
+      "title": "알림",
+      "desc": "감지된 길잡이 별 필드를 웹후크/로그로 알려요."
+    },
+    "stockings": {
+      "title": "양말",
+      "desc": "클로버 필드 근처의 양말을 수집해요."
+    },
+    "feast": {
+      "title": "만찬",
+      "desc": "북극곰 근처의 만찬을 수집해요."
+    },
+    "gingerbread": {
+      "title": "진저브레드 하우스",
+      "desc": "진저브레드 하우스를 수집해요."
+    },
+    "samovar": {
+      "title": "사모바르",
+      "desc": "대퍼 베어 상점 밖의 사모바르를 수집해요."
+    },
+    "snow_machine": {
+      "title": "눈 기계",
+      "desc": "파란 HQ 위의 눈 기계를 수집해요."
+    },
+    "lid_art": {
+      "title": "뚜껑 아트",
+      "desc": "Onett 근처의 뚜껑 아트를 수집해요."
+    },
+    "candles": {
+      "title": "양초",
+      "desc": "빨간 HQ 옆의 양초를 수집해요."
+    },
+    "wreath": {
+      "title": "꿀 화환",
+      "desc": "검은 곰 근처의 꿀 화환을 수집해요."
+    },
+    "gummy_beacon": {
+      "title": "구미 비콘",
+      "desc": "구미 비콘을 수집해요."
+    },
+    "sprouts_enable": {
+      "title": "작업 켜기",
+      "desc": "선택한 필드에 마법 콩을 심고, AI 토큰 추적으로 새싹 드롭을 주워요."
+    },
+    "sprouts_magic_bean_slot": {
+      "title": "마법 콩 칸",
+      "desc": "마법 콩이 있는 핫바 칸이에요."
+    },
+    "sprouts_max_beans": {
+      "title": "세션당 최대 개수",
+      "desc": "이번 세션에 매크로가 쓸 수 있는 마법 콩 개수예요."
+    },
+    "sprouts_max_beans_per_gather": {
+      "title": "채집당 최대 개수",
+      "desc": "새싹 채집 한 번에 쓸 수 있는 마법 콩 개수예요. 다 쓰면 다음 작업으로 넘어가요."
+    },
+    "sprouts_final_loot_seconds": {
+      "title": "마지막 줍기 시간",
+      "desc": "마법 콩 한도에 도달한 뒤에도 드롭을 계속 주울 시간(초)이에요."
+    },
+    "sprouts_pattern_width": {
+      "title": "패턴 너비",
+      "desc": "새싹 드롭을 주울 때 AI 채집 패턴이 쓰는 너비예요."
+    },
+    "sprouts_field": {
+      "title": "필드",
+      "desc": "새싹을 심을 필드예요."
+    },
+    "sprouts_ai_model": {
+      "title": "AI 모델",
+      "desc": "새싹 드롭을 찾는 데 쓰는 모델이에요. 전리품 모델은 떨어진 전리품을 쫓고, 토큰 모델은 토큰 우선순위 목록을 따라요."
+    },
+    "configure-sprout-ai-tokens-button": {
+      "title": "토큰 우선순위",
+      "desc": "새싹이 터진 뒤 AI가 쫓아갈 드롭 토큰을 고르고, 우선순위가 높은 순서대로 정렬해요."
+    },
+    "sticker_sprout_watch": {
+      "title": "스티커 새싹 감시",
+      "desc": "파란 글씨 알림에서 하이브 허브 스티커 새싹 등장 메시지를 지켜보다가, 뜨면 하이브 허브로 가서 드롭을 주워요."
+    },
+    "sticker_sprout_gather_minutes": {
+      "title": "채집 시간",
+      "desc": "스티커 새싹 등장이 감지된 뒤 하이브 허브에서 채집할 시간(분)이에요."
+    },
+    "blender_enable": {
+      "title": "작업 켜기",
+      "desc": "블렌더로 아이템을 만들고 수령해요."
+    },
+    "blender-reset": {
+      "title": "블렌더 타이머 초기화",
+      "desc": "블렌더 아이템에 대한 매크로의 기록 데이터를 초기화해요."
+    },
+    "preferred_hive_slot": {
+      "title": "선호 벌집 칸",
+      "desc": "먼저 차지할 벌집이에요. 이미 누가 쓰고 있으면 빨간 대포(1번 벌집)에서 가장 가까운 빈 칸을 차지해요. 1번이 대포에서 가장 가깝고 6번이 가장 멀어요."
+    },
+    "hive_claim_method": {
+      "title": "벌집 차지 방법",
+      "desc": "'확인'은 스폰 지점에서 선호 벌집 칸까지 걸어간 뒤, 이미 차 있으면 옆 칸들을 살펴봐요. '감지'는 화면을 줌아웃해 스폰 지점에서 빈 벌집을 찾은 다음, 고른 칸으로 걸어가요."
+    },
+    "hive_exclude_slot": {
+      "title": "비공개 서버 재접속 시 제외할 벌집 칸",
+      "desc": "비공개 서버에 재접속할 때만 이 벌집 칸들을 건너뛰어요. 선호 벌집 칸은 절대 제외되지 않아요."
+    },
+    "disable_tool_at_hive": {
+      "title": "벌집에서 도구 끄기",
+      "desc": "벌집에서 변환하는 동안 마우스 클릭을 멈춰서, 장착한 도구가 쓰이지 않게 해요."
+    },
+    "movespeed": {
+      "title": "이동 속도",
+      "desc": "헤이스트가 없을 때의 내 이동 속도예요."
+    },
+    "bees": {
+      "title": "벌 수",
+      "desc": "벌집에 있는 벌의 수예요."
+    },
+    "sprinkler_type": {
+      "title": "스프링클러 종류",
+      "desc": "사용하는 스프링클러 종류예요. 매크로는 스프링클러를 설치할 때 한곳에 겹쳐서 놓아요."
+    },
+    "sprinkler_slot": {
+      "title": "칸",
+      "desc": "스프링클러가 있는 핫바 칸이에요."
+    },
+    "use_sprinkler_model_for_drift_compensation": {
+      "title": "필드 위치 보정에 스프링클러 AI 사용",
+      "desc": "색상으로 찾는 방식 대신 AI로 스프링클러를 찾아 필드 위치를 보정해요. 모델을 실행할 수 없으면 자동으로 원래 방식으로 돌아가요."
+    },
+    "ai_gather_model": {
+      "title": "AI 채집 모델",
+      "desc": "AI 채집에 쓸 토큰 감지 모델을 골라요. 라이트와 미니는 불러오지 못하면 자동으로 표준 모델로 바뀌어요."
+    },
+    "goo_slot": {
+      "title": "칸",
+      "desc": "구(goo)가 있는 핫바 칸이에요."
+    },
+    "convert_balloon": {
+      "title": "풍선 변환",
+      "desc": "풍선을 얼마나 자주 변환할지 정해요."
+    },
+    "convert_balloon_every": {
+      "title": "X분마다 풍선 변환",
+      "desc": "X분마다 풍선을 변환해요. 풍선 변환이 '주기마다'로 설정되어 있을 때만 적용돼요."
+    },
+    "pine_tree_fast_return": {
+      "title": "빠른 귀환 경로",
+      "desc": "소나무 필드에서 벌집으로 돌아갈 때 글라이더를 타는 다른 경로를 써요. 기본 걷기 경로보다 빨라요."
+    },
+    "convert_wait": {
+      "title": "변환 후 X초 대기",
+      "desc": "변환이 끝나고 움직이기 전에 X초 기다려요. 남은 꽃가루까지 마저 변환할 때 유용해요."
+    },
+    "max_convert_time": {
+      "title": "최대 변환 시간 (분)",
+      "desc": "변환이 X분 넘게 이어지면 시간 초과 동작을 실행해요."
+    },
+    "convert_timeout_behavior": {
+      "title": "시간 초과 시 동작",
+      "desc": "변환 시간이 초과되면 다음 작업으로 넘어갈지, 게임에 재접속할지 골라요."
+    },
+    "coconut_crab_max_kill_time": {
+      "title": "코코넛 게 최대 처치 시간 (분)",
+      "desc": "코코넛 게 처치를 시도할 최대 시간(분)이에요. 이 시간을 넘기면 포기해요."
+    },
+    "always_rejoin": {
+      "title": "항상 재접속",
+      "desc": "매크로를 시작할 때마다 Bee Swarm에 재접속해요. 끄면 이미 열려 있는 로블록스 세션을 그대로 써요."
+    },
+    "private_server_link": {
+      "title": "비공개 서버 링크 (선택)",
+      "desc": "매크로가 접속할 비공개 서버 링크예요.<br>비워 두면 공개 서버에 접속해요."
+    },
+    "hive_hub_private_server": {
+      "title": "하이브 허브에 비공개 서버 사용",
+      "desc": "하이브 허브로 이동할 때, 설정한 비공개 서버 링크와 하이브 허브 게임 ID로 접속해요. 끄면 하이브 허브는 공개 서버를 써요."
+    },
+    "manage-fallback-private-servers-button": {
+      "title": "예비 비공개 서버",
+      "desc": "예비 서버를 최대 3개까지 설정해요. 기본 서버 접속에 실패하면, 공개 서버로 가기 전에 RobinMacro가 예비 서버를 하나씩 시도해요."
+    },
+    "rejoin_schedule_type": {
+      "title": "예약 재접속 방식",
+      "desc": "정해진 시간 간격마다 재접속할지, 매일 특정 시각에 한 번 재접속할지 골라요."
+    },
+    "rejoin_every": {
+      "title": "X시간마다 재접속",
+      "desc": "예약 재접속 방식이 'X시간마다'일 때의 재접속 주기예요. 0으로 두면 주기적 재접속을 꺼요."
+    },
+    "rejoin_at_time": {
+      "title": "재접속 시각",
+      "desc": "예약 재접속 방식이 '매일 지정 시각'일 때 재접속할 시각이에요. 24시간제 HH:MM 형식으로 입력하세요. 예: 00:00"
+    },
+    "rejoin_timezone": {
+      "title": "재접속 시간대",
+      "desc": "재접속 시각을 내 지역 시간으로 볼지, UTC로 볼지 골라요."
+    },
+    "max_cannon_attempts": {
+      "title": "재접속 전 최대 대포 시도 횟수",
+      "desc": "대포까지 가는 데 이 횟수만큼 실패하면 재접속해요."
+    },
+    "cannon_hive_resync_attempts": {
+      "title": "벌집 칸 재확인 전 대포 실패 횟수",
+      "desc": "대포 시도가 이 횟수만큼 실패하면 벌집으로 리셋해 벌집 칸 번호를 다시 확인하고, 재접속하기 전에 대포를 한 번 더 시도해요. 0으로 두면 꺼져요."
+    },
+    "auto_stop_after": {
+      "title": "X시간 후 매크로 정지",
+      "desc": "매크로를 시작하고 이 시간이 지나면 자동으로 멈춰요. 0으로 두면 자동 정지를 꺼요."
+    },
+    "inactive_honey_reset": {
+      "title": "꿀 정체 시 리셋 (베타)",
+      "desc": "채집이나 변환 중에 꿀이 한동안 늘지 않는 걸 감지하면 리셋하고 다시 시도해요."
+    },
+    "haste_compensation": {
+      "title": "헤이스트 보정 켜기",
+      "desc": "플레이어의 헤이스트 양에 맞춰 매크로의 움직임을 조절해요. 화면에서 헤이스트와 곰 변신 버프를 찾아서 계산해요."
+    },
+    "gui_theme": {
+      "title": "화면 테마",
+      "desc": "매크로 화면에 쓸 테마를 골라요."
+    },
+    "update_channel": {
+      "title": "업데이트 채널",
+      "desc": "정식: 안정 버전만 받아요 | 베타: 테스트용 사전 출시 버전도 받아요"
+    },
+    "low_performance": {
+      "title": "저사양 모드 켜기",
+      "desc": "매크로가 백그라운드에서 돌리는 작업 수를 줄여요."
+    },
+    "hourly_report_time_format": {
+      "title": "리포트 시간 형식",
+      "desc": "리포트에 표시할 시간을 12시간제(오전/오후)로 할지 24시간제로 할지 골라요."
+    },
+    "item_monitor": {
+      "title": "아이템 모니터",
+      "desc": "획득 알림 팝업(+N 아이템)을 추적해서, 시간별/세션 리포트와 함께 별도의 아이템 모니터 리포트를 보내요."
+    },
+    "hourly_report_uptime_buffs": {
+      "title": "버프 유지율 항목",
+      "desc": "시간별/세션 리포트에서 추적할 버프를 골라요. 처음 고른 16개까지 표시돼요."
+    },
+    "hourly_report_hourly_buffs": {
+      "title": "사이드 버프 항목",
+      "desc": "리포트 옆 버프 카드에 표시할 버프를 최대 5개까지 골라요."
+    },
+    "start_keybind": {
+      "title": "매크로 시작 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "pause_keybind": {
+      "title": "매크로 일시정지/재개 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "stop_keybind": {
+      "title": "매크로 정지 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "sep:Tool Keybinds": {
+      "title": "도구 단축키",
+      "desc": "매크로가 멈춰 있을 때 도구를 바로 시작하는 단축키예요. (선택)"
+    },
+    "hotbar_buff_start_keybind": {
+      "title": "핫바 버프 시작 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "autoclicker_keybind": {
+      "title": "오토 클리커 시작 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "auto_gifted_basic_bee_start_keybind": {
+      "title": "자동 기프트 베이직 비 시작 단축키",
+      "desc": "눌러서 키를 지정하세요. '지우기'를 누르면 단축키가 삭제되고, 키를 기다리는 중에는 Backspace/Delete로 지울 수 있어요."
+    },
+    "export_debug_button": {
+      "title": "디버그 폴더 내보내기",
+      "desc": "프로필 내보내기, 최근 로그, 시스템 정보가 담긴 zip 파일을 내려받아요."
+    },
+    "beta_update_row": {
+      "title": "베타 테스트",
+      "desc": "RobinMacro 디스코드 서버에서 받은 7자리 코드를 입력하세요."
+    },
+    "discord_delivery_mode": {
+      "title": "전송 방식",
+      "desc": "디스코드 메시지와 명령어를 어떻게 처리할지 골라요."
+    },
+    "discord_bot_token": {
+      "title": "디스코드 봇 토큰",
+      "desc": "디스코드 봇 명령어와 봇 채널 전송에 필요해요."
+    },
+    "webhook_time_format": {
+      "title": "웹후크 시간 형식",
+      "desc": "웹후크 메시지의 시간 표시를 12시간제(오전/오후)로 할지 24시간제로 할지 골라요."
+    },
+    "webhook_link": {
+      "title": "웹후크 URL",
+      "desc": "디스코드 알림에 쓰는 기본 웹후크예요."
+    },
+    "discord_channel_id": {
+      "title": "채널 ID",
+      "desc": "봇이 알림을 보낼 기본 디스코드 채널 ID예요."
+    },
+    "discord_rich_presence": {
+      "title": "디스코드 활동 상태 표시",
+      "desc": "디스코드 상태에 매크로 활동을 보여 줘요."
+    },
+    "send_screenshot": {
+      "title": "스크린샷 보내기",
+      "desc": "디스코드 알림에 게임 스크린샷을 첨부해요."
+    },
+    "only_send_hourly_report": {
+      "title": "리포트만 보내기",
+      "desc": "일반 상태 메시지는 끄고 시간별 리포트와 세션 리포트만 보내요."
+    },
+    "live_gather_report": {
+      "title": "실시간 채집 리포트 켜기",
+      "desc": "채집하는 동안 디스코드 메시지 하나를 10초마다 수정해서 꿀/꽃가루 스크린샷과 채집 타이머를 보여 줘요."
+    },
+    "route_macro_status": {
+      "title": "매크로",
+      "desc": "시작, 정지, 일시정지, 재개, 프로필 메시지"
+    },
+    "route_reports": {
+      "title": "리포트",
+      "desc": "시간별 리포트와 최종 리포트 이미지"
+    },
+    "route_gathering": {
+      "title": "채집",
+      "desc": "채집 시작/종료와 실시간 채집 리포트 메시지"
+    },
+    "route_combat": {
+      "title": "전투",
+      "desc": "몹, 비셔스 비, 캐릭터 사망 메시지"
+    },
+    "route_activities": {
+      "title": "활동",
+      "desc": "부스트, 제작, 스티커, 개미 챌린지, 플랜터, 퀘스트, 수집품, 변환 메시지"
+    },
+    "route_system": {
+      "title": "시스템",
+      "desc": "치명적 오류, 연결 끊김, 스트림 메시지 등 시스템 알림"
+    },
+    "discord_user_id": {
+      "title": "디스코드 사용자 ID",
+      "desc": "아래 핑(멘션) 옵션에 사용돼요."
+    },
+    "ping_critical_errors": {
+      "title": "치명적 오류",
+      "desc": "치명적 오류가 전송되면 핑을 보내요."
+    },
+    "ping_disconnects": {
+      "title": "연결 끊김",
+      "desc": "재연결이나 연결 문제 메시지가 오면 핑을 보내요."
+    },
+    "ping_character_deaths": {
+      "title": "캐릭터 사망",
+      "desc": "캐릭터가 죽으면 핑을 보내요."
+    },
+    "ping_hourly_reports": {
+      "title": "시간별/세션 리포트",
+      "desc": "시간별 또는 세션 리포트가 전송되면 핑을 보내요."
+    },
+    "ping_unusual_sprouts": {
+      "title": "특별한 새싹",
+      "desc": "문, 구미, 축제, 에픽, 레전더리, 슈프림 새싹 알림이 감지되면 핑을 보내요."
+    },
+    "ping_windy_bee": {
+      "title": "윈디 비 등장",
+      "desc": "윈디 비 등장 알림이 감지되면 핑을 보내요."
+    },
+    "discord_permission_public_info_ids": {
+      "title": "공개 정보",
+      "desc": "명령어: /help, /ping. 비워 두면 누구나 이 명령어를 쓸 수 있어요."
+    },
+    "discord_permission_observation_ids": {
+      "title": "상태 확인",
+      "desc": "명령어: /battery, /logs, /nectar, /screenshot, /status, /tasklist, /plantertimers."
+    },
+    "discord_permission_macro_control_ids": {
+      "title": "매크로 제어",
+      "desc": "명령어: /start, /stop, /pause, /resume, /rejoin, /skipserver."
+    },
+    "discord_permission_task_interrupt_ids": {
+      "title": "작업 중단",
+      "desc": "명령어: /amulet, /collectplanter, /planterreset, /reroll, /reset, /skip, /usehotbar."
+    },
+    "discord_permission_configuration_ids": {
+      "title": "설정",
+      "desc": "매크로 설정, 필드, 퀘스트, 수집품, 몹, 벌집 칸, 시프트 락, 매크로 모드를 보거나 바꾸는 명령어예요."
+    },
+    "discord_permission_system_action_ids": {
+      "title": "시스템 동작",
+      "desc": "명령어: /close, /mute, /unmute."
+    },
+    "discord_permission_profile_access_ids": {
+      "title": "프로필 접근",
+      "desc": "명령어: /privateserver, /swapprofile."
+    },
+    "discord_permission_streaming_ids": {
+      "title": "스트리밍",
+      "desc": "명령어: /stream, /streamurl."
+    },
+    "discord_permission_reports_ids": {
+      "title": "리포트",
+      "desc": "명령어: /hourlyreport, /session."
+    },
+    "enable_stream": {
+      "title": "스트림 켜기",
+      "desc": "자동으로 스트리밍을 시작해요."
+    },
+    "pin_stream_url": {
+      "title": "디스코드에 스트림 URL 고정",
+      "desc": "스트리밍이 시작되면 스트림 URL 메시지를 디스코드에 자동으로 고정해요.<br>디스코드 봇과 웹후크가 둘 다 켜져 있어야 해요."
+    },
+    "field_enable": {
+      "title": "작업 켜기",
+      "desc": "이 필드에서 채집을 켜요."
+    },
+    "field": {
+      "title": "필드",
+      "desc": "채집할 필드예요."
+    },
+    "shift_lock": {
+      "title": "시프트 락 사용",
+      "desc": "채집할 때 시프트 락을 켜요."
+    },
+    "field_drift_compensation": {
+      "title": "필드 위치 보정",
+      "desc": "채집 패턴 사이사이에 캐릭터를 슈프림 새추레이터(AI 미사용 시)나 선택한 스프링클러(AI 사용 시) 쪽으로 옮겨 위치를 맞춰요."
+    },
+    "shape": {
+      "title": "패턴",
+      "desc": "이동 패턴이에요."
+    },
+    "size": {
+      "title": "크기",
+      "desc": "패턴마다 다르게 작용하지만, 보통 패턴이 커버하는 전체 범위를 바꿔요."
+    },
+    "width": {
+      "title": "너비",
+      "desc": "패턴마다 다르게 작용하지만, 보통 각 루프의 반복 횟수를 바꿔요. cornerx 패턴에서는 매크로가 모서리까지 이동하는 거리도 바뀌어요."
+    },
+    "invert_lr": {
+      "title": "좌우 반전",
+      "desc": "패턴의 좌우를 뒤집어요. 왼쪽으로 갈 때 오른쪽으로 가고, 그 반대도 마찬가지예요."
+    },
+    "invert_fb": {
+      "title": "앞뒤 반전",
+      "desc": "패턴의 앞뒤를 뒤집어요. 앞으로 갈 때 뒤로 가고, 그 반대도 마찬가지예요."
+    },
+    "turn": {
+      "title": "방향",
+      "desc": "카메라를 돌릴 방향이에요. 시작 방향은 필드마다 달라요."
+    },
+    "turn_times": {
+      "title": "회전 횟수",
+      "desc": "그 방향으로 몇 번 돌릴지 정해요. 방향이 '없음'이면 아무것도 하지 않아요."
+    },
+    "infinite_gather": {
+      "title": "무한 채집",
+      "desc": "시간과 가방 제한을 무시하고, 중단될 때까지 계속 채집해요."
+    },
+    "mins": {
+      "title": "분",
+      "desc": "채집할 최대 시간(분)이에요."
+    },
+    "backpack": {
+      "title": "가방%",
+      "desc": "가방이 몇 %까지 차면 채집을 멈출지 정해요. 100 대신 95로 설정하는 걸 추천해요."
+    },
+    "return": {
+      "title": "벌집 귀환",
+      "desc": "벌집으로 돌아가는 방법이에요."
+    },
+    "use_whirlwig_fallback": {
+      "title": "Whirligig 예비 사용",
+      "desc": "걸어서 벌집을 찾지 못하면, 리셋하기 전에 Whirligig를 시도해요."
+    },
+    "goo": {
+      "title": "구(goo) 사용",
+      "desc": "이 필드에서 채집할 때 구(goo)를 써서 꽃가루 수집량을 늘려요."
+    },
+    "goo_interval": {
+      "title": "구(goo) 사용 간격 (초)",
+      "desc": "채집 중에 구(goo)를 쓰는 주기예요. (최소 3초, 기본 3초)"
+    },
+    "start_location": {
+      "title": "시작 위치",
+      "desc": "필드에서 채집할 구역이에요."
+    },
+    "distance": {
+      "title": "거리",
+      "desc": "시작 위치 방향으로 이동할 거리예요. 시작 위치가 '가운데'면 아무것도 하지 않아요."
+    },
+    "configure-robin-ai-tokens-button": {
+      "title": "선호 토큰",
+      "desc": "AI 채집이 쫓아갈 토큰을 고르고 우선순위대로 정렬해요."
+    },
+    "blooms_ai_model": {
+      "title": "감지 모델",
+      "desc": "블룸과 꽃잎 감지기를 골라요. 표준이 가장 정확하고, 라이트와 미니는 정확도를 조금 낮추는 대신 더 빨라요."
+    },
+    "gifted_vicious": {
+      "title": "기프트 비셔스 비",
+      "desc": "기프트 비셔스 비의 리스폰 시간 15% 감소 보너스를 적용해요."
+    },
+    "stick_bug_amulet": {
+      "title": "스틱 버그 부적",
+      "desc": "스틱 버그 부적의 몬스터 리스폰 시간 -X%를 적용해요."
+    },
+    "icicles_beequip": {
+      "title": "고드름(Icicles) 비큅",
+      "desc": "고드름 비큅의 몬스터 리스폰 시간 -X%를 적용해요."
+    },
+    "ladybug": {
+      "title": "무당벌레",
+      "desc": "무당벌레를 잡고 전리품을 주워요."
+    },
+    "rhinobeetle": {
+      "title": "장수풍뎅이",
+      "desc": "장수풍뎅이를 잡고 전리품을 주워요."
+    },
+    "scorpion": {
+      "title": "전갈",
+      "desc": "전갈을 잡고 전리품을 주워요."
+    },
+    "mantis": {
+      "title": "사마귀",
+      "desc": "사마귀를 잡고 전리품을 주워요."
+    },
+    "spider": {
+      "title": "거미",
+      "desc": "거미를 잡고 전리품을 주워요."
+    },
+    "werewolf": {
+      "title": "늑대인간",
+      "desc": "늑대인간을 잡고 전리품을 주워요."
+    },
+    "stinger_hunt": {
+      "title": "작업 켜기",
+      "desc": "밤이 되면 비셔스 비를 찾아서 처치해요."
+    },
+    "stinger_clover": {
+      "title": "클로버",
+      "desc": "클로버 필드에서 비셔스 비를 찾아요."
+    },
+    "stinger_spider": {
+      "title": "거미",
+      "desc": "거미 필드에서 비셔스 비를 찾아요."
+    },
+    "stinger_cactus": {
+      "title": "선인장",
+      "desc": "선인장 필드에서 비셔스 비를 찾아요."
+    },
+    "stinger_rose": {
+      "title": "장미",
+      "desc": "장미 필드에서 비셔스 비를 찾아요."
+    },
+    "stinger_mountain_top": {
+      "title": "산 정상",
+      "desc": "산 정상 필드에서 비셔스 비를 찾아요."
+    },
+    "stinger_pepper": {
+      "title": "고추",
+      "desc": "고추 필드에서 비셔스 비를 찾아요."
+    },
+    "stump_snail": {
+      "title": "작업 켜기",
+      "desc": "그루터기 달팽이를 처치해요."
+    },
+    "stump_snail_amulet": {
+      "title": "부적",
+      "desc": "그루터기 달팽이 부적을 어떻게 할지 정해요.<br><br><strong>유지</strong> - 'keep old(기존 유지)' 옵션을 골라요<br><strong>교체</strong> - 'replace(교체)' 옵션을 골라요<br><strong>정지</strong> - 아무것도 고르지 않고, 부적을 유지하거나 교체할 때까지 매크로를 멈춰요<br><strong>명령 대기</strong> - 아무것도 고르지 않고, 유지/교체 명령을 받을 때까지 매크로를 멈춰요. (디스코드 봇 필요)"
+    },
+    "stump_snail_balloon_interval": {
+      "title": "풍선 회복 주기 (분)",
+      "desc": "이 시간(분)만큼 공격한 뒤 소나무 필드로 돌아가 풍선을 다시 채워요. 0으로 두면 주기적인 풍선 회복을 꺼요."
+    },
+    "coconut_crab": {
+      "title": "작업 켜기",
+      "desc": "코코넛 게를 처치해요. 처치 성공 여부는 벌집 레벨, 공격력, 렉에 따라 달라요."
+    },
+    "king_beetle": {
+      "title": "작업 켜기",
+      "desc": "킹 비틀을 처치해요. 처치 성공 여부는 벌집 레벨, 공격력, 렉에 따라 달라요."
+    },
+    "tunnel_bear": {
+      "title": "작업 켜기",
+      "desc": "터널 곰을 처치해요. 처치 성공 여부는 벌집 레벨, 공격력, 렉에 따라 달라요."
+    },
+    "ant_challenge": {
+      "title": "작업 켜기",
+      "desc": "개미 챌린지를 진행해요. 개미 부적은 그대로 유지해요."
+    },
+    "quest_use_gumdrops": {
+      "title": "검드롭 사용",
+      "desc": "구(goo) 퀘스트를 위해 채집할 때 검드롭을 써요."
+    },
+    "quest_gumdrop_slot": {
+      "title": "검드롭 칸",
+      "desc": "사용할 검드롭이 있는 핫바 칸이에요."
+    },
+    "quest_progress_watch": {
+      "title": "퀘스트 창 열어 두기",
+      "desc": "진행 중인 퀘스트를 화면에 띄워 두고, 필드 목표를 다 채우면 바로 채집을 멈춰요."
+    },
+    "polar_bear_quest_gather_interrupt": {
+      "title": "북극곰",
+      "desc": "북극곰의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "brown_bear_quest_gather_interrupt": {
+      "title": "갈색 곰",
+      "desc": "갈색 곰의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "black_bear_quest_gather_interrupt": {
+      "title": "검은 곰",
+      "desc": "검은 곰의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "honey_bee_quest_gather_interrupt": {
+      "title": "꿀벌",
+      "desc": "꿀벌의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "bucko_bee_quest_gather_interrupt": {
+      "title": "버코 비",
+      "desc": "버코 비의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "riley_bee_quest_gather_interrupt": {
+      "title": "라일리 비",
+      "desc": "라일리 비의 진행 중인 퀘스트에 필요한 몹이 나타나면 채집을 중단해요."
+    },
+    "petal_quest_gather_mins": {
+      "title": "채집 시간 (분)",
+      "desc": "꽃잎 퀘스트 목표에만 적용할 채집 시간이에요. 0으로 두면 퀘스트 제공자별 설정을 따라요."
+    },
+    "petal_quest_gather_return": {
+      "title": "벌집 귀환",
+      "desc": "꽃잎 퀘스트 목표에만 적용할 귀환 방식이에요."
+    },
+    "ignore_petal_quests": {
+      "title": "꽃잎 퀘스트 무시",
+      "desc": "알려진 꽃잎 퀘스트는 블룸 꽃잎을 채집하지 않고 건너뛰어요."
+    },
+    "polar_bear_quest": {
+      "title": "북극곰",
+      "desc": "북극곰의 퀘스트를 진행해요."
+    },
+    "brown_bear_quest": {
+      "title": "갈색 곰",
+      "desc": "갈색 곰의 퀘스트를 진행해요."
+    },
+    "black_bear_quest": {
+      "title": "검은 곰 (반복 퀘스트만)",
+      "desc": "검은 곰의 반복 퀘스트를 진행해요."
+    },
+    "honey_bee_quest": {
+      "title": "꿀벌",
+      "desc": "꿀벌의 퀘스트를 진행해요."
+    },
+    "bucko_bee_quest": {
+      "title": "버코 비",
+      "desc": "버코 비의 퀘스트를 진행해요."
+    },
+    "riley_bee_quest": {
+      "title": "라일리 비",
+      "desc": "라일리 비의 퀘스트를 진행해요."
+    },
+    "autoclicker_interval_ms": {
+      "title": "클릭 간격 (ms)",
+      "desc": "클릭 사이 시간(밀리초)이에요. 값이 낮을수록 빨리 클릭해요."
+    },
+    "autoclicker_start_delay_seconds": {
+      "title": "시작 지연 (초)",
+      "desc": "오토 클리커가 시작되기 전 대기 시간이에요. 기본값은 3초예요."
+    },
+    "autoclicker_start": {
+      "title": "오토 클리커 시작",
+      "desc": "설정한 시작 지연이 지나면 클릭을 시작해요."
+    },
+    "autoclicker_stop": {
+      "title": "오토 클리커 정지",
+      "desc": "모든 자동 클릭을 멈춰요."
+    }
+  },
+  "sections": {
+    "Field Boosters": {
+      "title": "필드 부스터"
+    },
+    "Automatic Field Boost": {
+      "title": "자동 필드 부스트",
+      "desc": "글리터와 주사위 부스트를 자동으로 유지해요. 제작: Sev"
+    },
+    "Sticker Stack": {
+      "title": "스티커 스택"
+    },
+    "TAD Alt Sync": {
+      "title": "TAD 부계정 동기화",
+      "desc": "부계정 모드 계정을 최대 2개까지 기본 필드에서 시작하고, 필드 부스트가 감지되면 그 필드로 옮겨요."
+    },
+    "Default Alt Gather Pattern": {
+      "title": "부계정 기본 채집 패턴",
+      "desc": "부계정이 부계정 기본 필드에서 계속 채집할 때 쓰는 설정이에요."
+    },
+    "Timing & Glitter Extending": {
+      "title": "타이밍 & 글리터 연장",
+      "desc": "부계정 재시작, 부스트 지속 시간, 본계정의 글리터 사용(선택)을 설정해요."
+    },
+    "Regular": {
+      "title": "일반"
+    },
+    "Glue Dispenser": {
+      "title": "글루 디스펜서"
+    },
+    "Sticker Printer": {
+      "title": "스티커 프린터"
+    },
+    "Mondo Buff": {
+      "title": "몬도 버프"
+    },
+    "Memory Match": {
+      "title": "메모리 매치"
+    },
+    "Wind Shrine": {
+      "title": "바람 신전"
+    },
+    "Guiding Star": {
+      "title": "길잡이 별"
+    },
+    "Beesmas 🏻": {
+      "title": "비즈마스"
+    },
+    "Petals & Blooms": {
+      "title": "꽃잎 & 블룸",
+      "desc": "꽃잎과 블룸 참고 가이드예요."
+    },
+    "Sprouts": {
+      "title": "새싹"
+    },
+    "Sticker Sprout": {
+      "title": "스티커 새싹"
+    },
+    "Drop Guide": {
+      "title": "드롭 가이드",
+      "desc": "필드와 새싹 종류별 일반·희귀 새싹 드롭 참고표예요."
+    },
+    "Blender": {
+      "title": "블렌더"
+    },
+    "Basic": {
+      "title": "기본"
+    },
+    "Sprinkler": {
+      "title": "스프링클러"
+    },
+    "Goo": {
+      "title": "구(goo)"
+    },
+    "Balloon": {
+      "title": "풍선"
+    },
+    "Pine Tree": {
+      "title": "소나무"
+    },
+    "Preferences": {
+      "title": "환경설정"
+    },
+    "Task Priority Order": {
+      "title": "작업 우선순위",
+      "desc": "작업을 끌어다 놓아서 우선순위를 정해요. 위에 있을수록 먼저 실행돼요. 퀘스트와 플랜터는 자동으로 처리되니 순서는 상관없어요. 검색창으로 작업을 빠르게 찾을 수 있어요. 회색으로 표시된 작업은 작업 대기열에 없지만, 순서는 바꿀 수 있어요."
+    },
+    "Rejoining": {
+      "title": "재접속"
+    },
+    "Auto Stop": {
+      "title": "자동 정지"
+    },
+    "Inactive Honey Reset": {
+      "title": "꿀 정체 시 리셋"
+    },
+    "Haste Compensation": {
+      "title": "헤이스트 보정"
+    },
+    "Macro Theme": {
+      "title": "매크로 테마"
+    },
+    "Update Settings": {
+      "title": "업데이트 설정"
+    },
+    "Low Performance": {
+      "title": "저사양 모드"
+    },
+    "Hourly / Session Reports": {
+      "title": "시간별 / 세션 리포트"
+    },
+    "Keybinds": {
+      "title": "단축키"
+    },
+    "Export Debug": {
+      "title": "디버그 내보내기",
+      "desc": "내보낸 프로필, 최근 로그, macOS·매크로 버전, 칩 정보를 zip 파일 하나로 묶어요."
+    },
+    "Advanced": {
+      "title": "고급"
+    },
+    "Discord Delivery": {
+      "title": "디스코드 전송"
+    },
+    "Message Options": {
+      "title": "메시지 옵션"
+    },
+    "Notification Routes": {
+      "title": "알림 경로",
+      "desc": "카테고리별로 알림을 따로 보낼 곳을 정할 수 있어요. (선택) 디스코드 웹후크 URL이나 디스코드 채널 ID를 붙여 넣으세요."
+    },
+    "Discord Pings": {
+      "title": "디스코드 핑"
+    },
+    "Bot Command Permissions": {
+      "title": "봇 명령어 권한",
+      "desc": "카테고리별로 사용을 허용할 디스코드 사용자 ID를 입력하세요. 여러 개는 쉼표로 구분해요. 비워 두면 누구나 쓸 수 있어요."
+    },
+    "Stream": {
+      "title": "스트림",
+      "desc": "웹 링크로 내 화면을 실시간 스트리밍해요. 설정 방법은 문서를 참고하세요."
+    },
+    "Gather Field": {
+      "title": "채집 필드"
+    },
+    "Pattern": {
+      "title": "패턴"
+    },
+    "Rotate Camera": {
+      "title": "카메라 회전",
+      "desc": "채집 전에 카메라를 돌려요."
+    },
+    "Gather Until": {
+      "title": "채집 종료 조건"
+    },
+    "Goo Settings": {
+      "title": "구(goo) 설정",
+      "desc": "이 필드에서 채집할 때 구(goo)를 사용해요."
+    },
+    "Start location": {
+      "title": "시작 위치",
+      "desc": "필드의 어느 부분에서 채집을 시작할지 정해요."
+    },
+    "AI Gathering": {
+      "title": "AI 채집"
+    },
+    "Respawn Time Modifiers": {
+      "title": "리스폰 시간 보정"
+    },
+    "Regular Mobs": {
+      "title": "일반 몹"
+    },
+    "Stinger Hunt": {
+      "title": "스팅어 사냥"
+    },
+    "Stump Snail": {
+      "title": "그루터기 달팽이"
+    },
+    "Coconut Crab": {
+      "title": "코코넛 게"
+    },
+    "King Beetle": {
+      "title": "킹 비틀"
+    },
+    "Tunnel Bear": {
+      "title": "터널 곰"
+    },
+    "Ant Challenge": {
+      "title": "개미 챌린지"
+    },
+    "Live Quest Progress": {
+      "title": "실시간 퀘스트 진행도",
+      "desc": "퀘스트용으로 채집하는 동안 열린 퀘스트 창을 지켜봐요."
+    },
+    "Quest Gather Interrupt": {
+      "title": "퀘스트 채집 중단",
+      "desc": "필요한 몹이 다시 나타났을 때 채집을 중단해도 되는 퀘스트 제공자를 골라요."
+    },
+    "Petal Gather": {
+      "title": "꽃잎 채집",
+      "desc": "꽃잎 퀘스트 목표에는 BloomsAI를 사용해요."
+    },
+    "Quests": {
+      "title": "퀘스트"
+    },
+    "Auto Clicker": {
+      "title": "오토 클리커",
+      "desc": "설정한 간격마다 왼쪽 클릭을 반복해요."
+    }
+  },
+  "options": {
+    "none": "없음",
+    "sunflower": "해바라기",
+    "dandelion": "민들레",
+    "mushroom": "버섯",
+    "blue_flower": "파란 꽃",
+    "clover": "클로버",
+    "strawberry": "딸기",
+    "spider": "거미",
+    "bamboo": "대나무",
+    "pineapple": "파인애플",
+    "stump": "그루터기",
+    "cactus": "선인장",
+    "pumpkin": "호박",
+    "pine_tree": "소나무",
+    "rose": "장미",
+    "mountain_top": "산 정상",
+    "pepper": "고추",
+    "coconut": "코코넛",
+    "Field Dice": "필드 주사위",
+    "Smooth Dice": "스무스 주사위",
+    "Loaded Dice": "로디드 주사위",
+    "Sticker": "스티커",
+    "Ticket": "티켓",
+    "Sticker/Ticket": "스티커/티켓",
+    "None": "없음",
+    "Left": "왼쪽",
+    "Right": "오른쪽",
+    "Center": "가운데",
+    "Upper Right": "오른쪽 위",
+    "Lower Right": "오른쪽 아래",
+    "Bottom": "아래",
+    "Lower Left": "왼쪽 아래",
+    "Upper Left": "왼쪽 위",
+    "Top": "위",
+    "Basic": "기본",
+    "Silver": "실버",
+    "Gold": "골드",
+    "Diamond": "다이아몬드",
+    "Mythic": "신화",
+    "Blueberries": "블루베리",
+    "Enzymes": "효소",
+    "Glitter": "글리터",
+    "Gumdrops": "검드롭",
+    "Honeysuckles": "허니서클",
+    "Jelly Beans": "젤리빈",
+    "Magic Bean": "마법 콩",
+    "Micro-Converter": "마이크로 컨버터",
+    "Moon Charms": "문 참",
+    "Oil": "오일",
+    "Pineapples": "파인애플",
+    "Royal Jelly": "로얄 젤리",
+    "Strawberries": "딸기",
+    "Sunflower Seeds": "해바라기 씨앗",
+    "Tickets": "티켓",
+    "Treats": "간식",
+    "Coconuts": "코코넛",
+    "Glue": "글루",
+    "Star Jelly": "스타 젤리",
+    "Blue Extract": "파란 추출물",
+    "Cloud Vial": "구름 병",
+    "Diamond Egg": "다이아몬드 알",
+    "Gold Egg": "골드 알",
+    "Red Extract": "빨간 추출물",
+    "Star Treat": "스타 간식",
+    "Stingers": "스팅어",
+    "Tropical Drink": "트로피컬 드링크",
+    "Festive Bean": "축제 콩",
+    "Gingerbread Bear": "진저브레드 곰",
+    "Hard Wax": "하드 왁스",
+    "Mythic Egg": "신화 알",
+    "Night Bell": "나이트 벨",
+    "Silver Egg": "실버 알",
+    "Soft Wax": "소프트 왁스",
+    "Super Smoothie": "슈퍼 스무디",
+    "Swirled Wax": "스월 왁스",
+    "Moon Charm": "문 참",
+    "Purple Potion": "보라색 물약",
+    "Caustic Wax": "부식성 왁스",
+    "Turpentine": "테레빈유",
+    "Sunflower": "해바라기",
+    "Dandelion": "민들레",
+    "Mushroom": "버섯",
+    "Blue Flower": "파란 꽃",
+    "Clover": "클로버",
+    "Strawberry": "딸기",
+    "Spider": "거미",
+    "Bamboo": "대나무",
+    "Pineapple": "파인애플",
+    "Stump": "그루터기",
+    "Cactus": "선인장",
+    "Pumpkin": "호박",
+    "Pine Tree": "소나무",
+    "Rose": "장미",
+    "Mountain Top": "산 정상",
+    "Coconut": "코코넛",
+    "Pepper": "고추",
+    "Hive Hub": "하이브 허브",
+    "Standard": "표준",
+    "Loot Light (macOS 12+)": "전리품 라이트 (macOS 12+)",
+    "Token Light (macOS 12+)": "토큰 라이트 (macOS 12+)",
+    "Loot Mini (macOS 12+)": "전리품 미니 (macOS 12+)",
+    "Token Mini (macOS 12+)": "토큰 미니 (macOS 12+)",
+    "Detect": "감지",
+    "Check": "확인",
+    "Golden": "골든",
+    "Saturator": "새추레이터",
+    "Light (macOS 12+)": "라이트 (macOS 12+)",
+    "Mini (macOS 12+)": "미니 (macOS 12+)",
+    "Always": "항상",
+    "Every": "주기마다",
+    "Every Gather": "채집할 때마다",
+    "Never": "안 함",
+    "Move On": "다음 작업으로",
+    "Rejoin": "재접속",
+    "Every X Hours": "X시간마다",
+    "Daily Time": "매일 지정 시각",
+    "Local": "내 지역 시간",
+    "Brown Theme": "브라운 테마",
+    "Cream Theme": "크림 테마",
+    "Precise Theme": "프리사이스 테마",
+    "Bouyant Theme": "부얀트 테마",
+    "Commander Theme": "커맨더 테마",
+    "Mythic Theme": "신화 테마",
+    "Basic Bee Theme": "베이직 비 테마",
+    "Gummy Theme": "구미 테마",
+    "Tadpole Theme": "탯폴 테마",
+    "Gifted Tad Theme": "기프트 탯폴 테마",
+    "Spicy Bee Theme": "스파이시 비 테마",
+    "Stable Releases": "정식 버전",
+    "Beta Releases": "베타 버전",
+    "Boost": "부스트",
+    "Haste": "헤이스트",
+    "Focus": "포커스",
+    "Bomb Combo": "폭탄 콤보",
+    "Balloon Aura": "풍선 오라",
+    "Honey Mark": "꿀 마크",
+    "Pollen Mark": "꽃가루 마크",
+    "Festive Mark": "축제 마크",
+    "Melody": "멜로디",
+    "Bear Morph": "곰 변신",
+    "Jelly Bean Share": "젤리빈 공유",
+    "Guiding Star": "길잡이 별",
+    "Mondo Chick": "몬도",
+    "Balloon Blessing": "풍선 축복",
+    "Tide Blessing": "조수의 축복",
+    "Wealth Clock": "부의 시계",
+    "Use Both": "둘 다 사용",
+    "Use Webhook": "웹후크 사용",
+    "Use Discord Bot": "디스코드 봇 사용",
+    "Reset": "리셋",
+    "Walk": "걸어서",
+    "Light (Faster)": "라이트 (더 빠름)",
+    "Mini (Fastest)": "미니 (가장 빠름)",
+    "Keep": "유지",
+    "Replace": "교체",
+    "Stop": "정지",
+    "Wait for command": "명령 대기",
+    "No Override": "덮어쓰지 않음"
+  }
+}

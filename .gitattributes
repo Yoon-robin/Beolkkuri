@@ -1,0 +1,12 @@
+# macOS shell scripts and Python must keep LF line endings even when committed from Windows.
+* text=auto eol=lf
+*.command text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.png binary
+*.ico binary
+*.jpg binary
+*.webp binary
+*.so binary
+*.onnx binary
+*.woff2 binary
