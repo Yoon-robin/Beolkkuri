@@ -2,6 +2,9 @@
 import { ZoomInIcon } from "lucide-react"
 import { useState, type ReactNode } from "react"
 
+import { useTabRequest } from "@/lib/focus"
+import type { PageId } from "@/lib/route"
+
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -27,7 +30,7 @@ export type SubTab = { value: string; label: ReactNode; content: ReactNode }
  * Sub-tabs that remember the last one opened, under the same localStorage key
  * the old UI used (e.g. "activeKillSubtab" -> "kill-boss").
  */
-export function SubTabs({ storageKey, fallback, tabs }: { storageKey: string; fallback: string; tabs: SubTab[] }) {
+export function SubTabs({ page, storageKey, fallback, tabs }: { page: PageId; storageKey: string; fallback: string; tabs: SubTab[] }) {
   const [active, setActive] = useState(() => {
     const saved = readStored(storageKey)
     return saved && tabs.some((t) => t.value === saved) ? saved : fallback
@@ -36,6 +39,9 @@ export function SubTabs({ storageKey, fallback, tabs }: { storageKey: string; fa
     setActive(value)
     writeStored(storageKey, value)
   }
+  useTabRequest(page, (value) => {
+    if (tabs.some((t) => t.value === value)) change(value)
+  })
   return (
     <Tabs value={active} onValueChange={change}>
       <TabsList>

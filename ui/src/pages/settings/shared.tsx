@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { useRef, type ReactNode } from "react"
 
 import { SettingRowLayout } from "@/components/settings/schema-section"
 import {
@@ -12,8 +12,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/i18n"
+import { useFocusTarget } from "@/lib/focus"
 
-/** A settings row for custom controls, laid out like the generated schema rows. */
+/**
+ * A settings row for custom controls, laid out like the generated schema rows. Search
+ * jumps to the setting named by `htmlFor` land here too.
+ */
 export function CustomRow({
   htmlFor,
   title,
@@ -27,8 +31,10 @@ export function CustomRow({
   children: ReactNode
   stacked?: boolean
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useFocusTarget(htmlFor, ref)
   return (
-    <SettingRowLayout htmlFor={htmlFor} title={title} desc={desc} stacked={stacked}>
+    <SettingRowLayout ref={ref} htmlFor={htmlFor} title={title} desc={desc} stacked={stacked}>
       {children}
     </SettingRowLayout>
   )

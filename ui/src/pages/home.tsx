@@ -67,6 +67,9 @@ const strings: PageStrings<
   | "permTitle"
   | "permDesc"
   | "permFix"
+  | "permKbTitle"
+  | "permKbDesc"
+  | "permKbFix"
   | "logsExport"
   | "logsClear"
   | "planterReset"
@@ -107,6 +110,9 @@ const strings: PageStrings<
     permTitle: "맥 권한이 꺼져 있어요",
     permDesc: "이대로 시작하면 매크로가 키보드·마우스를 움직이거나 화면을 볼 수 없어요.",
     permFix: "켜러 가기",
+    permKbTitle: "전체 키보드 접근이 켜져 있어요",
+    permKbDesc: "매크로가 오작동할 수 있으니 꺼 주세요.",
+    permKbFix: "끄러 가기",
     logsExport: "기록 저장",
     logsClear: "기록 지우기",
     planterReset: "이 타이머 초기화",
@@ -116,6 +122,9 @@ const strings: PageStrings<
     permTitle: "macOS permissions are off",
     permDesc: "Without them the macro can't move the mouse and keyboard or see the screen.",
     permFix: "Fix it",
+    permKbTitle: "Full Keyboard Access is on",
+    permKbDesc: "It can confuse the macro, so please turn it off.",
+    permKbFix: "Fix it",
     subtitle: "Start the macro and watch what it's doing.",
     control: "Macro control",
     controlDesc: "Open Bee Swarm Simulator in Roblox, then press Start.",
@@ -465,18 +474,20 @@ export default function HomePage() {
   // the macro asks the UI to reload its task list after it changes settings itself
   usePythonEvent("loadTasks", () => void refresh())
   usePythonEvent("updateMacroMode", () => void refresh())
-  const { missing: permissionsMissing } = usePermissions(5000)
+  const { status: perms, missing: permissionsMissing } = usePermissions(5000)
+  // only Full Keyboard Access is wrong: that one has to be turned off, not on
+  const keyboardOnly = !!perms && perms.accessibility !== false && perms.screenRecording !== false
 
   return (
     <Page title={t("title")} description={t("subtitle")}>
       {permissionsMissing && (
         <Alert variant="warning" className="animate-in fade-in slide-in-from-top-2 duration-300">
           <ShieldAlertIcon />
-          <AlertTitle>{t("permTitle")}</AlertTitle>
-          <AlertDescription>{t("permDesc")}</AlertDescription>
+          <AlertTitle>{keyboardOnly ? t("permKbTitle") : t("permTitle")}</AlertTitle>
+          <AlertDescription>{keyboardOnly ? t("permKbDesc") : t("permDesc")}</AlertDescription>
           <AlertAction>
             <Button size="sm" variant="outline" onClick={() => (window.location.hash = "/guide")}>
-              {t("permFix")}
+              {keyboardOnly ? t("permKbFix") : t("permFix")}
             </Button>
           </AlertAction>
         </Alert>

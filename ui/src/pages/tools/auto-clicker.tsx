@@ -1,9 +1,11 @@
 import { MousePointerClickIcon } from "lucide-react"
+import { useRef } from "react"
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
+import { useFocusTarget } from "@/lib/focus"
 import { callPy } from "@/lib/py"
 
 import {
@@ -104,6 +106,13 @@ export function AutoClickerTool({ status, refresh }: ToolProps<AutoClickerStatus
   const [intervalText, setIntervalText] = useStickyState("autoclicker_interval_ms", String(DEFAULT_INTERVAL))
   const [delay, setDelay] = useStickyState("autoclicker_start_delay_seconds", String(DEFAULT_START_DELAY))
   const busy = isBusy(status)
+  // search jumps land on these settings, which aren't regular setting rows
+  const actionsRef = useRef<HTMLDivElement>(null)
+  const intervalRef = useRef<HTMLDivElement>(null)
+  const delayRef = useRef<HTMLDivElement>(null)
+  useFocusTarget(["autoclicker_start", "autoclicker_stop"], actionsRef)
+  useFocusTarget("autoclicker_interval_ms", intervalRef)
+  useFocusTarget("autoclicker_start_delay_seconds", delayRef)
 
   const intervalMs = clampInterval(intervalText)
   const perSecond = Math.round((1000 / intervalMs) * 10) / 10
@@ -132,7 +141,7 @@ export function AutoClickerTool({ status, refresh }: ToolProps<AutoClickerStatus
           <ToolStateBadge status={status} />
         </CardTitle>
         <CardDescription>{t("desc")}</CardDescription>
-        <CardAction>
+        <CardAction ref={actionsRef}>
           <StartStopButtons status={status} onStart={start} onStop={stop} />
         </CardAction>
       </CardHeader>
@@ -143,7 +152,7 @@ export function AutoClickerTool({ status, refresh }: ToolProps<AutoClickerStatus
         <HotkeyHint startSetting="autoclicker_keybind" />
         <Separator />
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="space-y-1.5">
+          <div ref={intervalRef} className="space-y-1.5">
             <Label htmlFor="autoclicker_interval_ms">{t("interval")}</Label>
             <div className="flex items-center gap-2">
               <NumberInput
@@ -159,7 +168,7 @@ export function AutoClickerTool({ status, refresh }: ToolProps<AutoClickerStatus
             </div>
             <p className="text-xs text-muted-foreground">{t("intervalDesc")}</p>
           </div>
-          <div className="space-y-1.5">
+          <div ref={delayRef} className="space-y-1.5">
             <Label htmlFor="autoclicker_start_delay_seconds">{t("delay")}</Label>
             <div className="flex items-center gap-2">
               <NumberInput

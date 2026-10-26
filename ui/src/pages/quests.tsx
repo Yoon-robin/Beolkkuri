@@ -106,6 +106,7 @@ export default function QuestsPage() {
   return (
     <Page title={tr("nav.quests")} description={t("description")}>
       <SubTabs
+        page="quests"
         storageKey="activeQuestsSubtab"
         fallback="quests-quests"
         tabs={[

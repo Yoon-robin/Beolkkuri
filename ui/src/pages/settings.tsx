@@ -6,6 +6,7 @@ import { SchemaSection, type SectionOverrides } from "@/components/settings/sche
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useStrings, type PageStrings } from "@/i18n"
+import { useTabRequest } from "@/lib/focus"
 import { callPy } from "@/lib/py"
 import { sectionsFor, type SectionDef } from "@/schema"
 import { useSettings } from "@/state/settings"
@@ -145,6 +146,9 @@ export default function SettingsPage() {
     lastTab = value as TabId
     setTab(lastTab)
   }
+  useTabRequest("settings", (value) => {
+    if ((TABS as readonly string[]).includes(value)) change(value)
+  })
 
   return (
     <Page title={t("title")} description={t("subtitle")}>

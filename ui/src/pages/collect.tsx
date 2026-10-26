@@ -112,6 +112,7 @@ export default function CollectPage() {
   return (
     <Page title={tr("nav.collect")} description={t("description")}>
       <SubTabs
+        page="collect"
         storageKey="activeCollectSubtab"
         fallback="collect-dispensers"
         tabs={[

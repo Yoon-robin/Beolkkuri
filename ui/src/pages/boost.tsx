@@ -8,6 +8,7 @@ import { SchemaSections, type SectionOverrides } from "@/components/settings/sch
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useI18n, useStrings } from "@/i18n"
+import { useTabRequest } from "@/lib/focus"
 import { callPy, py, type Settings } from "@/lib/py"
 import { sectionsFor, type SettingDef } from "@/schema"
 import { useSettings } from "@/state/settings"
@@ -154,6 +155,7 @@ export default function BoostPage() {
   const { t: tc } = useI18n()
   const { settings } = useSettings()
   const [tab, setTab] = usePersistedTab("robin.boost.tab", "hotbar")
+  useTabRequest("boost", setTab)
   const overrides = useBoostOverrides()
   if (!settings) return <PageLoading />
 

@@ -1,9 +1,10 @@
-import type { ReactNode } from "react"
+import { useRef, type ReactNode, type Ref } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { useI18n } from "@/i18n"
+import { useFocusTarget } from "@/lib/focus"
 import { RichText } from "@/lib/rich-text"
 import { cn } from "@/lib/utils"
 import { normalizeOptions, saveTargetOf, type SectionDef, type SettingDef } from "@/schema"
@@ -116,7 +117,9 @@ export function SettingRowLayout({
   children,
   stacked,
   className,
+  ref,
 }: {
+  ref?: Ref<HTMLDivElement>
   htmlFor?: string
   title: ReactNode
   desc?: ReactNode
@@ -125,7 +128,7 @@ export function SettingRowLayout({
   className?: string
 }) {
   return (
-    <div className={cn("flex gap-x-6 gap-y-3 py-3", stacked ? "flex-col" : "flex-col sm:flex-row sm:items-center sm:justify-between", className)}>
+    <div ref={ref} className={cn("flex gap-x-6 gap-y-3 py-3", stacked ? "flex-col" : "flex-col sm:flex-row sm:items-center sm:justify-between", className)}>
       <div className="min-w-0 flex-1 space-y-0.5">
         <Label htmlFor={htmlFor} className="text-sm leading-snug font-medium">
           {title}
@@ -141,8 +144,11 @@ export function SettingRowLayout({
 export function SettingRow({ def, binding, overrides }: { def: SettingDef; binding: Binding; overrides?: SectionOverrides }) {
   const { setting } = useI18n()
   const { title, desc } = setting(def)
+  const ref = useRef<HTMLDivElement>(null)
+  useFocusTarget(def.id, ref)
   return (
     <SettingRowLayout
+      ref={ref}
       htmlFor={def.id}
       title={<RichText text={title} />}
       desc={desc ? <RichText text={desc} /> : undefined}
@@ -175,9 +181,13 @@ export function SchemaSection({
   const { section: trSection, setting } = useI18n()
   const { title, desc } = trSection(section)
   const visible = section.settings.filter((d) => isVisible(d.id, b.get) && !overrides?.hidden?.(d.id))
+  // a search jump to a setting that is hidden right now lands on its section instead
+  const hiddenIds = section.settings.filter((d) => d.id && !visible.includes(d)).map((d) => d.id)
+  const cardRef = useRef<HTMLDivElement>(null)
+  useFocusTarget(hiddenIds, cardRef)
 
   return (
-    <Card className={className}>
+    <Card ref={cardRef} className={className}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="space-y-1">
           <CardTitle className="flex items-center gap-1 text-base">

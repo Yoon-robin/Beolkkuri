@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
-import { useRun } from "@/state/run-state"
+import { formatDuration, useElapsed, useRun } from "@/state/run-state"
 import { useSetting } from "@/state/settings"
 
 import { keybindDisplay } from "./settings/keybind"
@@ -12,6 +12,7 @@ import { keybindDisplay } from "./settings/keybind"
 export function RunStatusBadge({ className }: { className?: string }) {
   const { t } = useI18n()
   const { status } = useRun()
+  const elapsed = useElapsed()
   const tone = {
     running: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
     paused: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
@@ -22,6 +23,11 @@ export function RunStatusBadge({ className }: { className?: string }) {
     <Badge variant="outline" className={cn("gap-1.5", tone, className)}>
       <span className={cn("size-1.5 rounded-full bg-current", status === "running" && "animate-pulse")} />
       {t(`run.status.${status}`)}
+      {elapsed !== null && (
+        <span className="tabular-nums opacity-75" title={t("run.elapsed")}>
+          · {formatDuration(elapsed)}
+        </span>
+      )}
     </Badge>
   )
 }

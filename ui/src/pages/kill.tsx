@@ -31,6 +31,7 @@ export default function KillPage() {
   return (
     <Page title={tr("nav.kill")} description={t("description")}>
       <SubTabs
+        page="kill"
         storageKey="activeKillSubtab"
         fallback="kill-settings"
         tabs={[

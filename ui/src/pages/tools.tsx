@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useStrings, type PageStrings } from "@/i18n"
+import { useTabRequest } from "@/lib/focus"
 import { callPy } from "@/lib/py"
 import { cn } from "@/lib/utils"
 
@@ -144,6 +145,9 @@ export default function ToolsPage() {
       // ignore
     }
   }
+  useTabRequest("tools", (next) => {
+    if ((TABS as readonly string[]).includes(next)) changeTab(next)
+  })
 
   const stopAll = async () => {
     try {

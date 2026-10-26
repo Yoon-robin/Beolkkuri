@@ -22,7 +22,13 @@ export function usePermissions(intervalMs = 3000) {
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible") void refresh()
     }, intervalMs)
-    return () => window.clearInterval(timer)
+    // coming back from System Settings shows the new state right away
+    const onFocus = () => void refresh()
+    window.addEventListener("focus", onFocus)
+    return () => {
+      window.clearInterval(timer)
+      window.removeEventListener("focus", onFocus)
+    }
   }, [refresh, intervalMs])
 
   const missing = status ? status.accessibility === false || status.screenRecording === false || status.fullKeyboardAccess === true : false

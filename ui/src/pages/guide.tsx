@@ -220,7 +220,17 @@ function Step({
   )
 }
 
-function PermissionRow({ label, value, kind }: { label: string; value: boolean | null | undefined; kind: PermissionKind }) {
+function PermissionRow({
+  label,
+  value,
+  kind,
+  onOpened,
+}: {
+  label: string
+  value: boolean | null | undefined
+  kind: PermissionKind
+  onOpened: () => void
+}) {
   const s = useStrings(strings)
   const loading = value === undefined
   return (
@@ -233,16 +243,22 @@ function PermissionRow({ label, value, kind }: { label: string; value: boolean |
           (value === null || loading) && "bg-muted text-muted-foreground",
         )}
       >
-        {loading ? <Loader2Icon className="size-3.5 animate-spin" /> : value ? <CheckCircle2Icon className="size-3.5" /> : <CircleIcon className="size-3.5" />}
+        {loading ? (
+          <Loader2Icon className="size-3.5 animate-spin" />
+        ) : (
+          <span key={String(value)} className={cn("inline-flex", value && "rm-pop")}>
+            {value ? <CheckCircle2Icon className="size-3.5" /> : <CircleIcon className="size-3.5" />}
+          </span>
+        )}
       </span>
       <span className="flex-1 text-foreground">{label}</span>
       {value === false ? (
-        <Button size="sm" onClick={() => void py.openPrivacySettings(kind)}>
+        <Button size="sm" onClick={() => void py.openPrivacySettings(kind).finally(onOpened)}>
           {s("perm.turnOn")}
         </Button>
       ) : (
         !loading && (
-          <span className={cn("text-xs", value ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+          <span className={cn("text-xs animate-in fade-in-0 duration-300", value ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
             {value ? s("perm.on") : s("perm.unknown")}
           </span>
         )
@@ -265,7 +281,7 @@ export default function GuidePage() {
   const { t } = useI18n()
   const s = useStrings(strings)
   const { settings, fields, saveGeneral } = useSettings()
-  const { status: perms } = usePermissions()
+  const { status: perms, refresh: refreshPerms } = usePermissions()
   const permsOk = !!perms && perms.accessibility !== false && perms.screenRecording !== false && !perms.fullKeyboardAccess
 
   const hiveSlot = String(useSetting<number | string>("preferred_hive_slot", 1) ?? 1)
@@ -298,12 +314,12 @@ export default function GuidePage() {
           <Step n={1} icon={<ShieldCheckIcon />} title={s("perm.title")} done={perms ? permsOk : undefined}>
             <p>{s("perm.body")}</p>
             <div className="space-y-2">
-              <PermissionRow label={s("perm.accessibility")} value={perms ? perms.accessibility : undefined} kind="accessibility" />
-              <PermissionRow label={s("perm.screen")} value={perms ? perms.screenRecording : undefined} kind="screenRecording" />
+              <PermissionRow label={s("perm.accessibility")} value={perms ? perms.accessibility : undefined} kind="accessibility" onOpened={refreshPerms} />
+              <PermissionRow label={s("perm.screen")} value={perms ? perms.screenRecording : undefined} kind="screenRecording" onOpened={refreshPerms} />
               {perms?.fullKeyboardAccess && (
                 <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">
                   <span className="flex-1">{s("perm.keyboard")}</span>
-                  <Button size="sm" variant="outline" onClick={() => void py.openPrivacySettings("keyboard")}>
+                  <Button size="sm" variant="outline" onClick={() => void py.openPrivacySettings("keyboard").finally(refreshPerms)}>
                     {s("perm.keyboardOn")}
                   </Button>
                 </div>

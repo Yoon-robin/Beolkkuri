@@ -2,6 +2,7 @@ import { ThemeProvider, useTheme } from "@/lib/theme"
 import { useEffect, useLayoutEffect, useRef, type ComponentType } from "react"
 
 import { AppSidebar, NAV } from "@/components/app-sidebar"
+import { CommandPalette } from "@/components/command-palette"
 import { PageError, PageLoading } from "@/components/page"
 import { RunButton, RunStatusBadge } from "@/components/run-controls"
 import { Separator } from "@/components/ui/separator"
@@ -96,9 +97,11 @@ function Shell() {
             </TooltipContent>
           </Tooltip>
           <Separator orientation="vertical" className="mx-1 h-5 data-vertical:self-center" />
-          <span className="truncate text-sm font-medium">{label ? t(label) : ""}</span>
-          {!isDesktopApp() && <span className="hidden truncate text-xs text-muted-foreground md:inline">· {t("devBanner")}</span>}
+          {/* the page name keeps its room; the dev-mode note gives way first */}
+          <span className="shrink-0 text-sm font-medium">{label ? t(label) : ""}</span>
+          {!isDesktopApp() && <span className="hidden min-w-0 truncate text-xs text-muted-foreground md:inline">· {t("devBanner")}</span>}
           <div className="ml-auto flex items-center gap-2">
+            <CommandPalette />
             <RunStatusBadge className="hidden sm:inline-flex" />
             {page !== "home" && <RunButton />}
           </div>

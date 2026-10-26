@@ -252,7 +252,8 @@ export function KeybindControl({
         <Button
           id={id}
           variant={recording ? "default" : "outline"}
-          className={cn("min-w-36 justify-center font-mono", recording && "animate-pulse")}
+          // only the key itself is monospaced; Korean prompts look letter-spaced in a mono font
+          className={cn("min-w-36 justify-center", current && !recording && "font-mono", recording && "animate-pulse")}
           onClick={() => {
             setError(null)
             setRecording((r) => !r)

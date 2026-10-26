@@ -210,3 +210,16 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A setting reached from search glows once so the eye finds it. */
+@keyframes rm-flash {
+  0%, 35% { background-color: color-mix(in oklch, var(--primary) 18%, transparent); box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 18%, transparent); }
+  100% { background-color: transparent; box-shadow: 0 0 0 6px transparent; }
+}
+
+@layer utilities {
+  .rm-flash {
+    border-radius: var(--radius-md);
+    animation: rm-flash 1.8s ease-out both;
+  }
+}
