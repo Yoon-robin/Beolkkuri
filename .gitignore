@@ -35,3 +35,8 @@ smoke_hourly_report.py
 src/data/legacy_user_backups
 /tools/
 generate_theme_reports.py
+
+# landing page tooling
+scripts/site/node_modules/
+scripts/site/out/
+scripts/site/package-lock.json

@@ -15,6 +15,8 @@ paths/, settings/ movement paths and gather patterns used by the macro
 install.sh        one-line installer: downloads latest release (or main) into ~/RobinMacro, runs install_dependencies.command
 install_dependencies.command / run_macro.command   macOS installer and launcher (bash, LF, must stay executable)
 docs/             Korean help pages linked from the app and README
+site/             landing page (GitHub Pages): one static index.html + assets/. Deployed by .github/workflows/pages.yml
+scripts/site/     screenshot tooling for the landing page (puppeteer-core; own package.json, not part of the app)
 ```
 
 ## Developing (any OS)
@@ -61,6 +63,20 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 - **Permissions:** `state/permissions.ts` polls `getPermissionStatus` in `gui.py`.
 - **Components:** use the shadcn components in `ui/src/components/ui` and Tailwind. Don't add dependencies casually.
 
+## Landing page (`site/`)
+
+- Live at https://yoon-robin.github.io/RobinMacro/. Every push to `main` that touches `site/**` redeploys it (Pages source: GitHub Actions).
+- A single hand-written `site/index.html` (no build step, no framework): inline CSS/JS, Pretendard from jsDelivr, dark honey theme. Korean by default, with an EN toggle remembered in localStorage (`rm_site_lang`). Korean text lives in the HTML (`data-i18n` / `data-i18n-html`); the English strings are in the `EN` object in the script, so keep the keys in sync.
+- Preview: `python -m http.server 8790 --directory site` (`robinmacro-site` in `.claude/launch.json`).
+- Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
+- Refresh the app screenshots:
+  1. Run the dev UI plus backend.
+  2. `node scripts/site/shoot-app.mjs <dir>` (fake running state and logs, 2x).
+  3. `python scripts/site/to-webp.py <dir> site/assets`.
+- `site/assets/og.png` (1200×630 share card) was composed once by hand; redo it only if the branding changes.
+- Set `CHROME=/path/to/chrome` if the scripts can't find a browser. On Windows with the sandbox on, Chrome may fail to launch; headless-shell with `pipe: true` worked.
+- Copy rules: no made-up stats or user counts. "Not affiliated with Onett/Roblox" stays in the FAQ and footer.
+
 ## Brand rules
 
 The owner asked for no trace of the old name. "Fuzzy"/"fuzz" may appear only in:
@@ -90,6 +106,7 @@ Done:
 - The Ctrl+K search.
 - The run timer and toasts.
 - Three UI and animation review passes.
+- The landing page on GitHub Pages (`site/`).
 
 Not yet verified on a real Mac, so test these first:
 1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/RobinMacro.app` with its Desktop alias.

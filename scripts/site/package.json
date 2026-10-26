@@ -1,0 +1,13 @@
+{
+  "name": "robinmacro-site-tools",
+  "private": true,
+  "type": "module",
+  "description": "Screenshot tooling for the landing page. Not part of the app.",
+  "scripts": {
+    "shoot": "node shoot-app.mjs out",
+    "check": "node check-site.mjs out"
+  },
+  "dependencies": {
+    "puppeteer-core": "24.10.0"
+  }
+}
