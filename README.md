@@ -38,28 +38,40 @@
 
 > **필요한 것:** 인터넷이 되는 맥 (애플 실리콘 M1 이상은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상), 로블록스, 약 3GB의 저장 공간
 
-### 1. 내려받기
-1. 이 페이지 위쪽의 초록색 **`<> Code`** 버튼 → **Download ZIP** 을 눌러요.
-2. 다운로드 폴더에 생긴 **RobinMacro-main.zip** 을 더블클릭해서 압축을 풀어요.
-3. 풀린 **RobinMacro-main** 폴더를 원하는 곳(예: `문서` 폴더)으로 옮겨요.
-   *설치한 뒤에는 폴더를 옮기지 마세요. 옮겼다면 2단계를 다시 하면 돼요.*
+### 1. 한 줄로 설치하기 (추천)
+1. **⌘ + 스페이스**를 눌러 Spotlight를 열고 `터미널`을 입력한 뒤 엔터를 눌러요.
+2. 아래 한 줄을 **복사해서 터미널에 붙여넣고(⌘V) 엔터**를 눌러요.
 
-### 2. 설치 프로그램 실행
-1. 폴더 안의 **`install_dependencies.command`** 를 **마우스 오른쪽 버튼(또는 control+클릭) → 열기** 로 실행해요.
+```bash
+curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash
+```
+
+3. 이제 기다리기만 하면 돼요. **10~20분** 정도 걸리고, 진행 상황이 한국어로 나와요.
+   - 파이썬이나 개발 도구 설치 창이 뜨면 **계속 / 설치** 를 눌러 주세요.
+   - 맥 로그인 암호를 물으면 입력해요. (입력해도 화면에 안 보이는 게 정상이에요)
+4. 끝나면 **바탕화면에 RobinMacro 앱**이 생겨요. 설치 위치는 `내 홈 폴더/RobinMacro` 예요.
+
+> 업데이트하거나 다시 설치할 때도 같은 줄을 붙여넣으면 돼요. 내 설정은 그대로 남아요.
+
+<details>
+<summary><b>터미널이 어렵다면: ZIP으로 설치하기</b></summary>
+
+1. 이 페이지 위쪽의 초록색 **`<> Code`** 버튼 → **Download ZIP** 을 눌러요.
+2. 다운로드 폴더의 **RobinMacro-main.zip** 을 더블클릭해서 풀고, 폴더를 원하는 곳(예: `문서`)으로 옮겨요.
+3. 폴더 안의 **`install_dependencies.command`** 를 **마우스 오른쪽 버튼(또는 control+클릭) → 열기** 로 실행해요.
    - "확인되지 않은 개발자" 경고가 뜨면 **열기** 를 한 번 더 눌러요.
    - 그래도 막히면 **시스템 설정 → 개인정보 보호 및 보안** 맨 아래의 **"그래도 열기"** 를 눌러요.
-2. 터미널 창이 열리고 1/5 ~ 5/5 단계가 차례로 진행돼요. **10~20분** 정도 걸려요.
-   - 파이썬이나 개발 도구 설치 창이 뜨면 **계속 / 설치** 를 눌러 주세요.
-3. 끝나면 **바탕화면에 RobinMacro 앱**이 생겨요.
+4. 설치한 뒤에는 폴더를 옮기지 마세요. 옮겼다면 3번을 다시 하면 돼요.
+</details>
 
-### 3. 권한 주기 (꼭 필요해요)
+### 2. 권한 주기 (꼭 필요해요)
 매크로가 키보드·마우스를 움직이고 화면을 보려면 **터미널**에 권한이 있어야 해요. 설치가 끝날 때 엔터를 누르면 설정 화면이 열려요.
 
 1. **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용** 에서 **터미널** 을 켜요.
 2. **시스템 설정 → 개인정보 보호 및 보안 → 화면 기록** 에서도 **터미널** 을 켜요.
-3. 터미널을 완전히 껐다가(⌘Q) 다시 실행해요.
+3. 터미널을 완전히 껐다가(⌘Q) 바탕화면의 RobinMacro 를 열어요.
 
-자세한 그림 설명: [docs/permissions.md](docs/permissions.md)
+앱의 **시작 가이드** 에서 권한이 제대로 켜졌는지 초록 체크로 바로 확인할 수 있어요. 자세한 설명: [docs/permissions.md](docs/permissions.md)
 
 ---
 
@@ -85,7 +97,7 @@
 <details>
 <summary><b>시작을 눌러도 캐릭터가 안 움직여요</b></summary>
 
-거의 항상 권한 문제예요. [권한 주기](#3-권한-주기-꼭-필요해요)를 다시 확인하고, 목록에 터미널이 이미 켜져 있다면 **꺼다가 다시 켜고** 터미널을 재시작해 보세요.
+거의 항상 권한 문제예요. [권한 주기](#2-권한-주기-꼭-필요해요)를 다시 확인하고, 목록에 터미널이 이미 켜져 있다면 **꺼다가 다시 켜고** 터미널을 재시작해 보세요.
 </details>
 
 <details>
@@ -110,7 +122,7 @@
 <details>
 <summary><b>처음부터 다시 설치하고 싶어요</b></summary>
 
-터미널에서 `rm -rf ~/robin-macro-env` 를 실행한 뒤 `install_dependencies.command` 를 다시 실행하세요.
+터미널에서 `rm -rf ~/robin-macro-env` 를 실행한 뒤, [한 줄 설치](#1-한-줄로-설치하기-추천) 명령을 다시 붙여넣으세요.
 </details>
 
 ---
@@ -143,7 +155,7 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 
 **RobinMacro** is a Bee Swarm Simulator macro for macOS with a modern React + shadcn/ui interface in Korean and English.
 
-**Install:** Download the ZIP from the green *Code* button and unzip it. Right-click `install_dependencies.command` and choose *Open*, then wait 10-20 minutes. When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
+**Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
 **Run:** Open Bee Swarm Simulator in Roblox, then open the **RobinMacro** app the installer put on your Desktop (or run `run_macro.command`). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
 
 Features: field gathering with patterns and AI token gathering, dispensers/collectibles, mob and boss runs, quests, manual and auto planters, hotbar and field boosts, rejoining, death recovery, profiles, Discord webhooks, a bot and streaming, and hourly reports.

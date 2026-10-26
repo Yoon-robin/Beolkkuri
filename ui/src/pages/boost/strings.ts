@@ -4,7 +4,7 @@ const ko = {
   subtitle: "핫바 아이템, 필드 부스터, 스티커 스택 같은 버프를 관리해요.",
   "tab.hotbar": "핫바",
   "tab.buffs": "버프",
-  "tab.tad": "TAD 알트 동기화",
+  "tab.tad": "TAD 부계정 동기화",
 
   hotbarTitle: "핫바 자동 사용",
   hotbarDesc: "아래 핫바에서 칸을 골라, 그 칸의 아이템을 언제 얼마나 자주 쓸지 정해요.",
@@ -32,7 +32,7 @@ const ko = {
   afbResetDesc: "주사위와 글리터를 마지막으로 쓴 시간 기록을 지워요. 다음 AFB는 처음부터 다시 시작해요.",
   afbResetDone: "AFB 기록을 초기화했어요",
   copySettings: "설정 복사",
-  copied: "{field} 필드의 채집 설정을 알트용으로 복사했어요",
+  copied: "{field} 필드의 채집 설정을 부계정용으로 복사했어요",
   copyFailed: "복사하지 못했어요. {field} 필드 설정을 찾을 수 없어요.",
   patternsFailed: "패턴 목록을 불러오지 못했어요",
 }

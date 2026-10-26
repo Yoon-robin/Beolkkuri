@@ -303,7 +303,7 @@ export function MultiCheckControl({
               else if (!max || selected.length < max) onChange([...selected, String(o.value)])
             }}
             className={cn(
-              "relative flex flex-col items-center justify-center gap-1 rounded-lg border p-2 text-center text-[0.7rem] leading-tight transition-colors",
+              "relative flex flex-col items-center justify-center gap-1 rounded-lg border p-2 text-center text-[0.7rem] leading-tight transition-[background-color,border-color,opacity,scale] duration-150 active:scale-[0.96]",
               on ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/30 opacity-70 hover:opacity-100",
             )}
           >

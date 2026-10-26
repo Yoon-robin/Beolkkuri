@@ -36,11 +36,16 @@ function ModePicker({ mode, onChange }: { mode: number; onChange: (mode: number)
             aria-checked={on}
             onClick={() => onChange(value)}
             className={cn(
-              "flex items-start gap-3 rounded-xl border p-3 text-left transition-colors",
-              on ? "border-primary bg-primary/10 ring-1 ring-primary" : "bg-card hover:bg-accent",
+              "flex items-start gap-3 rounded-xl border p-3 text-left transition-[background-color,border-color,box-shadow] duration-200 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              on ? "border-primary bg-primary/10 ring-1 ring-primary" : "bg-card hover:border-primary/40 hover:bg-accent",
             )}
           >
-            <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+            <span
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200",
+                on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+              )}
+            >
               <Icon className="size-5" />
             </span>
             <span className="space-y-0.5">
@@ -113,13 +118,12 @@ function ImportExport() {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={exportSettings}>
+      <Button variant="outline" onClick={exportSettings}>
         <ClipboardCopyIcon />
         {t("export")}
       </Button>
       <Button
         variant="outline"
-        size="sm"
         onClick={() => {
           setText("")
           setOpen(true)

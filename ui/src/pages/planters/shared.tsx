@@ -1,6 +1,7 @@
 // Pieces used by both the manual and auto planter panels.
-import { TimerResetIcon } from "lucide-react"
+import { SproutIcon, TimerResetIcon } from "lucide-react"
 
+import { EmptyState } from "@/components/page"
 import { SwitchControl, TextControl } from "@/components/settings/controls"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -26,7 +27,7 @@ export function PlanterHotbarSlots({ planters, desc }: { planters: string[]; des
       </CardHeader>
       <CardContent>
         {planters.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{t("hotbarEmpty")}</p>
+          <EmptyState icon={SproutIcon} description={t("hotbarEmpty")} className="py-6" />
         ) : (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {planters.map((p) => {

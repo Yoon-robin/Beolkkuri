@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 
+import { SettingRowLayout } from "@/components/settings/schema-section"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
 import { useI18n } from "@/i18n"
-import { cn } from "@/lib/utils"
 
 /** A settings row for custom controls, laid out like the generated schema rows. */
 export function CustomRow({
@@ -29,15 +28,9 @@ export function CustomRow({
   stacked?: boolean
 }) {
   return (
-    <div className={cn("flex gap-x-6 gap-y-3 py-3", stacked ? "flex-col" : "flex-col sm:flex-row sm:items-center sm:justify-between")}>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <Label htmlFor={htmlFor} className="text-sm leading-snug font-medium">
-          {title}
-        </Label>
-        {desc && <p className="text-[0.8rem] leading-relaxed text-muted-foreground">{desc}</p>}
-      </div>
-      <div className={cn("shrink-0", !stacked && "sm:max-w-[55%]")}>{children}</div>
-    </div>
+    <SettingRowLayout htmlFor={htmlFor} title={title} desc={desc} stacked={stacked}>
+      {children}
+    </SettingRowLayout>
   )
 }
 

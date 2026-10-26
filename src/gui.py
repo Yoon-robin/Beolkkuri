@@ -485,7 +485,46 @@ def configureToolRuntime(logger=None, status=None, presence=None):
 @eel.expose
 def openLink(link):
     webbrowser.open(link, autoraise = True)
-    
+
+_PRIVACY_PANES = {
+    "accessibility": "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+    "screenRecording": "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
+    "keyboard": "x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard",
+}
+
+@eel.expose
+def getPermissionStatus():
+    """Report the macOS permissions the macro needs. None means it could not be checked."""
+    import ctypes
+    import subprocess
+    status = {"accessibility": None, "screenRecording": None, "fullKeyboardAccess": None}
+    try:
+        services = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices")
+        services.AXIsProcessTrusted.restype = ctypes.c_bool
+        status["accessibility"] = bool(services.AXIsProcessTrusted())
+    except (OSError, AttributeError):
+        pass
+    try:
+        # CGPreflightScreenCaptureAccess only checks; it never shows the system prompt.
+        graphics = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+        graphics.CGPreflightScreenCaptureAccess.restype = ctypes.c_bool
+        status["screenRecording"] = bool(graphics.CGPreflightScreenCaptureAccess())
+    except (OSError, AttributeError):
+        pass
+    try:
+        result = subprocess.run(["defaults", "read", "com.apple.universalaccess", "KeyboardAccessEnabled"], capture_output=True, text=True)
+        status["fullKeyboardAccess"] = result.stdout.strip() == "1"
+    except OSError:
+        pass
+    return status
+
+@eel.expose
+def openPrivacySettings(kind):
+    import subprocess
+    pane = _PRIVACY_PANES.get(kind)
+    if pane:
+        subprocess.run(["open", pane])
+
 @eel.expose
 def start():
     if run.value != 3:

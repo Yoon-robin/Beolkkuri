@@ -6,8 +6,6 @@ type Key =
   | "importPatterns"
   | "importPatternsHint"
   | "slot"
-  | "slotOn"
-  | "slotOff"
   | "noField"
   | "slotTitle"
   | "slotDesc"
@@ -75,8 +73,6 @@ export const strings: PageStrings<Key> = {
     importPatterns: "패턴 가져오기",
     importPatternsHint: "가지고 있는 패턴 파일(.py, .ahk)을 추가해요.",
     slot: "필드 {n}",
-    slotOn: "켜짐",
-    slotOff: "꺼짐",
     noField: "필드 없음",
     slotTitle: "필드 {n}",
     slotDesc: "이 칸에서 채집할 필드를 고르고 켜거나 꺼요.",
@@ -143,8 +139,6 @@ export const strings: PageStrings<Key> = {
     importPatterns: "Import patterns",
     importPatternsHint: "Add your own pattern files (.py, .ahk).",
     slot: "Field {n}",
-    slotOn: "On",
-    slotOff: "Off",
     noField: "No field",
     slotTitle: "Field {n}",
     slotDesc: "Choose which field this slot gathers in and turn it on or off.",

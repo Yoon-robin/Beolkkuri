@@ -17,6 +17,9 @@ sys.path.insert(0, os.path.join(ROOT, "src", "modules", "misc"))
 
 import settingsManager  # noqa: E402
 
+# Pretend screen recording is still off so the permission UI can be exercised;
+# "opening" its settings pane turns it on.
+DEV_PERMISSIONS = {"accessibility": True, "screenRecording": False, "fullKeyboardAccess": False}
 RUN_STATE = {"value": 3}  # 0 stopping, 2 running, 3 stopped, 6 paused
 LOGS = [
     {"time": time.strftime("%H:%M:%S"), "title": "Dev server", "desc": "Settings are live; macro calls are stubbed.", "color": "7289da"},
@@ -41,6 +44,8 @@ STUBS = {
     "pause": lambda: RUN_STATE.update(value=6),
     "resume": lambda: RUN_STATE.update(value=2),
     "getRunState": lambda: RUN_STATE["value"],
+    "getPermissionStatus": lambda: dict(DEV_PERMISSIONS),
+    "openPrivacySettings": lambda kind: DEV_PERMISSIONS.update({kind: True}),
     "setRunState": lambda v: RUN_STATE.update(value=v),
     "getRecentLogs": lambda: LOGS,
     "clearRecentLogs": lambda: LOGS.clear(),

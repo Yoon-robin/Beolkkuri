@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n } from "@/i18n"
 import { usePythonEvent } from "@/lib/bridge"
 import { callPy, callPyQuiet, isDesktopApp } from "@/lib/py"
@@ -22,7 +23,7 @@ import { callPy, callPyQuiet, isDesktopApp } from "@/lib/py"
 type UpdateInfo = { available?: boolean; current_version?: string; latest_version?: string }
 
 /** Version label, update button/progress, and the "update available" prompt. */
-export function UpdatePanel() {
+export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
   const { t } = useI18n()
   const [version, setVersion] = useState<string>("")
   const [progress, setProgress] = useState<{ percent: number; message: string } | null>(null)
@@ -65,17 +66,33 @@ export function UpdatePanel() {
     void callPyQuiet("update")
   }
 
+  const label = progress ? t("update.updating") : t("update.check")
+
   return (
-    <div className="space-y-2 px-2 text-xs text-muted-foreground">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-mono">{version}</span>
-        <Button variant="ghost" size="xs" onClick={runUpdate} disabled={!!progress}>
-          {progress ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
-          {progress ? t("update.updating") : t("update.check")}
-        </Button>
+    <div className="space-y-2 px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:px-0">
+      <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
+        <span className="font-mono group-data-[collapsible=icon]:hidden">{version}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={runUpdate}
+              disabled={!!progress}
+              aria-label={iconOnly ? label : undefined}
+              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 [&_svg]:transition-transform hover:[&_svg]:translate-y-px"
+            >
+              {progress ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
+              <span className="group-data-[collapsible=icon]:hidden">{label}</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right" hidden={!iconOnly}>
+            {progress ? `${label} · ${Math.round(progress.percent)}%` : `${label} · ${version}`}
+          </TooltipContent>
+        </Tooltip>
       </div>
       {progress && (
-        <div className="space-y-1" aria-live="polite">
+        <div className="space-y-1 animate-in fade-in-0 slide-in-from-bottom-1 duration-300 group-data-[collapsible=icon]:hidden" aria-live="polite">
           <div className="flex justify-between">
             <span className="truncate">{progress.message}</span>
             <span className="tabular-nums">{Math.round(progress.percent)}%</span>

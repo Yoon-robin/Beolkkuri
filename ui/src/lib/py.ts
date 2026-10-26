@@ -64,7 +64,13 @@ export const py = {
   openLink: (url: string) => callPy("openLink", url),
   listProfiles: () => callPy<string[]>("listProfiles"),
   getCurrentProfile: () => callPy<string>("getCurrentProfile"),
+  getPermissionStatus: () => callPy<PermissionStatus>("getPermissionStatus"),
+  openPrivacySettings: (kind: PermissionKind) => callPy("openPrivacySettings", kind),
 }
+
+/** null means the check is not available on this macOS version. */
+export type PermissionStatus = { accessibility: boolean | null; screenRecording: boolean | null; fullKeyboardAccess: boolean | null }
+export type PermissionKind = "accessibility" | "screenRecording" | "keyboard"
 
 export type LogEntry = { time?: string; title?: string; desc?: string; color?: string }
 

@@ -148,8 +148,8 @@ export default function SettingsPage() {
 
   return (
     <Page title={t("title")} description={t("subtitle")}>
-      <Tabs value={tab} onValueChange={change} className="gap-4">
-        <TabsList className="h-auto flex-wrap">
+      <Tabs value={tab} onValueChange={change}>
+        <TabsList>
           {TABS.map((id) => (
             <TabsTrigger key={id} value={id}>
               {t(`tab.${id}`)}

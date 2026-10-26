@@ -1,13 +1,13 @@
 import { ThemeProvider, useTheme } from "@/lib/theme"
-import { useEffect, useRef, type ComponentType } from "react"
+import { useEffect, useLayoutEffect, useRef, type ComponentType } from "react"
 
 import { AppSidebar, NAV } from "@/components/app-sidebar"
-import { PageLoading } from "@/components/page"
+import { PageError, PageLoading } from "@/components/page"
 import { RunButton, RunStatusBadge } from "@/components/run-controls"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { I18nProvider, useI18n } from "@/i18n"
 import { isDesktopApp } from "@/lib/py"
 import { usePage, type PageId } from "@/lib/route"
@@ -23,6 +23,8 @@ import SettingsPage from "@/pages/settings"
 import ToolsPage from "@/pages/tools"
 import { RunStateProvider } from "@/state/run-state"
 import { SettingsProvider, useSettings } from "@/state/settings"
+
+const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || navigator.userAgent)
 
 const PAGE_COMPONENTS: Record<PageId, ComponentType> = {
   home: HomePage,
@@ -67,7 +69,7 @@ function Shell() {
   usePersistedPreferences()
   const { t } = useI18n()
   const [page, setPage] = usePage()
-  const { settings } = useSettings()
+  const { settings, loadError, refresh } = useSettings()
   const Current = PAGE_COMPONENTS[page]
   const label = NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label
 
@@ -75,13 +77,25 @@ function Shell() {
     document.title = label ? `${t(label)} · RobinMacro` : "RobinMacro"
   }, [label, t])
 
+  // each page starts at the top instead of keeping the previous page's scroll position
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [page])
+
   return (
     <SidebarProvider>
       <AppSidebar page={page} onNavigate={setPage} />
       <SidebarInset>
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="mx-1 h-5" />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarTrigger label={t("nav.toggle")} />
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              {t("nav.toggle")} <kbd className="ml-1 rounded bg-background/20 px-1 font-mono text-[0.7rem]">{isMac ? "⌘B" : "Ctrl+B"}</kbd>
+            </TooltipContent>
+          </Tooltip>
+          <Separator orientation="vertical" className="mx-1 h-5 data-vertical:self-center" />
           <span className="truncate text-sm font-medium">{label ? t(label) : ""}</span>
           {!isDesktopApp() && <span className="hidden truncate text-xs text-muted-foreground md:inline">· {t("devBanner")}</span>}
           <div className="ml-auto flex items-center gap-2">
@@ -89,7 +103,8 @@ function Shell() {
             {page !== "home" && <RunButton />}
           </div>
         </header>
-        <main className="flex-1">{settings ? <Current key={page} /> : <PageLoading />}</main>
+        {/* SidebarInset is already the page's <main> */}
+        <div className="min-w-0 flex-1">{settings ? <Current key={page} /> : loadError ? <PageError onRetry={refresh} /> : <PageLoading />}</div>
       </SidebarInset>
     </SidebarProvider>
   )

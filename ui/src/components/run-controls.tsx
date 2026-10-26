@@ -36,7 +36,7 @@ export function RunButton({ size = "default", className }: { size?: "default" | 
 
   if (status === "running" || status === "stopping") {
     return (
-      <Button variant="destructive" size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", className)} onClick={stop} disabled={status === "stopping"}>
+      <Button variant="destructive" size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", status === "running" && "rm-glow", className)} onClick={stop} disabled={status === "stopping"}>
         {status === "stopping" ? <Loader2Icon className="animate-spin" /> : <SquareIcon className="fill-current" />}
         {status === "stopping" ? t("run.stopping") : t("run.stop")}
         {status !== "stopping" && <kbd className="ml-1 rounded bg-background/40 px-1.5 font-mono text-[0.7em]">{stopKey}</kbd>}

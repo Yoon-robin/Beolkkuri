@@ -271,7 +271,7 @@ function SlotPicker({
               <Switch
                 size="sm"
                 checked={on}
-                aria-label={ts("slot", { n: i + 1 })}
+                aria-label={`${ts("slot", { n: i + 1 })} · ${name}`}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => e.stopPropagation()}
                 onCheckedChange={(v) => onToggle(i, v)}
@@ -283,9 +283,9 @@ function SlotPicker({
               </span>
               <div className="min-w-0">
                 <div className="truncate font-semibold">{name}</div>
+                {/* the switch already shows on/off, so the second line is just the pattern */}
                 <div className="truncate text-xs text-muted-foreground">
-                  {on ? ts("slotOn") : ts("slotOff")}
-                  {field && shape ? ` · ${patternLabel(patterns.find((p) => p.value.toLowerCase() === shape.toLowerCase()), shape, lang)}` : ""}
+                  {field && shape ? patternLabel(patterns.find((p) => p.value.toLowerCase() === shape.toLowerCase()), shape, lang) : " "}
                 </div>
               </div>
             </div>
@@ -437,7 +437,8 @@ function FieldPanel({
   }
 
   return (
-    <div role="tabpanel" className="grid gap-4">
+    // remounts (key) when the slot or field changes, so this fade plays once per switch
+    <div role="tabpanel" className="grid gap-4 animate-in fade-in-0 duration-200">
       {fieldSection && (
         <SchemaSection
           section={{ ...fieldSection, title: `${ts("slotTitle", { n: slot + 1 })}${field ? ` · ${fieldLabel(field, lang)}` : ""}`, desc: ts("slotDesc") }}
@@ -447,9 +448,9 @@ function FieldPanel({
       )}
 
       {isHiveHub && (
-        <Alert className="border-amber-500/40 bg-amber-500/10">
-          <InfoIcon className="text-amber-600 dark:text-amber-400" />
-          <AlertDescription className="text-foreground">{ts("hiveHubNotice")}</AlertDescription>
+        <Alert variant="warning">
+          <InfoIcon />
+          <AlertDescription>{ts("hiveHubNotice")}</AlertDescription>
         </Alert>
       )}
 

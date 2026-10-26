@@ -46,7 +46,7 @@ function FieldTile({ field, on, onToggle }: { field: string; on: boolean; onTogg
       aria-pressed={on}
       onClick={onToggle}
       className={cn(
-        "relative flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-colors",
+        "relative flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-[background-color,border-color,opacity,scale] duration-150 active:scale-[0.97]",
         on ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-border bg-muted/20 text-muted-foreground opacity-70 hover:opacity-100",
       )}
     >
@@ -311,7 +311,7 @@ export function AutoPlanters() {
 
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList className="h-auto flex-wrap">
+      <TabsList>
         <TabsTrigger value="basic">{t("tab.basic")}</TabsTrigger>
         <TabsTrigger value="nectar">{t("tab.nectar")}</TabsTrigger>
         <TabsTrigger value="planters">{t("tab.planters")}</TabsTrigger>

@@ -29,10 +29,10 @@ const ko = {
   item: "아이템",
   quantity: "수량",
   max: "최대",
-  maxHint: "만들 수 있는 만큼 최대로 만들어요",
+  maxHint: "가능한 만큼 만들어요",
   repeat: "반복",
   inf: "무한",
-  infHint: "횟수 제한 없이 계속 반복해요",
+  infHint: "멈추지 않고 계속 만들어요",
   repeatHint: "몇 번 더 만들지 정해요. 한 번 만들 때마다 1씩 줄어요.",
   resetButton: "초기화",
   resetTitle: "블렌더 기록을 초기화할까요?",
@@ -51,10 +51,10 @@ const strings: PageStrings<keyof typeof ko> = {
     item: "Item",
     quantity: "Quantity",
     max: "Max",
-    maxHint: "Craft the max quantity",
+    maxHint: "Craft as many as possible",
     repeat: "Repeat",
     inf: "Inf",
-    infHint: "Repeat infinitely",
+    infHint: "Keep crafting forever",
     repeatHint: "How many more times to craft it. Goes down by 1 after each craft.",
     resetButton: "Reset",
     resetTitle: "Reset blender timers?",
@@ -112,7 +112,7 @@ export function BlenderResetButton() {
 function ToggleWithHint({ id, label, hint, checked, onChange }: { id: string; label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="space-y-0.5">
+      <div className="min-w-0 space-y-0.5">
         <Label htmlFor={id} className="text-xs font-medium">
           {label}
         </Label>

@@ -9,7 +9,9 @@ import {
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ArrowDownToLineIcon, ArrowUpToLineIcon, GripVerticalIcon, LockIcon, RotateCcwIcon, SearchIcon } from "lucide-react"
+import { ArrowDownToLineIcon, ArrowUpToLineIcon, GripVerticalIcon, ListOrderedIcon, LockIcon, RotateCcwIcon, SearchIcon, SearchXIcon } from "lucide-react"
+
+import { EmptyState } from "@/components/page"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
@@ -19,6 +21,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
+import { DRAGGING_ROW, REORDER_ATTR, restrictToVerticalAxis, useDndAccessibility, useReorderAnimation } from "@/lib/dnd"
 import { callPy } from "@/lib/py"
 import { RichText, plainText } from "@/lib/rich-text"
 import { cn } from "@/lib/utils"
@@ -142,11 +145,14 @@ export function PrioritySection() {
     void saveProfile("task_priority_order", mergeWithLocks(nextUnlocked, lock, lock.questIds, ["planters"]))
   }
 
+  const reorder = useReorderAnimation<HTMLOListElement>(unlocked)
   const move = (id: string, where: "top" | "bottom") => {
+    reorder.capture()
     const rest = unlocked.filter((x) => x !== id)
     save(where === "top" ? [id, ...rest] : [...rest, id])
   }
 
+  const dndA11y = useDndAccessibility()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -207,11 +213,11 @@ export function PrioritySection() {
         {term && visibleIds.length > 0 && <p className="text-xs text-muted-foreground">{t("searchDragHint")}</p>}
 
         {rows.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{t("empty")}</p>
+          <EmptyState icon={ListOrderedIcon} description={t("empty")} />
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} accessibility={dndA11y} onDragEnd={onDragEnd}>
             <SortableContext items={visibleIds} strategy={verticalListSortingStrategy}>
-              <ol className="space-y-1.5">
+              <ol ref={reorder.ref} className="space-y-1.5">
                 {rows.map((id) => {
                   if (id === QUEST_TOKEN || id === PLANTER_TOKEN) {
                     if (!matches(lockedHeaderText(id))) return null
@@ -242,7 +248,7 @@ export function PrioritySection() {
             </SortableContext>
           </DndContext>
         )}
-        {rows.length > 0 && term && visibleIds.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">{t("noMatch")}</p>}
+        {rows.length > 0 && term && visibleIds.length === 0 && <EmptyState icon={SearchXIcon} description={t("noMatch")} className="py-6" />}
       </CardContent>
 
       <ConfirmDialog
@@ -299,10 +305,11 @@ function SortableTask({
   return (
     <li
       ref={setNodeRef}
+      {...{ [REORDER_ATTR]: id }}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "group flex items-center gap-2 rounded-lg border bg-card px-2 py-1.5 text-sm",
-        isDragging && "relative z-10 shadow-lg ring-1 ring-primary",
+        "group flex items-center gap-2 rounded-lg border bg-card px-2 py-1.5 text-sm transition-[opacity,box-shadow] hover:border-foreground/20",
+        isDragging && DRAGGING_ROW,
         !enabled && !isDragging && "opacity-55",
       )}
     >

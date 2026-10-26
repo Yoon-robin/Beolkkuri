@@ -62,7 +62,6 @@ const strings: PageStrings<
   | "pauseMythicDesc"
   | "always"
   | "progress"
-  | "status"
   | "slot"
   | "notCaptured"
   | "eggs"
@@ -103,7 +102,6 @@ const strings: PageStrings<
     pauseMythicDesc: "신화 등급 벌이 나오면 멈춰요.",
     always: "항상",
     progress: "진행 상황",
-    status: "상태",
     slot: "벌 칸 위치",
     notCaptured: "아직 저장 안 됨",
     eggs: "쓴 기본 알",
@@ -145,7 +143,6 @@ const strings: PageStrings<
     pauseMythicDesc: "Stop on any Mythic bee.",
     always: "Always",
     progress: "Progress",
-    status: "Status",
     slot: "Bee slot",
     notCaptured: "Not captured",
     eggs: "Basic Eggs",
@@ -205,7 +202,7 @@ export function GiftedBasicBeeTool({ status, refresh }: ToolProps<GiftedBasicBee
 
   return (
     <div className="space-y-4">
-      <Alert variant="destructive">
+      <Alert variant="warning">
         <TriangleAlertIcon />
         <AlertTitle>{t("betaTitle")}</AlertTitle>
         <AlertDescription>{t("betaBody")}</AlertDescription>
@@ -289,8 +286,7 @@ export function GiftedBasicBeeTool({ status, refresh }: ToolProps<GiftedBasicBee
 
           <div className="space-y-3">
             <div className="text-sm font-medium">{t("progress")}</div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              <Stat label={t("status")} value={<ToolStateBadge status={status} />} />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Stat label={t("slot")} value={slot} />
               <Stat label={t("eggs")} value={status?.basic_eggs_used ?? 0} />
               <Stat label={t("rj")} value={status?.royal_jellies_used ?? 0} />

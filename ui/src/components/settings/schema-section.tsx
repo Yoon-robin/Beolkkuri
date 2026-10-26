@@ -85,7 +85,8 @@ export function SettingControl({ def, binding, overrides }: { def: SettingDef; b
     case "button":
       return (
         <Button variant="secondary" onClick={() => overrides?.actions?.[def.id]?.(def)} disabled={!overrides?.actions?.[def.id]}>
-          <RichText text={type.text ?? setting(def).title} />
+          {/* a label that just repeats the row title uses the translated title */}
+          <RichText text={type.text && type.text !== def.title ? type.text : setting(def).title} />
         </Button>
       )
     case "textbox_with_button": {
@@ -104,26 +105,51 @@ export function SettingControl({ def, binding, overrides }: { def: SettingDef; b
   }
 }
 
+/**
+ * Shared layout for one setting: title + helper text on the left, control on the right
+ * (or below when `stacked`). Every settings-style row in the app should use this.
+ */
+export function SettingRowLayout({
+  htmlFor,
+  title,
+  desc,
+  children,
+  stacked,
+  className,
+}: {
+  htmlFor?: string
+  title: ReactNode
+  desc?: ReactNode
+  children: ReactNode
+  stacked?: boolean
+  className?: string
+}) {
+  return (
+    <div className={cn("flex gap-x-6 gap-y-3 py-3", stacked ? "flex-col" : "flex-col sm:flex-row sm:items-center sm:justify-between", className)}>
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <Label htmlFor={htmlFor} className="text-sm leading-snug font-medium">
+          {title}
+        </Label>
+        {desc && <p className="text-[0.8rem] leading-relaxed text-muted-foreground">{desc}</p>}
+      </div>
+      {/* controls hug the right edge so inputs, selects and switches line up between rows */}
+      <div className={cn("shrink-0", !stacked && "flex sm:max-w-[55%] sm:justify-end")}>{children}</div>
+    </div>
+  )
+}
+
 export function SettingRow({ def, binding, overrides }: { def: SettingDef; binding: Binding; overrides?: SectionOverrides }) {
   const { setting } = useI18n()
   const { title, desc } = setting(def)
-  const stacked = def.type.name === "multicheck"
   return (
-    <div className={cn("flex gap-x-6 gap-y-3 py-3", stacked ? "flex-col" : "flex-col sm:flex-row sm:items-center sm:justify-between")}>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <Label htmlFor={def.id} className="text-sm leading-snug font-medium">
-          <RichText text={title} />
-        </Label>
-        {desc && (
-          <p className="text-[0.8rem] leading-relaxed text-muted-foreground">
-            <RichText text={desc} />
-          </p>
-        )}
-      </div>
-      <div className={cn("shrink-0", !stacked && "sm:max-w-[55%]")}>
-        <SettingControl def={def} binding={binding} overrides={overrides} />
-      </div>
-    </div>
+    <SettingRowLayout
+      htmlFor={def.id}
+      title={<RichText text={title} />}
+      desc={desc ? <RichText text={desc} /> : undefined}
+      stacked={def.type.name === "multicheck"}
+    >
+      <SettingControl def={def} binding={binding} overrides={overrides} />
+    </SettingRowLayout>
   )
 }
 

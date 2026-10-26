@@ -1,7 +1,7 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon } from "lucide-react"
+import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, Loader2Icon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useStrings, type PageStrings } from "@/i18n"
+import { DRAGGING_ROW, REORDER_ATTR, restrictToVerticalAxis, useDndAccessibility, useReorderAnimation } from "@/lib/dnd"
 import { callPy } from "@/lib/py"
 import { cn } from "@/lib/utils"
 import { useSettings } from "@/state/settings"
@@ -77,11 +78,12 @@ function TokenRowItem({
   return (
     <div
       ref={setNodeRef}
+      {...{ [REORDER_ATTR]: row.name }}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
         "flex items-center gap-2 rounded-md border bg-card px-2 py-1.5",
-        isDragging && "z-10 shadow-md ring-1 ring-primary",
-        !row.enabled && "opacity-60",
+        isDragging && DRAGGING_ROW,
+        !row.enabled && !isDragging && "opacity-60",
       )}
     >
       <button
@@ -91,7 +93,7 @@ function TokenRowItem({
         {...listeners}
         aria-label={t("drag")}
         title={t("drag")}
-        className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+        className="cursor-grab touch-none rounded p-0.5 text-muted-foreground hover:text-foreground active:cursor-grabbing"
       >
         <GripVerticalIcon className="size-4" />
       </button>
@@ -100,11 +102,11 @@ function TokenRowItem({
         <span className="w-6 shrink-0 text-right text-xs text-muted-foreground tabular-nums">{index + 1}.</span>
         <span className="truncate">{row.name}</span>
       </label>
-      <Button variant="ghost" size="icon-sm" aria-label={t("up")} disabled={index === 0} onClick={() => onMove(-1)}>
-        <ArrowUpIcon />
+      <Button variant="ghost" size="icon-sm" aria-label={t("up")} title={t("up")} disabled={index === 0} onClick={() => onMove(-1)}>
+        <ChevronUpIcon />
       </Button>
-      <Button variant="ghost" size="icon-sm" aria-label={t("down")} disabled={index === count - 1} onClick={() => onMove(1)}>
-        <ArrowDownIcon />
+      <Button variant="ghost" size="icon-sm" aria-label={t("down")} title={t("down")} disabled={index === count - 1} onClick={() => onMove(1)}>
+        <ChevronDownIcon />
       </Button>
     </div>
   )
@@ -118,6 +120,7 @@ export function SproutTokenDialog({ open, onOpenChange }: { open: boolean; onOpe
   const allTokens = SPROUT_TOKENS_BY_MODEL[modelName]
   const [rows, setRows] = useState<TokenRow[]>([])
   const [saving, setSaving] = useState(false)
+  const dndA11y = useDndAccessibility()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -130,9 +133,14 @@ export function SproutTokenDialog({ open, onOpenChange }: { open: boolean; onOpe
     if (open) setRows(buildTokenRows(allTokens, settings?.sprouts_preferred_tokens, settings?.sprouts_ignored_tokens))
   }
 
+  const reorder = useReorderAnimation<HTMLDivElement>(rows.map((r) => r.name))
   const move = (from: number, to: number) => {
     if (to < 0 || to >= rows.length) return
     setRows((r) => arrayMove(r, from, to))
+  }
+  const step = (from: number, to: number) => {
+    reorder.capture()
+    move(from, to)
   }
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return
@@ -182,9 +190,9 @@ export function SproutTokenDialog({ open, onOpenChange }: { open: boolean; onOpe
           <span className="ml-auto text-xs text-muted-foreground">{t("enabledCount", { count: enabledCount })}</span>
         </div>
         <div className="-mr-2 min-h-0 flex-1 overflow-y-auto pr-2">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} accessibility={dndA11y} onDragEnd={onDragEnd}>
             <SortableContext items={rows.map((r) => r.name)} strategy={verticalListSortingStrategy}>
-              <div className="grid gap-1.5">
+              <div ref={reorder.ref} className="grid gap-1.5">
                 {rows.map((row, i) => (
                   <TokenRowItem
                     key={row.name}
@@ -193,7 +201,7 @@ export function SproutTokenDialog({ open, onOpenChange }: { open: boolean; onOpe
                     count={rows.length}
                     t={t}
                     onToggle={(enabled) => setRows((r) => r.map((x) => (x.name === row.name ? { ...x, enabled } : x)))}
-                    onMove={(delta) => move(i, i + delta)}
+                    onMove={(delta) => step(i, i + delta)}
                   />
                 ))}
               </div>
@@ -205,6 +213,7 @@ export function SproutTokenDialog({ open, onOpenChange }: { open: boolean; onOpe
             {t("cancel")}
           </Button>
           <Button onClick={save} disabled={saving}>
+            {saving && <Loader2Icon className="animate-spin" />}
             {t("save")}
           </Button>
         </DialogFooter>

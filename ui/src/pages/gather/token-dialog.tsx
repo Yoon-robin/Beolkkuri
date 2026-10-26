@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useI18n, useStrings } from "@/i18n"
+import { DRAGGING_ROW, REORDER_ATTR, restrictToVerticalAxis, useDndAccessibility, useReorderAnimation } from "@/lib/dnd"
 import { callPy } from "@/lib/py"
 import { cn } from "@/lib/utils"
 
@@ -44,16 +45,17 @@ function TokenRow({
   return (
     <div
       ref={setNodeRef}
+      {...{ [REORDER_ATTR]: token.name }}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-2 border-b border-border/60 bg-popover py-1.5 pr-1",
-        isDragging && "relative z-10 rounded-md opacity-80 shadow-md",
-        !token.enabled && "text-muted-foreground",
+        "flex items-center gap-2 rounded-md border bg-card px-2 py-1.5 text-sm",
+        isDragging && DRAGGING_ROW,
+        !token.enabled && !isDragging && "opacity-60",
       )}
     >
       <button
         type="button"
-        className="cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+        className="cursor-grab touch-none rounded p-0.5 text-muted-foreground hover:text-foreground active:cursor-grabbing"
         aria-label={ts("tokensDrag")}
         title={ts("tokensDrag")}
         {...attributes}
@@ -100,6 +102,7 @@ export function TokenDialog({
   const ts = useStrings(strings)
   const [tokens, setTokens] = useState<Token[] | null>(null)
   const [saving, setSaving] = useState(false)
+  const dndA11y = useDndAccessibility()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -121,7 +124,12 @@ export function TokenDialog({
     }
   }, [open, field, model, ts])
 
+  const reorder = useReorderAnimation<HTMLDivElement>(tokens?.map((x) => x.name) ?? [])
   const move = (from: number, to: number) => setTokens((list) => (list && to >= 0 && to < list.length ? arrayMove(list, from, to) : list))
+  const step = (from: number, to: number) => {
+    reorder.capture()
+    move(from, to)
+  }
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (!tokens || !over || active.id === over.id) return
     move(
@@ -180,18 +188,20 @@ export function TokenDialog({
               {t("common.loading")}
             </div>
           ) : (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} modifiers={[restrictToVerticalAxis]} accessibility={dndA11y} onDragEnd={onDragEnd}>
               <SortableContext items={tokens.map((x) => x.name)} strategy={verticalListSortingStrategy}>
-                {tokens.map((token, i) => (
-                  <TokenRow
-                    key={token.name}
-                    token={token}
-                    index={i}
-                    count={tokens.length}
-                    onToggle={(on) => setTokens((list) => list?.map((x) => (x.name === token.name ? { ...x, enabled: on } : x)) ?? list)}
-                    onMove={(delta) => move(i, i + delta)}
-                  />
-                ))}
+                <div ref={reorder.ref} className="grid gap-1.5 animate-in fade-in-0 duration-200">
+                  {tokens.map((token, i) => (
+                    <TokenRow
+                      key={token.name}
+                      token={token}
+                      index={i}
+                      count={tokens.length}
+                      onToggle={(on) => setTokens((list) => list?.map((x) => (x.name === token.name ? { ...x, enabled: on } : x)) ?? list)}
+                      onMove={(delta) => step(i, i + delta)}
+                    />
+                  ))}
+                </div>
               </SortableContext>
             </DndContext>
           )}

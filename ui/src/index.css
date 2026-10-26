@@ -56,18 +56,18 @@
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.68 0.16 60);
+    --primary: oklch(0.62 0.16 55);
     --primary-foreground: oklch(0.99 0.01 85);
-    --secondary: oklch(0.97 0 0);
+    --secondary: oklch(0.955 0.004 85);
     --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
+    --muted: oklch(0.955 0.004 85);
+    --muted-foreground: oklch(0.5 0 0);
+    --accent: oklch(0.955 0.004 85);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.75 0.15 70);
+    --border: oklch(0.91 0.004 85);
+    --input: oklch(0.88 0.004 85);
+    --ring: oklch(0.72 0.15 65);
     --chart-1: oklch(0.77 0.16 70);
     --chart-2: oklch(0.6 0.2 30);
     --chart-3: oklch(0.55 0.12 250);
@@ -76,11 +76,11 @@
     --radius: 0.625rem;
     --sidebar: oklch(0.975 0.008 85);
     --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.68 0.16 60);
+    --sidebar-primary: oklch(0.62 0.16 55);
     --sidebar-primary-foreground: oklch(0.99 0.01 85);
-    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent: oklch(0.93 0.012 85);
     --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-border: oklch(0.91 0.004 85);
     --sidebar-ring: oklch(0.708 0 0);
 }
 
@@ -124,11 +124,89 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* Korean wraps between words, not mid-word; long tokens can still break. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
     }
+  /* One keyboard focus ring for hand-made buttons, links and tiles. Components that
+     draw their own ring (outline-none + focus-visible:ring-*) override this from the
+     utilities layer. */
+  :where(button, a[href], [role="button"], [role="tab"], [role="radio"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    }
   html {
     @apply font-sans;
     }
+}
+/* ---------------------------------------------------------------- motion */
+
+@keyframes rm-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes rm-shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@keyframes rm-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--destructive) 35%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--destructive) 0%, transparent); }
+}
+
+@keyframes rm-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@layer utilities {
+  /* Page content: each direct child rises in shortly after the previous one. */
+  .rm-page > * {
+    animation: rm-rise 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .rm-page > *:nth-child(2) { animation-delay: 40ms; }
+  .rm-page > *:nth-child(3) { animation-delay: 80ms; }
+  .rm-page > *:nth-child(4) { animation-delay: 120ms; }
+  .rm-page > *:nth-child(n + 5) { animation-delay: 160ms; }
+
+  /* Same, for the cards inside a grid or list. */
+  .rm-stagger > * {
+    animation: rm-rise 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .rm-stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .rm-stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .rm-stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .rm-stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .rm-stagger > *:nth-child(n + 6) { animation-delay: 240ms; }
+
+  .rm-shimmer {
+    background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted), var(--foreground) 6%) 50%, var(--muted) 100%);
+    background-size: 200% 100%;
+    animation: rm-shimmer 1.6s linear infinite;
+  }
+
+  .rm-glow { animation: rm-glow 1.8s ease-in-out infinite; }
+  .rm-pop { animation: rm-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+}
+
+/* Theme switch: the new theme grows out of the toggle button (see lib/theme.tsx). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

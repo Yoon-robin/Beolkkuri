@@ -2,6 +2,7 @@
 import { CheckIcon, ChevronsUpDownIcon, ZoomInIcon } from "lucide-react"
 import { useState, type ReactNode } from "react"
 
+import { SettingRowLayout } from "@/components/settings/schema-section"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +16,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useI18n } from "@/i18n"
 import { cn } from "@/lib/utils"
@@ -23,15 +23,9 @@ import { cn } from "@/lib/utils"
 /** One settings row: title + helper text on the left, control on the right. */
 export function Row({ id, title, desc, children, className }: { id?: string; title: ReactNode; desc?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-x-6 gap-y-3 py-3 sm:flex-row sm:items-center sm:justify-between", className)}>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <Label htmlFor={id} className="text-sm leading-snug font-medium">
-          {title}
-        </Label>
-        {desc && <p className="text-[0.8rem] leading-relaxed text-muted-foreground">{desc}</p>}
-      </div>
-      <div className="shrink-0 sm:max-w-[55%]">{children}</div>
-    </div>
+    <SettingRowLayout htmlFor={id} title={title} desc={desc} className={className}>
+      {children}
+    </SettingRowLayout>
   )
 }
 
@@ -178,7 +172,7 @@ export function IconPicker({
                   setOpen(false)
                 }}
                 className={cn(
-                  "relative flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-[0.7rem] leading-tight transition-colors hover:bg-accent",
+                  "relative flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-[0.7rem] leading-tight transition-[background-color,border-color,scale] duration-150 hover:bg-accent active:scale-[0.96]",
                   on ? "border-primary bg-primary/10 ring-1 ring-primary" : "border-transparent",
                 )}
               >

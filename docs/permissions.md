@@ -19,6 +19,10 @@ RobinMacro는 **터미널** 안에서 실행돼요. 그래서 키보드·마우�
 
 권한은 터미널을 **완전히 끄고(⌘Q) 다시 켜야** 적용돼요. 그다음 RobinMacro를 다시 실행하세요.
 
+## 제대로 켜졌는지 확인하기
+
+RobinMacro를 열고 왼쪽의 **시작 가이드** 를 보면, 두 권한이 켜져 있는지 초록 체크로 바로 보여 줘요. 꺼져 있으면 **켜기** 버튼이 해당 설정 화면을 열어 줘요.
+
 ## 그래도 안 될 때
 
 - 목록에 터미널이 켜져 있는데도 안 되면, **터미널을 선택하고 − 버튼으로 지운 뒤 다시 추가**해 보세요. macOS 업데이트 뒤에 권한이 꼬이는 경우가 있어요.
@@ -26,4 +30,4 @@ RobinMacro는 **터미널** 안에서 실행돼요. 그래서 키보드·마우�
 
 ---
 
-**English:** Open *System Settings → Privacy & Security*. Under **Accessibility** and **Screen Recording** (called *Screen & System Audio Recording* on macOS 15+), turn on **Terminal**, or add it with **+** from *Applications → Utilities*. Quit Terminal (⌘Q) and start RobinMacro again. If it still fails, remove Terminal from the list and add it back.
+**English:** Open *System Settings → Privacy & Security*. Under **Accessibility** and **Screen Recording** (called *Screen & System Audio Recording* on macOS 15+), turn on **Terminal**, or add it with **+** from *Applications → Utilities*. Quit Terminal (⌘Q) and start RobinMacro again. The Getting Started page shows a green check for each permission once it is on. If it still fails, remove Terminal from the list and add it back.

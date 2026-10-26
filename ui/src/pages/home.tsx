@@ -1,7 +1,7 @@
-import { DownloadIcon, SearchIcon, Trash2Icon, TimerResetIcon } from "lucide-react"
+import { CompassIcon, DownloadIcon, FlowerIcon, ListTodoIcon, ScrollTextIcon, SearchIcon, ShieldAlertIcon, SproutIcon, Trash2Icon, TimerResetIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { Page } from "@/components/page"
+import { EmptyState, Page } from "@/components/page"
 import { RunButton, RunStatusBadge } from "@/components/run-controls"
 import {
   AlertDialog,
@@ -14,18 +14,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
 import { usePythonEvent } from "@/lib/bridge"
 import { callPy, py, type LogEntry, type Settings } from "@/lib/py"
 import { RichText } from "@/lib/rich-text"
 import { buildTaskList, type TaskItem } from "@/lib/tasks"
 import { cn } from "@/lib/utils"
+import { usePermissions } from "@/state/permissions"
 import { useSettings } from "@/state/settings"
 
 const strings: PageStrings<
@@ -47,6 +50,8 @@ const strings: PageStrings<
   | "tasks"
   | "tasksDesc"
   | "tasksEmpty"
+  | "tasksGo"
+  | "firstTime"
   | "logs"
   | "logsEmpty"
   | "logsSearch"
@@ -59,6 +64,12 @@ const strings: PageStrings<
   | "noPlanters"
   | "manual"
   | "auto"
+  | "permTitle"
+  | "permDesc"
+  | "permFix"
+  | "logsExport"
+  | "logsClear"
+  | "planterReset"
 > = {
   ko: {
     title: "홈",
@@ -79,6 +90,8 @@ const strings: PageStrings<
     tasks: "할 일 목록",
     tasksDesc: "매크로가 이 순서대로 작업해요.",
     tasksEmpty: "켜진 작업이 없어요. 채집이나 수집 탭에서 작업을 켜 주세요.",
+    tasksGo: "채집 필드 고르기",
+    firstTime: "처음이세요?",
     logs: "기록",
     logsEmpty: "아직 기록이 없어요.",
     logsSearch: "기록 검색 (예: 벌집)",
@@ -91,9 +104,18 @@ const strings: PageStrings<
     noPlanters: "심어 둔 플랜터가 없어요.",
     manual: "수동",
     auto: "자동",
+    permTitle: "맥 권한이 꺼져 있어요",
+    permDesc: "이대로 시작하면 매크로가 키보드·마우스를 움직이거나 화면을 볼 수 없어요.",
+    permFix: "켜러 가기",
+    logsExport: "기록 저장",
+    logsClear: "기록 지우기",
+    planterReset: "이 타이머 초기화",
   },
   en: {
     title: "Home",
+    permTitle: "macOS permissions are off",
+    permDesc: "Without them the macro can't move the mouse and keyboard or see the screen.",
+    permFix: "Fix it",
     subtitle: "Start the macro and watch what it's doing.",
     control: "Macro control",
     controlDesc: "Open Bee Swarm Simulator in Roblox, then press Start.",
@@ -111,6 +133,8 @@ const strings: PageStrings<
     tasks: "Tasks",
     tasksDesc: "The macro works through these in order.",
     tasksEmpty: "No tasks are enabled. Turn some on in Gather or Collect.",
+    tasksGo: "Choose a field",
+    firstTime: "New here?",
     logs: "Logs",
     logsEmpty: "Nothing logged yet.",
     logsSearch: "Search logs (e.g. claimed hive)",
@@ -123,6 +147,9 @@ const strings: PageStrings<
     noPlanters: "No planters placed.",
     manual: "Manual",
     auto: "Auto",
+    logsExport: "Save logs",
+    logsClear: "Clear logs",
+    planterReset: "Reset this timer",
   },
 }
 
@@ -162,6 +189,7 @@ function useLogs() {
 
 function LogsCard() {
   const t = useStrings(strings)
+  const { t: tc } = useI18n()
   const { logs, clear } = useLogs()
   const [query, setQuery] = useState("")
   const bottom = useRef<HTMLDivElement>(null)
@@ -173,8 +201,27 @@ function LogsCard() {
       })
     : logs
 
+  // Only lines that just arrived slide in; lines coming back after a search is cleared don't.
+  const seenUpTo = useRef(-1)
   useEffect(() => {
-    bottom.current?.scrollIntoView({ block: "end" })
+    if (logs.length) seenUpTo.current = Math.max(seenUpTo.current, logs[logs.length - 1].key)
+  }, [logs])
+
+  // Follow new lines, but only inside the log box (scrollIntoView would also scroll the page)
+  // and only while the reader is already at the bottom.
+  const stick = useRef(true)
+  useEffect(() => {
+    const viewport = bottom.current?.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
+    if (!viewport) return
+    const onScroll = () => {
+      stick.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 32
+    }
+    viewport.addEventListener("scroll", onScroll, { passive: true })
+    return () => viewport.removeEventListener("scroll", onScroll)
+  }, [])
+  useEffect(() => {
+    const viewport = bottom.current?.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
+    if (viewport && stick.current) viewport.scrollTop = viewport.scrollHeight
   }, [shown.length])
 
   const exportLogs = async () => {
@@ -194,29 +241,41 @@ function LogsCard() {
       <CardHeader>
         <CardTitle>{t("logs")}</CardTitle>
         <CardAction className="flex gap-1">
-          <Button variant="ghost" size="icon-sm" onClick={exportLogs} aria-label="Export">
-            <DownloadIcon />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Clear">
-                <Trash2Icon />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-sm" onClick={exportLogs} aria-label={t("logsExport")}>
+                <DownloadIcon />
               </Button>
-            </AlertDialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>{t("logsExport")}</TooltipContent>
+          </Tooltip>
+          <AlertDialog>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon-sm" aria-label={t("logsClear")}>
+                    <Trash2Icon />
+                  </Button>
+                </AlertDialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent>{t("logsClear")}</TooltipContent>
+            </Tooltip>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("logsClearTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>{t("logsClearDesc")}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>✕</AlertDialogCancel>
+                <AlertDialogCancel>{tc("common.cancel")}</AlertDialogCancel>
                 <AlertDialogAction
+                  variant="destructive"
                   onClick={async () => {
                     await callPy("clearRecentLogs").catch(() => undefined)
                     clear()
                   }}
                 >
                   <Trash2Icon />
+                  {tc("common.clear")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -235,26 +294,52 @@ function LogsCard() {
         </div>
         <ScrollArea className="h-80 flex-1 rounded-md border bg-muted/20">
           <div className="space-y-1 p-2 font-mono text-xs">
-            {shown.length === 0 && <p className="p-2 text-muted-foreground">{t("logsEmpty")}</p>}
+            {shown.length === 0 && (
+              <p className="flex flex-col items-center gap-2 px-2 py-10 text-center font-sans text-sm text-muted-foreground">
+                <ScrollTextIcon className="size-5 opacity-60" />
+                {terms.length ? tc("common.noResults") : t("logsEmpty")}
+              </p>
+            )}
             {shown.map((l) => (
-              <div key={l.key} className="flex gap-2 rounded px-1.5 py-1 hover:bg-muted/50">
-                <span className="mt-1 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: l.color ? `#${l.color}` : "var(--muted-foreground)" }} />
-                <div className="min-w-0">
-                  <span className="text-muted-foreground">{l.time ? `[${l.time}] ` : ""}</span>
-                  <RichText text={l.title ?? ""} className="font-medium" />
-                  {l.desc && (
-                    <div className="text-muted-foreground">
-                      <RichText text={l.desc.replace(/<br>/g, " · ")} />
-                    </div>
-                  )}
-                </div>
-              </div>
+              <LogRow key={l.key} line={l} fresh={l.key > seenUpTo.current} />
             ))}
             <div ref={bottom} />
           </div>
         </ScrollArea>
       </CardContent>
     </Card>
+  )
+}
+
+/**
+ * Keys that survive a task being switched on or off elsewhere in the list, so only the
+ * changed row animates in (an index in the key would remount every row below it).
+ */
+function taskKeys(tasks: TaskItem[]) {
+  const seen = new Map<string, number>()
+  return tasks.map((task) => {
+    const n = seen.get(task.id) ?? 0
+    seen.set(task.id, n + 1)
+    return [n ? `${task.id}#${n}` : task.id, task] as const
+  })
+}
+
+function LogRow({ line: l, fresh }: { line: LogLine; fresh: boolean }) {
+  // decided once at mount so a re-render can't cut the animation short
+  const [animate] = useState(fresh)
+  return (
+    <div className={cn("flex gap-2 rounded px-1.5 py-1 transition-colors hover:bg-muted/50", animate && "animate-in fade-in-0 slide-in-from-bottom-1 duration-300")}>
+      <span className="mt-1 h-3 w-1 shrink-0 rounded-full" style={{ backgroundColor: l.color ? `#${l.color}` : "var(--muted-foreground)" }} />
+      <div className="min-w-0">
+        <span className="text-muted-foreground">{l.time ? `[${l.time}] ` : ""}</span>
+        <RichText text={l.title ?? ""} className="font-medium" />
+        {l.desc && (
+          <div className="text-muted-foreground">
+            <RichText text={l.desc.replace(/<br>/g, " · ")} />
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -340,19 +425,26 @@ function PlanterTimers({ settings }: { settings: Settings }) {
       </CardHeader>
       <CardContent>
         {timers.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("noPlanters")}</p>
+          <EmptyState icon={SproutIcon} description={t("noPlanters")} className="py-6" />
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="rm-stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
             {timers.map((p) => {
               const remaining = formatRemaining(p.harvestTime - now)
               return (
                 <div key={p.index} className="flex flex-col items-center gap-1 rounded-lg border p-3 text-center">
                   <img src={`./assets/icons/${p.planter.replaceAll(" ", "_")}_planter.png`} alt="" className="size-10 object-contain" />
                   <span className="text-xs capitalize">{p.field}</span>
-                  <span className={cn("text-sm font-semibold tabular-nums", !remaining && "text-emerald-500")}>{remaining ?? t("planterReady")}</span>
-                  <Button variant="ghost" size="xs" onClick={() => reset(p.index)}>
-                    <TimerResetIcon />
-                  </Button>
+                  <span className={cn("text-sm font-semibold tabular-nums", !remaining && "text-emerald-600 dark:text-emerald-400")}>
+                    {remaining ?? t("planterReady")}
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon-xs" onClick={() => reset(p.index)} aria-label={t("planterReset")}>
+                        <TimerResetIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("planterReset")}</TooltipContent>
+                  </Tooltip>
                 </div>
               )
             })}
@@ -365,7 +457,7 @@ function PlanterTimers({ settings }: { settings: Settings }) {
 
 export default function HomePage() {
   const t = useStrings(strings)
-  const { lang } = useI18n()
+  const { lang, t: tc } = useI18n()
   const { settings, saveGeneral, refresh } = useSettings()
   const mode = String(settings?.macro_mode ?? "normal") as (typeof MODES)[number]
   const tasks = useMemo(() => (settings ? buildTaskList(settings, lang) : []), [settings, lang])
@@ -373,9 +465,22 @@ export default function HomePage() {
   // the macro asks the UI to reload its task list after it changes settings itself
   usePythonEvent("loadTasks", () => void refresh())
   usePythonEvent("updateMacroMode", () => void refresh())
+  const { missing: permissionsMissing } = usePermissions(5000)
 
   return (
     <Page title={t("title")} description={t("subtitle")}>
+      {permissionsMissing && (
+        <Alert variant="warning" className="animate-in fade-in slide-in-from-top-2 duration-300">
+          <ShieldAlertIcon />
+          <AlertTitle>{t("permTitle")}</AlertTitle>
+          <AlertDescription>{t("permDesc")}</AlertDescription>
+          <AlertAction>
+            <Button size="sm" variant="outline" onClick={() => (window.location.hash = "/guide")}>
+              {t("permFix")}
+            </Button>
+          </AlertAction>
+        </Alert>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="bg-gradient-to-br from-primary/15 via-card to-card">
           <CardHeader>
@@ -385,8 +490,18 @@ export default function HomePage() {
             </CardTitle>
             <CardDescription>{t("controlDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <RunButton size="lg" className="w-full" />
+            <p className="flex flex-wrap items-center justify-center gap-x-1 text-xs text-muted-foreground">
+              {t("firstTime")}
+              <a
+                href="#/guide"
+                className="inline-flex items-center gap-1 rounded-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                <CompassIcon className="size-3.5" />
+                {tc("nav.guide")}
+              </a>
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -420,11 +535,20 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               {tasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("tasksEmpty")}</p>
+                <EmptyState
+                  icon={ListTodoIcon}
+                  description={t("tasksEmpty")}
+                  action={
+                    <Button variant="outline" size="sm" onClick={() => (window.location.hash = "/gather")}>
+                      <FlowerIcon />
+                      {t("tasksGo")}
+                    </Button>
+                  }
+                />
               ) : (
-                <ol className="space-y-1.5">
-                  {tasks.map((task, i) => (
-                    <TaskRow key={`${task.id}-${i}`} task={task} />
+                <ol className="rm-stagger space-y-1.5">
+                  {taskKeys(tasks).map(([key, task]) => (
+                    <TaskRow key={key} task={task} />
                   ))}
                 </ol>
               )}

@@ -48,7 +48,7 @@ function Segmented<T extends string>({
             aria-checked={on}
             onClick={() => onChange(v)}
             className={cn(
-              "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
+              "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-[background-color,border-color,color,scale] duration-150 active:scale-[0.97]",
               on ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-accent",
             )}
           >
@@ -95,7 +95,7 @@ export function BoostHotbar() {
                 aria-pressed={active === slot}
                 title={t("slot", { n: slot })}
                 className={cn(
-                  "relative flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 text-xs transition-all",
+                  "relative flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 text-xs transition-all duration-200 active:scale-[0.96]",
                   active === slot ? "border-primary bg-primary/10 shadow-sm" : "border-border bg-card hover:border-primary/50",
                 )}
               >
@@ -110,7 +110,7 @@ export function BoostHotbar() {
         </div>
 
         {/* settings for the selected slot */}
-        <div className="space-y-4 rounded-xl border p-4">
+        <div key={active} className="space-y-4 rounded-xl border p-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
               <ActiveIcon className="size-5" />

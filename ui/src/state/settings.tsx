@@ -11,6 +11,8 @@ type SettingsStore = {
   fields: Record<string, FieldSettings> | null
   /** Bumped whenever settings are replaced wholesale (profile switch, import). */
   revision: number
+  /** Set when the last load failed (cleared by a successful refresh). */
+  loadError: string | null
   refresh: () => Promise<void>
   get: <T = unknown>(id: string, fallback?: T) => T
   saveProfile: (id: string, value: unknown) => Promise<void>
@@ -27,6 +29,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [fields, setFields] = useState<Record<string, FieldSettings> | null>(null)
   const [revision, setRevision] = useState(0)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const settingsRef = useRef(settings)
   settingsRef.current = settings
   const fieldsRef = useRef(fields)
@@ -38,9 +41,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setSettings(s)
       setFields(f)
       setRevision((r) => r + 1)
+      setLoadError(null)
     } catch (err) {
       console.error("[settings] load failed", err)
-      toast.error(String(err))
+      setLoadError(String(err))
+      // before the first load the page itself shows the error with a retry button
+      if (settingsRef.current) toast.error(String(err))
     }
   }, [])
 
@@ -95,8 +101,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   })
 
   const value = useMemo<SettingsStore>(
-    () => ({ settings, fields, revision, refresh, get, saveProfile, saveGeneral, saveField, patchLocal }),
-    [settings, fields, revision, refresh, get, saveProfile, saveGeneral, saveField, patchLocal],
+    () => ({ settings, fields, revision, loadError, refresh, get, saveProfile, saveGeneral, saveField, patchLocal }),
+    [settings, fields, revision, loadError, refresh, get, saveProfile, saveGeneral, saveField, patchLocal],
   )
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>
 }

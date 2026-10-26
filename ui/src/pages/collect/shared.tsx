@@ -37,16 +37,14 @@ export function SubTabs({ storageKey, fallback, tabs }: { storageKey: string; fa
     writeStored(storageKey, value)
   }
   return (
-    <Tabs value={active} onValueChange={change} className="gap-4">
-      <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <TabsList className="h-9">
-          {tabs.map((t) => (
-            <TabsTrigger key={t.value} value={t.value} className="px-3">
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </div>
+    <Tabs value={active} onValueChange={change}>
+      <TabsList>
+        {tabs.map((t) => (
+          <TabsTrigger key={t.value} value={t.value}>
+            {t.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
       {tabs.map((t) => (
         <TabsContent key={t.value} value={t.value} className="grid gap-4">
           {t.content}
@@ -64,10 +62,10 @@ export function ZoomableImage({ src, alt, hint }: { src: string; alt: string; hi
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group relative w-full max-w-[600px] cursor-zoom-in overflow-hidden rounded-lg border shadow-sm"
+        className="group relative w-full max-w-[600px] cursor-zoom-in overflow-hidden rounded-lg border shadow-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <img src={src} alt={alt} className="h-auto w-full" draggable={false} />
-        <span className="absolute right-2 bottom-2 flex items-center gap-1 rounded-md bg-background/85 px-2 py-1 text-xs opacity-0 shadow transition-opacity group-hover:opacity-100">
+        <img src={src} alt={alt} className="h-auto w-full transition-transform duration-300 ease-out group-hover:scale-[1.015]" draggable={false} />
+        <span className="absolute right-2 bottom-2 flex items-center gap-1 rounded-md bg-background/85 px-2 py-1 text-xs opacity-0 shadow transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
           <ZoomInIcon className="size-3.5" />
           {hint}
         </span>

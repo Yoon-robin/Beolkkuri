@@ -27,7 +27,6 @@ const SLOTS = [1, 2, 3, 4, 5, 6, 7] as const
 const strings: PageStrings<
   | "title"
   | "desc"
-  | "status"
   | "lastSlot"
   | "slotN"
   | "none"
@@ -52,7 +51,6 @@ const strings: PageStrings<
   ko: {
     title: "핫바 버프",
     desc: "직접 플레이하는 동안 핫바 칸을 정해 둔 시간마다 대신 눌러 줘요.",
-    status: "상태",
     lastSlot: "마지막으로 누른 칸",
     slotN: "{n}번 칸",
     none: "없음",
@@ -77,7 +75,6 @@ const strings: PageStrings<
   en: {
     title: "Hotbar Buff",
     desc: "Presses your hotbar slots on a timer while you play yourself.",
-    status: "Status",
     lastSlot: "Last slot pressed",
     slotN: "Slot {n}",
     none: "None",
@@ -197,10 +194,7 @@ export function HotbarBuffTool({ status, refresh }: ToolProps<HotbarBuffStatus>)
           <p className="text-sm" aria-live="polite">
             {toolMessage(status?.message, lang, toolMessage("Ready", lang))}
           </p>
-          <div className="grid grid-cols-2 gap-3 sm:max-w-md">
-            <Stat label={t("status")} value={<ToolStateBadge status={status} />} />
-            <Stat label={t("lastSlot")} value={status?.last_slot ? t("slotN", { n: status.last_slot }) : t("none")} />
-          </div>
+          <Stat label={t("lastSlot")} value={status?.last_slot ? t("slotN", { n: status.last_slot }) : t("none")} className="sm:max-w-56" />
           <HotkeyHint startSetting="hotbar_buff_start_keybind" startFallback="F4" />
           <Separator />
           <HowTo

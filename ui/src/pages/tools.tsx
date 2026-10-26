@@ -182,26 +182,24 @@ export default function ToolsPage() {
         )
       }
     >
-      <Tabs value={tab} onValueChange={changeTab} className="gap-4">
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <TabsList className="h-auto! flex-wrap justify-start">
-            {TABS.map((id) => {
-              const Icon = ICONS[id]
-              return (
-                <TabsTrigger key={id} value={id} className="gap-1.5">
-                  <Icon className="size-4" />
-                  {t(`tab.${id}`)}
-                  {running[id] && (
-                    <span className="relative flex size-2" title={t("running")}>
-                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-                      <span className={cn("relative inline-flex size-2 rounded-full bg-emerald-500")} />
-                    </span>
-                  )}
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </div>
+      <Tabs value={tab} onValueChange={changeTab}>
+        <TabsList>
+          {TABS.map((id) => {
+            const Icon = ICONS[id]
+            return (
+              <TabsTrigger key={id} value={id} className="gap-1.5">
+                <Icon className="size-4" />
+                {t(`tab.${id}`)}
+                {running[id] && (
+                  <span className="relative flex size-2" title={t("running")}>
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                    <span className={cn("relative inline-flex size-2 rounded-full bg-emerald-500")} />
+                  </span>
+                )}
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
         <TabsContent value="autoclicker">
           <AutoClickerTool status={clicker} refresh={refreshClicker} />
         </TabsContent>

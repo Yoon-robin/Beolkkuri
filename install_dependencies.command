@@ -1,11 +1,16 @@
 #!/bin/bash
 #
-# RobinMacro installer. Double-click this file in Finder; it installs Python,
-# the libraries the macro needs, and a RobinMacro app you can open later.
+# RobinMacro installer. install.sh runs it after downloading, or open this file
+# from Finder (right-click > Open). It installs Python, the libraries the macro
+# needs, and a RobinMacro app you can open later.
 
 VENV_NAME="robin-macro-env"
 VENV_PATH="$HOME/$VENV_NAME"
 MACRO_DIR="$(cd "$(dirname "$0")" && pwd)"
+# pip prints thousands of lines; keep them in a log and show one line per library.
+LOG="$HOME/RobinMacro-install.log"
+: > "$LOG"
+failures=0
 
 # Print a numbered step in Korean with the English underneath.
 say_step() {
@@ -41,6 +46,8 @@ install_pip_package() {
 	local packages="$1"
 	local extra_args="$2"
 	local tmp_constraint=""
+	local status=0
+	printf "   \033[0;37m• %s\033[0m " "$packages"
 
 	if [ -n "$constraints" ]; then
 		tmp_constraint=$(mktemp)
@@ -51,10 +58,18 @@ install_pip_package() {
 	fi
 
 	if [ "$chip" = "arm64" ]; then
-		arch -arm64 pip install --prefer-binary --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 $extra_args $packages $constraint_arg
+		arch -arm64 pip install --prefer-binary --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 $extra_args $packages $constraint_arg >>"$LOG" 2>&1 || status=$?
 	else
 		#fallback for other architectures
-		pip install --prefer-binary --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 $extra_args $packages $constraint_arg
+		pip install --prefer-binary --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 $extra_args $packages $constraint_arg >>"$LOG" 2>&1 || status=$?
+	fi
+
+	if [ "$status" -eq 0 ]; then
+		printf "\033[32m✓\033[0m\n"
+	else
+		printf "\033[31m✗\033[0m\n"
+		tail -n 8 "$LOG" | sed 's/^/      /'
+		failures=$((failures + 1))
 	fi
 
 	if [ -n "$tmp_constraint" ] && [ -f "$tmp_constraint" ]; then
@@ -64,9 +79,9 @@ install_pip_package() {
 
 upgrade_pip_tools() {
     if [ "$chip" = "arm64" ]; then
-        arch -arm64 python"${python_ver}" -m pip install --upgrade pip setuptools wheel
+        arch -arm64 python"${python_ver}" -m pip install --upgrade pip setuptools wheel >>"$LOG" 2>&1
     else
-        python"${python_ver}" -m pip install --upgrade pip setuptools wheel
+        python"${python_ver}" -m pip install --upgrade pip setuptools wheel >>"$LOG" 2>&1
     fi
 }
 
@@ -143,7 +158,8 @@ if python"${python_ver}" --version; then
 		fi
 else
 	printf "\033[1;35m파이썬 ${python_ver} 설치 창이 뜨면 '계속'과 '설치'를 눌러 주세요.\nPython is not installed, installing python ${python_ver}\nThere should be a popup for the python installer.\n\033[0m"
-	curl -O "https:/${python_link}" && open "${filename}"
+	pkg_dir=$(mktemp -d)
+	curl -fL --progress-bar "https:/${python_link}" -o "$pkg_dir/${filename}" && open "$pkg_dir/${filename}"
 	# Wait until python installation has finished.
 	until python"${python_ver}" --version &> /dev/null; do
 	  sleep 5;
@@ -166,9 +182,9 @@ fi
 
 #echo "Enter your password (the password used to log into the admin user). Note: the password is not visible"
 #sudo xcode-select --switch /Library/Developer/CommandLineTools
-printf "\033[1;35mMaking sure pip is installed\033[0m\n\n"
-python"${python_ver}" -m ensurepip
-python"${python_ver}" -m pip cache purge
+printf "\033[1;35mpip 준비 중 / Preparing pip\033[0m\n"
+python"${python_ver}" -m ensurepip >>"$LOG" 2>&1
+python"${python_ver}" -m pip cache purge >>"$LOG" 2>&1
 upgrade_pip_tools
 
 printf "\033[1;35mInstalling SSL certificates for Python\033[0m\n"
@@ -177,7 +193,7 @@ printf "\033[1;35mInstalling SSL certificates for Python\033[0m\n"
 cert_command="/Applications/Python ${python_ver}/Install Certificates.command"
 if [ -f "$cert_command" ]; then
 	printf "\033[1;32mFound certificate installer for Python ${python_ver}\033[0m\n"
-	"$cert_command"
+	"$cert_command" >>"$LOG" 2>&1
 else
 	printf "\033[1;31mDid not find certificate installer for Python ${python_ver}\033[0m\n"
 fi
@@ -201,9 +217,10 @@ while [ "$attempt" -le 3 ]; do
 	fi
 done
 
-pip install --upgrade pip setuptools wheel
+pip install --upgrade pip setuptools wheel >>"$LOG" 2>&1
+printf "\033[1;35m라이브러리를 하나씩 설치해요. 큰 것(torch)은 몇 분 걸릴 수 있어요.\n"
+printf "Installing libraries one by one; large ones (torch) can take a few minutes.\033[0m\n"
 install_pip_package "numpy<2"
-printf "\033[1;35mInstalling libraries\033[0m\n\n"
 
 if [ "$python_ver" = '3.9' ] || { [ "$python_ver" = '3.8' ] && version_at_least "$os_ver" "12.0.0"; }; then
 	# Use pip --force-reinstall to ensure a compatible opencv and numpy
@@ -218,13 +235,13 @@ if [ "$python_ver" = '3.9' ] || { [ "$python_ver" = '3.8' ] && version_at_least 
 
 elif version_at_least "$os_ver" "10.15.0"; then
 	printf "\033[1;35mInstalling rust\n\n\033[0m"
-	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >>"$LOG" 2>&1
 	source "$HOME/.cargo/env"
 
 	# OpenCV 4.4 and 4.6 cannot load the current AI Gather ONNX models.
 	# OpenCV 4.10 has a compatible macOS 10.15 Intel wheel. Keep exactly one
 	# OpenCV package installed because all variants share the cv2 namespace.
-	pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless opencv-contrib-python-headless
+	pip uninstall -y opencv-python opencv-contrib-python opencv-python-headless opencv-contrib-python-headless >>"$LOG" 2>&1
 	install_pip_package "opencv-python==4.10.0.84 numpy==1.19.1 Polygon3" "--force-reinstall"
 	install_pip_package "easyocr" "--no-deps"
 	install_pip_package "torch"
@@ -280,7 +297,7 @@ install_pip_package "requests" #used to check if this script was ran, should be 
 install_pip_package "pynput"
 install_pip_package "numpy<2" "--force-reinstall"
 
-"$VENV_PATH/bin/python" << "EOF"
+"$VENV_PATH/bin/python" >>"$LOG" 2>&1 << "EOF"
 
 # install_certifi.py
 #
@@ -326,7 +343,7 @@ def main():
 if __name__ == '__main__':
     main()
 EOF
-"$VENV_PATH/bin/python" << "EOF"
+"$VENV_PATH/bin/python" >>"$LOG" 2>&1 << "EOF"
 
 # remove self-documented expressions from chrome_cdp.py for python 3.7 compatibility
 import os
@@ -395,6 +412,12 @@ else
 	printf "\033[1;33m앱 바로가기는 만들지 못했어요. 대신 run_macro.command 를 더블클릭해서 실행하세요.\nCould not create the app shortcut; double-click run_macro.command instead.\033[0m\n"
 fi
 
+if [ "$failures" -gt 0 ]; then
+	printf "\n\033[1;33m라이브러리 %s개를 설치하지 못했어요. 설치를 한 번 더 실행하면 대부분 해결돼요.\n" "$failures"
+	printf "그래도 안 되면 이 파일을 GitHub Issues에 올려 주세요: %s\n" "$LOG"
+	printf "%s libraries failed. Running the installer again usually fixes it; otherwise attach %s to a GitHub issue.\033[0m\n" "$failures" "$LOG"
+fi
+
 printf "\n\n\033[32;1m설치가 끝났어요! / Installation complete!\033[0m\n\n"
 printf "마지막으로 '터미널'에 두 가지 권한을 줘야 매크로가 키보드와 화면을 쓸 수 있어요.\n"
 printf "  1) 손쉬운 사용 (Accessibility)\n  2) 화면 기록 (Screen Recording)\n"
@@ -405,4 +428,12 @@ read -r _
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null
 sleep 1
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture" 2>/dev/null
-printf "\n권한을 켠 뒤 바탕화면의 RobinMacro 를 열면 시작할 수 있어요.\nAfter allowing them, open RobinMacro from your Desktop.\n"
+printf "\n\033[1;36m이제 이렇게 하면 돼요 / Next:\033[0m\n"
+printf "  1) 열린 설정 창에서 '터미널'을 켜요 (목록에 없으면 + 버튼으로 추가)\n"
+printf "  2) 터미널을 완전히 종료해요 (⌘Q)\n"
+printf "  3) 바탕화면의 RobinMacro 를 더블클릭해요\n\n"
+printf "  1) Turn on Terminal in the settings windows that opened (add it with + if missing)\n"
+printf "  2) Quit Terminal completely (⌘Q)\n"
+printf "  3) Double-click RobinMacro on your Desktop\n\n"
+printf "앱의 '시작 가이드'에서 권한이 제대로 켜졌는지 바로 확인할 수 있어요.\n"
+printf "The Getting Started page in the app shows whether the permissions are on.\n"
