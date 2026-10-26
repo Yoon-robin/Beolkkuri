@@ -150,6 +150,8 @@ pnpm dev                   # http://localhost:5173
 pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 사용자에게 반영돼요)
 ```
 
+**다른 컴퓨터에서 이어서 작업하기:** `git clone https://github.com/Yoon-robin/RobinMacro` 한 뒤 위 명령을 그대로 실행하면 돼요. 구조, 규칙, 남은 할 일은 [CLAUDE.md](CLAUDE.md) 에 정리돼 있어요 (Claude Code가 자동으로 읽어요). 개발 서버 실행 설정은 `.claude/launch.json` 에 있어요.
+
 ---
 
 ## English

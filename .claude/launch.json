@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "robinmacro-backend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["ui/dev/dev_server.py"],
+      "port": 8765
+    },
+    {
+      "name": "robinmacro-ui",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "ui", "dev"],
+      "port": 5173
+    }
+  ]
+}
