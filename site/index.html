@@ -343,7 +343,7 @@ kbd { font-family: ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px;
 .term-body { height: 400px; padding: 18px 20px; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.75; color: #ece4d4; }
 .term-body .ln { white-space: pre-wrap; word-break: break-all; animation: termIn 0.25s ease-out both; }
 @keyframes termIn { from { opacity: 0; translate: 0 4px; } }
-.t-amber { color: #fbbf24; font-weight: 700; } .t-cyan { color: #67e8f9; font-weight: 700; } .t-dim { color: #8a8174; } .t-green { color: #4ade80; font-weight: 700; } .t-ok { color: #4ade80; }
+.t-amber { color: #fbbf24; font-weight: 700; } .t-cyan { color: #67e8f9; font-weight: 700; } .t-dim { color: #8a8174; } .t-green { color: #4ade80; font-weight: 700; }
 .cursor { display: inline-block; width: 8px; height: 16px; margin-left: 2px; vertical-align: -3px; background: var(--honey); animation: blink 1s steps(1) infinite; }
 
 /* ---------- faq ---------- */
@@ -709,9 +709,9 @@ footer a:hover { color: var(--honey); }
         </div>
         <ol class="steps" data-os-only="mac">
           <li><span data-i18n-html="ins.1"><b>⌘ + 스페이스</b>를 누르고 <b>터미널</b>을 열어요.</span></li>
-          <li><span data-i18n-html="ins.2">아래 명령어를 <b>붙여 넣고 엔터</b>. 설치 창이 뜨면 <b>계속</b>, <b>설치</b>를 눌러요.</span></li>
-          <li><span data-i18n-html="ins.3"><b>손쉬운 사용</b>과 <b>화면 기록</b>에서 터미널을 켜요. 켜졌는지는 앱이 초록 체크로 알려 줘요.</span></li>
-          <li><span data-i18n-html="ins.4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
+          <li><span data-i18n-html="ins.2">아래 명령어를 <b>붙여 넣고 엔터</b>. 설치 창이 뜨면 <b>계속</b>, <b>설치</b>를 눌러요. 끝나면 벌꿀이가 저절로 열려요.</span></li>
+          <li><span data-i18n-html="ins.3">시작 가이드의 <b>켜기</b>를 눌러 <b>손쉬운 사용</b>과 <b>화면 기록</b>에서 터미널을 켜요. 켜지면 초록 체크가 떠요.</span></li>
+          <li><span data-i18n-html="ins.4">터미널을 <b>⌘Q</b>로 끄고 바탕화면의 <b>벌꿀이</b>를 다시 열어요. 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
         </ol>
         <ol class="steps" data-os-only="win" hidden>
           <li><span data-i18n-html="ins.w1">아래 버튼으로 <b>Beolkkuri-Setup.exe</b>를 내려받아 열어요.</span></li>
@@ -834,9 +834,9 @@ footer a:hover { color: var(--honey); }
     "tab.home": "Home", "tab.gather": "Gather", "tab.guide": "Getting Started", "tab.search": "Search", "tab.light": "Light theme",
     "ins.title": "Install with<br />one line",
     "ins.1": "Press <b>⌘ + Space</b> and open <b>Terminal</b>.",
-    "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>.",
-    "ins.3": "Turn on Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. The app shows a green check when they're on.",
-    "ins.4": "Open <b>Beolkkuri</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
+    "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>. Beolkkuri opens by itself when it's done.",
+    "ins.3": "Press <b>Turn on</b> in Getting Started to allow Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. A green check shows when they're on.",
+    "ins.4": "Quit Terminal with <b>⌘Q</b> and open <b>Beolkkuri</b> from your Desktop again. Join Bee Swarm in Roblox and press Start.",
     "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.walt": "One-line PowerShell install and Windows help →",
     "ins.wtitle": "Install with<br />one file",
     "ins.w1": "Download <b>Beolkkuri-Setup.exe</b> with the button below and open it.",
@@ -1123,15 +1123,15 @@ footer a:hover { color: var(--honey); }
     ["ln", "==============================================", "t-amber"],
     ["ln", "   벌꿀이 설치 / Beolkkuri installer", "t-amber"],
     ["ln", "==============================================", "t-amber"],
-    ["ln", lang === "ko" ? "[1/5] 맥 버전 확인" : "[1/5] Checking your Mac", "t-cyan"],
+    ["ln", lang === "ko" ? "[1/4] 맥 버전 확인" : "[1/4] Checking your Mac", "t-cyan"],
     ["ln", lang === "ko" ? "쓸 수 있는 맥이에요 / Your mac is compatible" : "Your mac is compatible", "t-green"],
-    ["ln", lang === "ko" ? "[2/5] 파이썬 확인" : "[2/5] Checking Python", "t-cyan"],
-    ["ln", lang === "ko" ? "[3/5] 개발 도구 확인" : "[3/5] Checking Command Line Tools", "t-cyan"],
-    ["ln", lang === "ko" ? "[4/5] 라이브러리 설치 (가장 오래 걸려요)" : "[4/5] Installing libraries (this takes the longest)", "t-cyan"],
-    ["pkg", "numpy<2"], ["pkg", "opencv-python-headless"], ["pkg", "torch==2.7.0 torchvision"], ["pkg", "pyautogui"], ["pkg", "mss"], ["pkg", "discord.py"], ["pkg", "eel"],
-    ["ln", lang === "ko" ? "[5/5] 벌꿀이 앱 만들기" : "[5/5] Creating the Beolkkuri app", "t-cyan"],
+    ["ln", lang === "ko" ? "[2/4] 파이썬 확인" : "[2/4] Checking Python", "t-cyan"],
+    ["ln", lang === "ko" ? "[3/4] 라이브러리 설치 (가장 오래 걸려요)" : "[3/4] Installing libraries (this takes the longest)", "t-cyan"],
+    ["pkg", "numpy<2"], ["pkg", "opencv-python-headless"], ["pkg", "coremltools"], ["pkg", "ocrmac"], ["pkg", "pyautogui"], ["pkg", "mss"], ["pkg", "discord.py"], ["pkg", "eel"],
+    ["done", lang === "ko" ? "라이브러리를 모두 설치했어요" : "All libraries installed", "t-green"],
+    ["ln", lang === "ko" ? "[4/4] 벌꿀이 앱 만들기" : "[4/4] Creating the Beolkkuri app", "t-cyan"],
     ["ln", lang === "ko" ? "바탕화면에 벌꿀이 앱을 만들었어요." : "Created the Beolkkuri app on your Desktop.", "t-green"],
-    ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
+    ["ln", lang === "ko" ? "설치가 끝났어요! 벌꿀이를 열게요." : "Installation complete! Opening Beolkkuri...", "t-green"],
   ]
   // each run gets an id; switching OS or language starts a new run and the old one stops at its next step
   let termRun = 0, termStarted = false
@@ -1142,7 +1142,7 @@ footer a:hover { color: var(--honey); }
     for (;;) {
       term.innerHTML = ""
       const script = MAC_SCRIPT()
-      let line
+      let line, pkgLine
       for (const [kind, text, cls] of script) {
         if (!alive()) return
         if (kind === "") { line = document.createElement("div"); line.className = "ln"; line.innerHTML = `<span class="${cls}">${text}</span>`; term.append(line); continue }
@@ -1151,9 +1151,15 @@ footer a:hover { color: var(--honey); }
           for (const ch of text) { if (!alive()) return; span.textContent += ch; await sleep(reduced ? 0 : 14) }
           await sleep(500); cur.remove(); continue
         }
-        const div = document.createElement("div"); div.className = "ln"
-        if (kind === "pkg") { div.innerHTML = `   <span class="t-dim">• ${text.replace("<", "&lt;")}</span> `; term.append(div); await sleep(420); div.innerHTML += `<span class="t-ok">✓</span>` }
-        else { div.innerHTML = `<span class="${cls}">${text}</span>`; term.append(div); await sleep(380) }
+        // like the installer, the libraries share one line that is rewritten, and "done" replaces it
+        if (kind === "pkg" || kind === "done") {
+          if (!pkgLine) { pkgLine = document.createElement("div"); pkgLine.className = "ln"; term.append(pkgLine) }
+          if (kind === "pkg") { pkgLine.innerHTML = `   <span class="t-dim">• ${text.replace("<", "&lt;")} ...</span>`; await sleep(420) }
+          else { pkgLine.innerHTML = `<span class="${cls}">${text}</span>`; pkgLine = null; await sleep(380) }
+        } else {
+          const div = document.createElement("div"); div.className = "ln"
+          div.innerHTML = `<span class="${cls}">${text}</span>`; term.append(div); await sleep(380)
+        }
         term.scrollTop = term.scrollHeight
       }
       if (!alive()) return

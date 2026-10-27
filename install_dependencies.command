@@ -24,8 +24,8 @@ say_step() {
 printf "\033[1;33m==============================================\n"
 printf "   벌꿀이 설치 / Beolkkuri installer\n"
 printf "==============================================\033[0m\n"
-printf "창을 닫지 말고 끝날 때까지 기다려 주세요. (10~20분 걸려요)\n"
-printf "Keep this window open until it finishes (10-20 minutes).\n"
+printf "창을 닫지 말고 끝날 때까지 기다려 주세요. 끝나면 벌꿀이가 저절로 열려요.\n"
+printf "Keep this window open until it finishes. Beolkkuri opens by itself afterwards.\n"
 
 # Files downloaded from the internet are quarantined by macOS, which makes it
 # refuse to open run_macro.command later. Clear that flag on our own folder.
@@ -34,24 +34,23 @@ chmod +x "$MACRO_DIR/run_macro.command" "$MACRO_DIR/install_dependencies.command
 
 create_virtual_env() {
     if [ ! -d "$VENV_PATH" ]; then
-        printf "\033[1;35mCreating virtual environment at $VENV_PATH\033[0m\n"
-        python"${python_ver}" -m venv "$VENV_PATH"
-    else
-        printf "\033[1;32mVirtual environment already exists at $VENV_PATH\033[0m\n"
+        echo "Creating virtual environment at $VENV_PATH" >>"$LOG"
+        python"${python_ver}" -m venv "$VENV_PATH" >>"$LOG" 2>&1
     fi
 }
 
 activate_virtual_env() {
-    printf "\033[1;35mActivating virtual environment\033[0m\n"
     source "$VENV_PATH/bin/activate"
 }
 
+# One line that shows the library being installed, rewritten in place; only a failure
+# leaves a line behind (with the end of the log).
 install_pip_package() {
 	local packages="$1"
 	local extra_args="$2"
 	local tmp_constraint=""
 	local status=0
-	printf "   \033[0;37m• %s\033[0m " "$packages"
+	printf "\r\033[K   \033[0;37m• %s ...\033[0m" "$packages"
 
 	if [ -n "$constraints" ]; then
 		tmp_constraint=$(mktemp)
@@ -68,10 +67,8 @@ install_pip_package() {
 		pip install --prefer-binary --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 $extra_args $packages $constraint_arg >>"$LOG" 2>&1 || status=$?
 	fi
 
-	if [ "$status" -eq 0 ]; then
-		printf "\033[32m✓\033[0m\n"
-	else
-		printf "\033[31m✗\033[0m\n"
+	if [ "$status" -ne 0 ]; then
+		printf "\r\033[K   \033[31m✗ %s\033[0m\n" "$packages"
 		tail -n 8 "$LOG" | sed 's/^/      /'
 		failures=$((failures + 1))
 	fi
@@ -100,7 +97,7 @@ version_at_least() {
 	[ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
 }
 
-say_step "1/5" "맥 버전 확인" "Checking your Mac"
+say_step "1/4" "맥 버전 확인" "Checking your Mac"
 
 if [ "$chip" = 'arm64' ]; then
 	if ! version_at_least "$os_ver" "13.0.0"; then
@@ -116,7 +113,7 @@ fi
 
 printf "\033[32;1m쓸 수 있는 맥이에요 / Your mac is compatible\033[0m\n"
 
-say_step "2/5" "파이썬 확인" "Checking Python"
+say_step "2/4" "파이썬 확인" "Checking Python"
 
 python_ver="3.9"
 python_link="/www.python.org/ftp/python/3.9.8/python-3.9.8-macos11.pkg"
@@ -139,8 +136,8 @@ fi
 
 filename=$(echo "${python_link}" | sed -e 's/\/.*\///g')
 
-if python"${python_ver}" --version; then
-	printf "\033[1;32mPython is already installed\033[0m\n"
+if python"${python_ver}" --version >>"$LOG" 2>&1; then
+	printf "\033[1;32m파이썬 %s 이 있어요 / Python %s is installed\033[0m\n" "$python_ver" "$python_ver"
 		if [ "$chip" = "arm64" ]; then
 			# Resolve the real python executable (pyenv shims may point to a shim script)
 			python_exec=$(python"${python_ver}" -c 'import sys; print(sys.executable)' 2>/dev/null || true)
@@ -154,7 +151,7 @@ if python"${python_ver}" --version; then
 			fi
 
 			if echo "$py_platform" | grep -qi "arm64" || echo "$arch_output" | grep -q "arm64"; then
-				echo -e "\033[1;32mPython $python_ver has an arm64 binary\033[0m"
+				echo "Python $python_ver has an arm64 binary" >>"$LOG"
 			else
 				echo -e "\033[1;31mThere are no arm64 binaries for Python $python_ver!\033[0m"
 				echo -e "\033[1;33mFix: reinstall Python 3.9 with arm64 binaries (brew, miniforge) or use a universal/arm64 build.\033[0m"
@@ -172,37 +169,34 @@ else
 	#read
 fi
 
-say_step "3/5" "개발 도구(Command Line Tools) 확인" "Checking Command Line Tools"
-if xcode-select --print-path &> /dev/null; then
-	printf "\033[1;32mCommand Line Tools are already installed.\033[0m\n"
-else
-	printf "\033[1;35m개발 도구 설치 창이 뜨면 '설치'를 눌러 주세요.\nInstall Command Line Tools. There should be a pop-up; click the install button.\033[0m\n"
-	xcode-select --install
-	# Wait until XCode Command Line Tools installation has finished.
-	until xcode-select --print-path &> /dev/null; do
-	  sleep 5
-	done
+# Apple Silicon gets ready-made packages for everything below, so only Intel Macs,
+# which build some of them from source, need the Command Line Tools (a long download).
+if [ "$chip" != "arm64" ]; then
+	if xcode-select --print-path &> /dev/null; then
+		echo "Command Line Tools are already installed." >>"$LOG"
+	else
+		printf "\033[1;35m개발 도구 설치 창이 뜨면 '설치'를 눌러 주세요.\nInstall Command Line Tools. There should be a pop-up; click the install button.\033[0m\n"
+		xcode-select --install
+		# Wait until XCode Command Line Tools installation has finished.
+		until xcode-select --print-path &> /dev/null; do
+		  sleep 5
+		done
+	fi
 fi
 
-#echo "Enter your password (the password used to log into the admin user). Note: the password is not visible"
-#sudo xcode-select --switch /Library/Developer/CommandLineTools
-printf "\033[1;35mpip 준비 중 / Preparing pip\033[0m\n"
 python"${python_ver}" -m ensurepip >>"$LOG" 2>&1
 python"${python_ver}" -m pip cache purge >>"$LOG" 2>&1
 upgrade_pip_tools
 
-printf "\033[1;35mInstalling SSL certificates for Python\033[0m\n"
-
 #find and run the Install Certificates command for the specific Python version
 cert_command="/Applications/Python ${python_ver}/Install Certificates.command"
 if [ -f "$cert_command" ]; then
-	printf "\033[1;32mFound certificate installer for Python ${python_ver}\033[0m\n"
 	"$cert_command" >>"$LOG" 2>&1
 else
-	printf "\033[1;31mDid not find certificate installer for Python ${python_ver}\033[0m\n"
+	echo "Did not find certificate installer for Python ${python_ver}" >>"$LOG"
 fi
 
-say_step "4/5" "매크로 전용 환경과 라이브러리 설치 (가장 오래 걸려요)" "Installing libraries (this takes the longest)"
+say_step "3/4" "매크로 전용 환경과 라이브러리 설치 (가장 오래 걸려요)" "Installing libraries (this takes the longest)"
 attempt=1
 while [ "$attempt" -le 3 ]; do
 	create_virtual_env
@@ -210,10 +204,9 @@ while [ "$attempt" -le 3 ]; do
 	
 	# Validate Python and pip paths inside the venv
 	if [ -x "$VENV_PATH/bin/python" ] && [ -x "$VENV_PATH/bin/pip" ]; then
-		echo -e "\033[1;32mVirtual environment is valid\033[0m"
 		break
 	else
-		echo -e "\033[1;31mVirtual environment is broken, recreating...\033[0m"
+		echo "Virtual environment is broken, recreating..." >>"$LOG"
 		rm -rf "$VENV_PATH"
 		((attempt++))
 		sleep 2
@@ -222,16 +215,13 @@ while [ "$attempt" -le 3 ]; do
 done
 
 pip install --upgrade pip setuptools wheel >>"$LOG" 2>&1
-printf "\033[1;35m라이브러리를 하나씩 설치해요. 큰 것(torch)은 몇 분 걸릴 수 있어요.\n"
-printf "Installing libraries one by one; large ones (torch) can take a few minutes.\033[0m\n"
 install_pip_package "numpy<2"
 
 if [ "$python_ver" = '3.9' ] || { [ "$python_ver" = '3.8' ] && version_at_least "$os_ver" "12.0.0"; }; then
 	# Use pip --force-reinstall to ensure a compatible opencv and numpy
 	# This installs the latest opencv-headless below 4.11 and enforces numpy<2
 	install_pip_package "opencv-python-headless<4.11 numpy<2" "--force-reinstall"
-	# Keep torch aligned with the version tested by coremltools.
-	install_pip_package "torch==2.7.0 torchvision==0.22.0" "--force-reinstall"
+	# Only for running the AI models (MLModel); converting models would need torch, which the macro never does.
 	install_pip_package "coremltools"
 	install_pip_package "ocrmac"
 	install_pip_package "pyobjc-framework-ColorSync<12.0"
@@ -286,20 +276,21 @@ else
 	install_pip_package "aiohttp==3.10.5"
 fi
 install_pip_package "pypresence"
-install_pip_package "matplotlib"
 install_pip_package "fuzzywuzzy"
 install_pip_package "python-Levenshtein"
 install_pip_package "pyscreeze<0.1.29"
-install_pip_package "html2image"
 install_pip_package "gevent"
 install_pip_package "eel"
-install_pip_package "ImageHash"
-install_pip_package "httpx"
 install_pip_package "flask"
 install_pip_package "pygetwindow"
 install_pip_package "requests" #used to check if this script was ran, should be installed by discord-webhooks
 install_pip_package "pynput"
 install_pip_package "numpy<2" "--force-reinstall"
+if [ "$failures" -eq 0 ]; then
+	printf "\r\033[K\033[1;32m라이브러리를 모두 설치했어요 / All libraries installed\033[0m\n"
+else
+	printf "\r\033[K"
+fi
 
 "$VENV_PATH/bin/python" >>"$LOG" 2>&1 << "EOF"
 
@@ -347,37 +338,7 @@ def main():
 if __name__ == '__main__':
     main()
 EOF
-"$VENV_PATH/bin/python" >>"$LOG" 2>&1 << "EOF"
-
-# remove self-documented expressions from chrome_cdp.py for python 3.7 compatibility
-import os
-import importlib.util
-
-spec = importlib.util.find_spec('html2image')
-if spec and spec.origin:
-    path = os.path.join(os.path.dirname(spec.origin), "browsers", "chrome_cdp.py")
-    if os.path.exists(path):
-        print(f"html2image found at {path}")
-        linesToRemove = ["print(f'{r.json()=}')", "print(f'cdp_send: {method=} {params=}')", "print(f'{method=}')", "print(f'{message=}')"]
-        with open(path, "r") as f:
-            data = f.read()
-        
-        original_data = data
-        for i in linesToRemove:
-            data = data.replace(i, "")
-        
-        if data != original_data:
-            with open(path, "w") as f:
-                f.write(data)
-            print("Fixed html2image")
-        else:
-            print("html2image already fixed or lines not found")
-    else:
-        print(f"chrome_cdp.py not found at {path}")
-else:
-    print("html2image package not found")
-EOF
-say_step "5/5" "벌꿀이 앱 만들기" "Creating the Beolkkuri app"
+say_step "4/4" "벌꿀이 앱 만들기" "Creating the Beolkkuri app"
 
 # A small AppleScript app that opens run_macro.command in Terminal, so the macro
 # can be started from the Desktop / Launchpad like any other app.
@@ -414,9 +375,11 @@ create_launcher() {
 		|| ln -sf "$app" "$HOME/Desktop/$name"
 }
 
+launcher_ok=1
 if create_launcher; then
 	printf "\033[1;32m바탕화면과 '응용 프로그램' 폴더에 벌꿀이 앱을 만들었어요.\nCreated the 벌꿀이 (Beolkkuri) app on your Desktop and in ~/Applications.\033[0m\n"
 else
+	launcher_ok=0
 	printf "\033[1;33m앱 바로가기는 만들지 못했어요. 대신 run_macro.command 를 더블클릭해서 실행하세요.\nCould not create the app shortcut; double-click run_macro.command instead.\033[0m\n"
 fi
 
@@ -424,24 +387,24 @@ if [ "$failures" -gt 0 ]; then
 	printf "\n\033[1;33m라이브러리 %s개를 설치하지 못했어요. 설치를 한 번 더 실행하면 대부분 해결돼요.\n" "$failures"
 	printf "그래도 안 되면 이 파일을 GitHub Issues에 올려 주세요: %s\n" "$LOG"
 	printf "%s libraries failed. Running the installer again usually fixes it; otherwise attach %s to a GitHub issue.\033[0m\n" "$failures" "$LOG"
+	exit 1
 fi
 
-printf "\n\n\033[32;1m설치가 끝났어요! / Installation complete!\033[0m\n\n"
-printf "마지막으로 '터미널'에 두 가지 권한을 줘야 매크로가 키보드와 화면을 쓸 수 있어요.\n"
-printf "  1) 손쉬운 사용 (Accessibility)\n  2) 화면 기록 (Screen Recording)\n"
-printf "시스템 설정 > 개인정보 보호 및 보안 에서 '터미널'을 켜 주세요.\n"
-printf "Finally, allow Terminal under System Settings > Privacy & Security > Accessibility and Screen Recording.\n\n"
-printf "\033[1;35m엔터를 누르면 설정 화면을 열어 드려요 / Press Enter to open the settings... \033[0m"
-read -r _
-open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility" 2>/dev/null
-sleep 1
-open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture" 2>/dev/null
-printf "\n\033[1;36m이제 이렇게 하면 돼요 / Next:\033[0m\n"
-printf "  1) 열린 설정 창에서 '터미널'을 켜요 (목록에 없으면 + 버튼으로 추가)\n"
-printf "  2) 터미널을 완전히 종료해요 (⌘Q)\n"
-printf "  3) 바탕화면의 벌꿀이를 더블클릭해요\n\n"
-printf "  1) Turn on Terminal in the settings windows that opened (add it with + if missing)\n"
-printf "  2) Quit Terminal completely (⌘Q)\n"
-printf "  3) Double-click 벌꿀이 (Beolkkuri) on your Desktop\n\n"
-printf "앱의 '시작 가이드'에서 권한이 제대로 켜졌는지 바로 확인할 수 있어요.\n"
-printf "The Getting Started page in the app shows whether the permissions are on.\n"
+# No question at the end: Beolkkuri opens, and step 1 of its guide walks through the
+# two permissions with live checks and buttons that open the right settings pages.
+printf "\n\033[32;1m설치가 끝났어요! 벌꿀이를 열게요. / Installation complete! Opening Beolkkuri...\033[0m\n\n"
+printf "처음 한 번은 '터미널'에 권한 두 가지(손쉬운 사용, 화면 기록)를 줘야 해요.\n"
+printf "벌꿀이 '시작 가이드' 1단계의 [켜기]를 누르면 맞는 설정 화면이 열려요.\n"
+printf "켠 다음에는 터미널을 완전히 종료(⌘Q)하고 바탕화면의 벌꿀이를 다시 열면 돼요.\n\n"
+printf "First time only: Terminal needs two permissions (Accessibility and Screen Recording).\n"
+printf "The Turn on buttons in step 1 of Getting Started open the right settings.\n"
+printf "Then quit Terminal (⌘Q) and open Beolkkuri again from your Desktop.\n\n"
+# The in-app updater runs this script in the background (no terminal) and restarts
+# Beolkkuri itself, so only open it when the installer has a window.
+if [ -t 1 ]; then
+	if [ "$launcher_ok" -eq 1 ]; then
+		open "$HOME/Applications/벌꿀이.app"
+	else
+		open -a Terminal "$MACRO_DIR/run_macro.command"
+	fi
+fi

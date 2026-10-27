@@ -5,11 +5,11 @@ import random
 from typing import Dict, List, Tuple, Set, Optional
 
 import cv2
-import imagehash
 import numpy as np
 from PIL import Image
 
 import modules.controls.mouse as mouse
+from modules.misc import imagehash
 from modules.screen.screenshot import mssScreenshot, mssScreenshotNP
 from modules.screen.ocr import ocrRead, imToString
 from modules.misc.imageManipulation import adjustImage

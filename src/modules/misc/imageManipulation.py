@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import os
 from PIL import Image
-import imagehash
+from modules.misc import imagehash
 #accept a pillow image and return a cv2 one
 def pillowToCv2(img):
     return cv2.cvtColor(np.array(img), cv2.COLOR_BGR2RGB)

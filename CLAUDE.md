@@ -64,6 +64,12 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 - **App window:** `gui.launch` opens Chrome in app mode; on Windows it falls back to Edge (`mode="edge"`) when Chrome is missing.
 - **UI:** `ui/src/lib/platform.ts` exports `isMac` / `isWindows`. Strings that differ per OS pick their text inside the string tables (`isMac ? … : …`), so ko/en keys stay the same.
 
+macOS install script (`install_dependencies.command`):
+- It asks nothing in Terminal. Only GUI windows appear: the python.org installer when Python is missing, and on Intel Macs the Command Line Tools (Apple Silicon has wheels for every package, so it skips them).
+- Each library shows on one line that is rewritten; only failures stay on screen, with the end of the log.
+- No torch (coremltools only runs the models), matplotlib, html2image, httpx or ImageHash. Nothing in `src` imports them.
+- At the end it opens `~/Applications/벌꿀이.app`, whose guide walks through the two permissions. It does that only when stdout is a terminal, because `update.py` runs the script in the background after an update and restarts the app itself.
+
 Windows install scripts (the source install; most users get Beolkkuri-Setup.exe, next section):
 - **`install.ps1`** must be UTF-8 **without** a BOM, because `irm | iex` fails on a leading BOM.
 - **`scripts/windows/*.ps1`** need UTF-8 **with** a BOM. Windows PowerShell 5.1 reads BOM-less files as ANSI, which breaks the Korean text.
@@ -85,10 +91,13 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - `scripts/windows/build_installer.ps1 [-Ref HEAD] [-Test]`:
   1. `git archive` of the ref (commit first, or pass `git stash create` as `-Ref`);
   2. the python.org NuGet package (Python 3.12, cached in `build/cache`) as `runtime/`;
-  3. pip installs `requirements-windows.txt` into it;
+  3. pip installs `requirements-windows.txt` into it with `--no-compile` (Python writes the `.pyc` files on the user's PC);
   4. compiles both exes;
-  5. writes `dist/Beolkkuri-Setup.exe` = stub exe + zip + 8-byte zip length + `BKPAYLD1`.
-  `-Test` silent-installs to `build/installer/test-install` and import-checks it. Run csc from PowerShell, not Git Bash (Korean paths break).
+  5. trims what never runs: package `tests` and `__pycache__`, `ensurepip`/`include`/`libs`, the `ui/`, `site/` and `.github/` sources, and the Inter font styles the hourly report doesn't use (an in-app update brings those files back);
+  6. writes `dist/Beolkkuri-Setup.exe` = stub exe + zip + 8-byte zip length + `BKPAYLD1` (about 95 MB, 250 MB installed).
+  `-Test` silent-installs to `build/installer/test-install`, import-checks the libraries and three macro modules, and opens the installer window for 8 seconds to check it stays open. Run csc from PowerShell, not Git Bash (Korean paths break).
+- **WinForms order:** `EnableVisualStyles`, `SetCompatibleTextRenderingDefault` and `SetUnhandledExceptionMode` must run before the first Form or control is created, or WinForms throws and Setup.exe closes without a word (v1.0.0 did). `Main` catches anything left and shows it in a message box with the log path.
+- **Size:** no SciPy. The ImageHash package pulled it in only for hashes the macro never uses, so `src/modules/misc/imagehash.py` provides `average_hash` and `ImageHash` (bit-for-bit the same as the package's). Check a new dependency's size before adding it to `requirements-windows.txt`.
 - Install: per user, no admin, default `%LOCALAPPDATA%\Programs\Beolkkuri`. Start menu (and optional Desktop) shortcut `벌꿀이.lnk` → `Beolkkuri.exe`, uninstall entry under `HKCU\…\Uninstall\Beolkkuri`, `uninstall.exe` is a copy of the stub. Upgrades keep `settings/profiles`, `settings/patterns` and `src/data/user`; a first install imports them from an old `%USERPROFILE%\Beolkkuri`. Log: `%TEMP%\Beolkkuri-Setup.log`.
 - Switches: `/S` silent, `/D=<folder>`, `/NoDesktop`, `/uninstall`, `/RemoveSettings`, `/lang=ko|en`, `/shot=<dir>` (renders every page to PNG at 2x; `site/assets/setup-ko.webp` / `setup-en.webp` come from these).
 - `Beolkkuri.exe` runs `runtime\python.exe src\main.py` with `PYTHONUTF8=1`, `PYTHONNOUSERSITE=1`, `BEOLKKURI_LAUNCHER=1`, and starts it again on exit code 75.
@@ -219,6 +228,7 @@ Done:
 Not yet verified on a real Mac, so test these first:
 1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/벌꿀이.app` with its Desktop alias.
    Also the upgrade from an old install: `install.sh` moving `~/RobinMacro`, the `~/robin-macro-env` fallback, and the old launcher and alias being removed.
+   Since the installer was trimmed: that Apple Silicon installs everything without the Command Line Tools, that AI gathering loads its Core ML models without torch, that the app opens at the end, and that an in-app update doesn't open a second window.
 2. `getPermissionStatus` / `openPrivacySettings` in `gui.py` (ctypes `AXIsProcessTrusted`, `CGPreflightScreenCaptureAccess`).
 3. Keybind recording versus the hotkeys. `main.py`'s pynput `on_press` asks `eel.getElementProperty(...)()` synchronously whether a keybind field is recording. On Windows, `ui/dev/eel_harness.py` asks the same way from a plain thread and gets `'true'` while a field records, in a few ms, so the eel round trip works. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
 4. The real macro run, start/stop hotkeys and the hourly report with the new UI.
@@ -237,6 +247,6 @@ Not yet verified on Windows with Roblox, so test these first:
 6. The Microsoft Store build of Roblox (`appManagerWindows` finds it only by its window title).
 
 Open items:
-- **Releases:** the first one is v1.0.0 (see "Releasing"). The updater, `install.sh`, `install.ps1` and the website's Windows download all use the latest release.
+- **Releases:** the first one is v1.0.0 (see "Releasing"). Its Setup.exe closes without a word when opened (see "WinForms order"), so it needs a fixed release. The updater, `install.sh`, `install.ps1` and the website's Windows download all use the latest release.
 - **Small UI leftover:** some buff names stay English in Korean mode, because they are game names.
 - **Old UI for reference:** the original UI code is in the upstream repo (https://github.com/Fuzzy-Team/Fuzzy-Macro, `src/webapp`), if a legacy behaviour needs checking. Don't copy branding from it.

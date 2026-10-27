@@ -20,7 +20,7 @@ aiohttp==3.10.5
 pypresence
 fuzzywuzzy
 python-Levenshtein
-ImageHash
+# No ImageHash: it pulls in SciPy for hashes the macro never uses (modules/misc/imagehash.py).
 flask
 # Windows' built-in OCR engine (Windows.Media.Ocr); replaces ocrmac.
 winocr

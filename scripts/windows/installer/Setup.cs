@@ -33,6 +33,27 @@ static class Program
     [STAThread]
     static int Main(string[] args)
     {
+        try
+        {
+            return Run(args);
+        }
+        catch (Exception e)
+        {
+            // Never close without a word: say what happened and keep the details in the log.
+            Log.Write("Setup crashed: " + e);
+            MessageBox.Show(L.T("설치 프로그램에 문제가 생겼어요.\n자세한 기록: ", "Something went wrong in Setup.\nDetails: ") + Log.Path + "\n\n" + e.Message,
+                            "Beolkkuri", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return 1;
+        }
+    }
+
+    static int Run(string[] args)
+    {
+        // These must run before the first window or control is created, or WinForms throws.
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        // An error inside the window reaches the handler in Main instead of WinForms' own dialog.
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
         Options options = Options.Parse(args);
         if (options.Language != null) L.Korean = options.Language == "ko";
         Log.Start();
@@ -41,7 +62,6 @@ static class Program
 
         if (options.ShotFolder != null)
         {
-            Application.EnableVisualStyles();
             SetupForm.SaveShots(options.ShotFolder, payload);
             return 0;
         }
@@ -58,7 +78,7 @@ static class Program
             if (!options.FromTemp) return Uninstaller.RelaunchFromTemp(target, options);
             int code = 0;
             if (options.Silent) code = Uninstaller.Run(target, options.RemoveSettings, null) ? 0 : 1;
-            else RunWindow(new SetupForm(null, target, true));
+            else Application.Run(new SetupForm(null, target, true));
             Uninstaller.DeleteSelfLater();
             return code;
         }
@@ -69,15 +89,8 @@ static class Program
             bool ok = installer.Run(options.Target ?? Installer.DefaultFolder(), !options.NoDesktop, null);
             return ok ? 0 : 1;
         }
-        RunWindow(new SetupForm(payload, null, false));
+        Application.Run(new SetupForm(payload, null, false));
         return 0;
-    }
-
-    static void RunWindow(Form form)
-    {
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(form);
     }
 }
 

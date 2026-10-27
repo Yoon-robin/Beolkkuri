@@ -50,9 +50,9 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 ```
 
 3. 이제 기다리기만 하면 돼요. **10~20분** 정도 걸리고, 진행 상황이 한국어로 나와요.
-   - 파이썬이나 개발 도구 설치 창이 뜨면 **계속 / 설치** 를 눌러 주세요.
-   - 맥 로그인 암호를 물으면 입력해요. (입력해도 화면에 안 보이는 게 정상이에요)
-4. 끝나면 **바탕화면에 벌꿀이 앱**이 생겨요. 설치 위치는 `내 홈 폴더/Beolkkuri` 예요.
+   - 파이썬 설치 창이 뜨면 **계속 / 설치** 를 누르고, 맥 로그인 암호를 물으면 입력해요. 파이썬이 이미 있으면 이 창은 안 떠요.
+   - 인텔 맥은 개발 도구(Command Line Tools) 설치 창도 떠요. 똑같이 **설치** 를 눌러 주세요.
+4. 끝나면 **바탕화면에 벌꿀이 앱**이 생기고, 벌꿀이가 저절로 열려요. 설치 위치는 `내 홈 폴더/Beolkkuri` 예요.
 
 > 업데이트하거나 다시 설치할 때도 같은 줄을 붙여넣으면 돼요. 내 설정은 그대로 남아요.
 
@@ -68,13 +68,13 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 </details>
 
 ### 2. 권한 주기 (꼭 필요해요)
-매크로가 키보드·마우스를 움직이고 화면을 보려면 **터미널**에 권한이 있어야 해요. 설치가 끝날 때 엔터를 누르면 설정 화면이 열려요.
+매크로가 키보드·마우스를 움직이고 화면을 보려면 **터미널**에 권한이 있어야 해요. 벌꿀이가 처음 열리면 **시작 가이드** 1단계에서 **켜기** 를 눌러요. 맞는 설정 화면이 열리고, 켜지면 초록 체크로 알려 줘요.
 
 1. **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용** 에서 **터미널** 을 켜요.
 2. **시스템 설정 → 개인정보 보호 및 보안 → 화면 기록** 에서도 **터미널** 을 켜요.
-3. 터미널을 완전히 껐다가(⌘Q) 바탕화면의 벌꿀이를 열어요.
+3. 터미널을 완전히 껐다가(⌘Q) 바탕화면의 벌꿀이를 다시 열어요.
 
-앱의 **시작 가이드** 에서 권한이 제대로 켜졌는지 초록 체크로 바로 확인할 수 있어요. 자세한 설명: [docs/permissions.md](docs/permissions.md)
+자세한 설명: [docs/permissions.md](docs/permissions.md)
 
 ### 🪟 윈도우에 설치하기
 
@@ -178,7 +178,7 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 
 **Beolkkuri** (벌꿀이) is a Bee Swarm Simulator macro for macOS and Windows with a React + shadcn/ui interface in Korean and English.
 
-**Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
+**Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, Beolkkuri opens by itself; its *Getting Started* page has buttons for allowing **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*. Then quit Terminal (⌘Q) and open Beolkkuri again.
 **Install on Windows:** Download [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) and open it (if "Windows protected your PC" appears, click *More info → Run anyway*). It installs for your account with Python included and needs no administrator rights. In PowerShell, `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` opens the same installer. Windows needs no permissions; 100% display scaling is recommended. Windows support is new, so please report anything odd. See [docs/windows.md](docs/windows.md).
 **Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer made (on Windows it's in the Start menu too). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
 **Updates:** Beolkkuri updates itself and restarts when you open it, never while the macro runs. You can turn this off under *Settings → Other*.

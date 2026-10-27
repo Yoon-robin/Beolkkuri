@@ -6,12 +6,12 @@ import time
 from difflib import SequenceMatcher
 
 import cv2
-import imagehash
 import numpy as np
 import pyautogui as pag
 from PIL import Image
 
 import modules.controls.mouse as mouse
+from modules.misc import imagehash
 import modules.misc.appManager as appManager
 from modules.misc import messageBox
 import modules.screen.ocr as ocr

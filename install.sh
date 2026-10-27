@@ -58,6 +58,7 @@ xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
 
 printf "\033[1;32m%s 에 내려받았어요. / Downloaded to %s\033[0m\n\n" "$DEST" "$DEST"
 
-# The installer asks questions; when this script is piped from curl, stdin is
-# the pipe, so read answers from the terminal instead.
+# The installer asks nothing in Terminal (Python and Apple's tools open their own
+# windows), but when this script is piped from curl, stdin is the pipe, so give
+# it the terminal in case a tool does want an answer.
 exec /bin/bash "$DEST/install_dependencies.command" </dev/tty

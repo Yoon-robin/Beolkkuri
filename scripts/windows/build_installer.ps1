@@ -66,8 +66,10 @@ Step "Libraries"
 # Only the bundled Python's own packages, never ones from the build PC's user folder.
 $env:PYTHONNOUSERSITE = "1"
 Run $Python -m pip --version
-Run $Python -m pip install --disable-pip-version-check --no-warn-script-location --prefer-binary -r $requirements -c $requirements
-Run $Python -c "import numpy, cv2, PIL, mss, eel, gevent, pyautogui, pynput, requests, discord, aiohttp, imagehash, flask, winocr; print('libraries load')"
+# --no-compile: Python writes the .pyc files on the user's PC the first time, which keeps the download smaller.
+Run $Python -m pip install --disable-pip-version-check --no-warn-script-location --no-compile --prefer-binary -r $requirements -c $requirements
+$imports = "numpy, cv2, PIL, mss, eel, gevent, pyautogui, pynput, requests, discord, discord_webhook, aiohttp, flask, pypresence, fuzzywuzzy, Levenshtein, winocr"
+Run $Python -c "import $imports; print('libraries load')"
 # Script launchers (pip.exe and friends) point at this build folder; the macro runs "python -m pip".
 Remove-Item -Recurse -Force (Join-Path $Runtime "Scripts") -ErrorAction SilentlyContinue
 
@@ -90,6 +92,19 @@ $resources = @("/resource:$(Join-Path $Payload 'site\assets\logo.png'),logo.png"
 if ($font) { $resources += "/resource:$font,title.ttf" }
 $stub = Join-Path $Work "setup-stub.exe"
 Run $Csc @common @resources /target:winexe /r:System.IO.Compression.dll "/out:$stub" (Join-Path $Sources "Setup.cs")
+
+Step "Trimming"
+# Nothing here is loaded when the macro runs: test suites, the import check's .pyc files,
+# files for building packages, the sources of the UI and the website, and font styles the
+# hourly report doesn't use. An in-app update brings back what it ships (ui/, site/, fonts).
+$sitePackages = Join-Path $Runtime "Lib\site-packages"
+Get-ChildItem $sitePackages -Recurse -Directory | Where-Object { $_.Name -in "tests", "__pycache__" } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+foreach ($dir in "Lib\ensurepip", "include", "libs") { Remove-Item -Recurse -Force (Join-Path $Runtime $dir) -ErrorAction SilentlyContinue }
+foreach ($dir in "ui", "site", ".github") { Remove-Item -Recurse -Force (Join-Path $Payload $dir) -ErrorAction SilentlyContinue }
+$inter = Join-Path $Payload "src\hourly_report\Inter"
+Get-ChildItem $inter -Recurse -Filter *.ttf | Where-Object { $_.Name -notlike "Inter_18pt-*" -or $_.Name -like "*Italic*" } | Remove-Item -Force
+Run $Python -c "import $imports; print('libraries still load')"
+Get-ChildItem $sitePackages -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
 
 Step "Beolkkuri-Setup.exe"
 $zip = Join-Path $Work "payload.zip"
@@ -119,5 +134,21 @@ if ($Test) {
 	foreach ($file in "Beolkkuri.exe", "uninstall.exe", "src\main.py", "runtime\python.exe") {
 		if (-not (Test-Path (Join-Path $target $file))) { throw "Missing after install: $file" }
 	}
-	Run (Join-Path $target "runtime\python.exe") -c "import numpy, cv2, eel, gevent, winocr; print('installed copy loads its libraries')"
+	Run (Join-Path $target "runtime\python.exe") -c "import $imports; print('installed copy loads its libraries')"
+	Push-Location (Join-Path $target "src")
+	try {
+		Run (Join-Path $target "runtime\python.exe") -c "import modules.misc.imageManipulation, modules.submacros.memoryMatch, modules.submacros.autoGiftedBasicBee; print('macro modules load')"
+	} finally {
+		Pop-Location
+	}
+
+	# The window: it must open and stay open (a crash before it shows used to close Setup silently).
+	$log = Join-Path $env:TEMP "Beolkkuri-Setup.log"
+	$window = Start-Process -FilePath $OutFile -PassThru
+	Start-Sleep -Seconds 8
+	$crashed = (Test-Path $log) -and (Select-String -Path $log -Pattern "Setup crashed" -Quiet)
+	$exited = $window.HasExited
+	if (-not $exited) { Stop-Process -Id $window.Id -Force }
+	if ($exited -or $crashed) { throw "The installer window did not stay open; see $log" }
+	Write-Host "installer window opens"
 }
