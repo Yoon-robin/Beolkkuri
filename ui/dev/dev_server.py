@@ -38,6 +38,15 @@ def _stop():
     return None
 
 
+def _reset_task_priorities():
+    # same as gui.resetTaskPrioritiesToDefault
+    order = settingsManager.getDefaultProfileSettings().get("task_priority_order") or []
+    if not isinstance(order, list) or not order:
+        return False
+    settingsManager.saveProfileSetting("task_priority_order", order)
+    return True
+
+
 STUBS = {
     "start": _start,
     "stop": _stop,
@@ -62,6 +71,7 @@ STUBS = {
     "getAutoPlanterData": lambda: {"planters": [], "nectar_last_field": {}, "gather": False},
     "getModelStatus": lambda *a: {"models": [], "model_dir": ""},
     "resetFieldToDefault": lambda *a: True,
+    "resetTaskPrioritiesToDefault": _reset_task_priorities,
     "importPatterns": lambda *a: [True, "dev stub"],
     "clearBlender": lambda *a: True,
     "usesLegacyDiscordBot": lambda: False,

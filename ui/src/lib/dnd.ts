@@ -15,25 +15,51 @@ export const REORDER_ATTR = "data-reorder-id"
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
 
 /**
+ * Put keyboard focus back on the button that moved a row. React re-inserts some rows
+ * when the order changes, and a focused element that leaves the document loses focus;
+ * a button that is now disabled (moved to the first or last place) hands it to the
+ * nearest enabled button in the same row.
+ */
+function restoreFocus(el: HTMLElement | null) {
+  if (!el?.isConnected) return
+  if (!el.matches(":disabled")) {
+    if (document.activeElement !== el) el.focus({ preventScroll: true })
+    return
+  }
+  // a button disabled this render still counts as focused until the browser's next paint
+  const buttons = [...(el.closest(`[${REORDER_ATTR}]`)?.querySelectorAll<HTMLElement>("button") ?? [])]
+  const at = buttons.indexOf(el)
+  const after = buttons.slice(at + 1).find((b) => !b.matches(":disabled"))
+  const before = buttons.slice(0, at).reverse().find((b) => !b.matches(":disabled"))
+  ;(after ?? before)?.focus({ preventScroll: true })
+}
+
+/**
  * Slide rows to their new place when a list is reordered by a button (up/down, to top),
- * instead of letting them jump. Drag and drop already animates itself, so only moves
- * announced with `capture()` right before the state change are animated.
+ * instead of letting them jump, and keep keyboard focus on that button. Drag and drop
+ * already animates itself, so only moves announced with `capture()` right before the
+ * state change are animated.
  *
  * Put `ref` on the list and `{ [REORDER_ATTR]: id }` on every row; pass the current order.
  */
 export function useReorderAnimation<T extends HTMLElement = HTMLElement>(order: readonly string[]) {
   const ref = useRef<T>(null)
-  const before = useRef<{ at: number; tops: Map<string, number> } | null>(null)
+  const before = useRef<{ at: number; tops: Map<string, number> | null; focused: HTMLElement | null } | null>(null)
   const key = order.join("\u0001")
 
   const capture = useCallback(() => {
     const root = ref.current
-    if (!root || reducedMotion()) return
-    const tops = new Map<string, number>()
-    root.querySelectorAll<HTMLElement>(`[${REORDER_ATTR}]`).forEach((el) => {
-      tops.set(el.getAttribute(REORDER_ATTR) ?? "", el.getBoundingClientRect().top)
-    })
-    before.current = { at: performance.now(), tops }
+    if (!root) return
+    const active = document.activeElement
+    const focused = active instanceof HTMLElement && root.contains(active) ? active : null
+    let tops: Map<string, number> | null = null
+    if (!reducedMotion()) {
+      tops = new Map()
+      root.querySelectorAll<HTMLElement>(`[${REORDER_ATTR}]`).forEach((el) => {
+        tops!.set(el.getAttribute(REORDER_ATTR) ?? "", el.getBoundingClientRect().top)
+      })
+    }
+    before.current = { at: performance.now(), tops, focused }
   }, [])
 
   useLayoutEffect(() => {
@@ -42,7 +68,9 @@ export function useReorderAnimation<T extends HTMLElement = HTMLElement>(order: 
     before.current = null
     // a capture whose move turned out to be a no-op must not animate a later drag
     if (!captured || !root || performance.now() - captured.at > 1000) return
+    restoreFocus(captured.focused)
     const { tops } = captured
+    if (!tops) return
     root.querySelectorAll<HTMLElement>(`[${REORDER_ATTR}]`).forEach((el) => {
       const prev = tops.get(el.getAttribute(REORDER_ATTR) ?? "")
       if (prev === undefined) return

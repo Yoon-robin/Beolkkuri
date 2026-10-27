@@ -163,9 +163,9 @@ export default function BoostPage() {
     <Page title={tc("nav.boost")} description={t("subtitle")}>
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="hotbar">{t("tab.hotbar")}</TabsTrigger>
-          <TabsTrigger value="buffs">{t("tab.buffs")}</TabsTrigger>
-          <TabsTrigger value="tad">{t("tab.tad")}</TabsTrigger>
+          <TabsTrigger value="hotbar">{tc("subtab.boost.hotbar")}</TabsTrigger>
+          <TabsTrigger value="buffs">{tc("subtab.boost.buffs")}</TabsTrigger>
+          <TabsTrigger value="tad">{tc("subtab.boost.tad")}</TabsTrigger>
         </TabsList>
         <TabsContent value="hotbar">
           <BoostHotbar />

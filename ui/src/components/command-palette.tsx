@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/command"
 import { sectionKey, useI18n, useStrings, type PageStrings } from "@/i18n"
 import schemaKo from "@/i18n/settings-ko.json"
-import { en as uiEn, ko as uiKo } from "@/i18n/ui"
+import { en as uiEn, ko as uiKo, type UiKey } from "@/i18n/ui"
 import { goToTarget, locateSection } from "@/lib/focus"
 import type { PageId } from "@/lib/route"
 import { plainText } from "@/lib/rich-text"
@@ -131,33 +131,12 @@ function matchScore(search: string, keywords: string[]) {
 }
 
 /** Sub-tabs inside pages, so "보스" or "티켓 계산기" lands on the right tab. */
-const SUBTABS: { page: PageId; tab: string; ko: string; en: string }[] = [
-  { page: "collect", tab: "collect-dispensers", ko: "디스펜서", en: "Dispensers" },
-  { page: "collect", tab: "collect-activities", ko: "활동", en: "Activities" },
-  { page: "collect", tab: "collect-seasonal", ko: "시즌 이벤트", en: "Seasonal" },
-  { page: "collect", tab: "collect-sprouts", ko: "새싹", en: "Sprouts" },
-  { page: "collect", tab: "collect-blender", ko: "블렌더", en: "Blender" },
-  { page: "kill", tab: "kill-settings", ko: "설정", en: "Settings" },
-  { page: "kill", tab: "kill-regular", ko: "일반 몹", en: "Regular" },
-  { page: "kill", tab: "kill-boss", ko: "보스", en: "Bosses" },
-  { page: "kill", tab: "kill-misc", ko: "기타", en: "Misc" },
-  { page: "boost", tab: "hotbar", ko: "핫바", en: "Hotbar" },
-  { page: "boost", tab: "buffs", ko: "버프", en: "Buffs" },
-  { page: "boost", tab: "tad", ko: "TAD 부계정 동기화", en: "TAD Alt Sync" },
-  { page: "quests", tab: "quests-quests", ko: "퀘스트", en: "Quests" },
-  { page: "quests", tab: "quests-settings", ko: "설정", en: "Settings" },
-  { page: "tools", tab: "autoclicker", ko: "오토 클릭", en: "Auto Clicker" },
-  { page: "tools", tab: "hotbar-buff", ko: "핫바 버프", en: "Hotbar Buff" },
-  { page: "tools", tab: "bond-calculator", ko: "유대감 계산기", en: "Bond Calculator" },
-  { page: "tools", tab: "ticket-calculator", ko: "티켓 계산기", en: "Ticket Price Calculator" },
-  { page: "tools", tab: "auto-gifted-basic-bee", ko: "기프티드 기본 벌", en: "Auto Gifted Basic Bee" },
-  { page: "settings", tab: "bss", ko: "게임 설정", en: "Game" },
-  { page: "settings", tab: "priorities", ko: "작업 우선순위", en: "Task priorities" },
-  { page: "settings", tab: "other", ko: "기타 설정", en: "Other" },
-  { page: "settings", tab: "discord", ko: "디스코드", en: "Discord" },
-  { page: "settings", tab: "stream", ko: "화면 공유", en: "Stream" },
-  { page: "settings", tab: "profiles", ko: "프로필", en: "Profiles" },
-]
+const SUBTABS = (Object.keys(uiKo) as UiKey[])
+  .filter((key) => key.startsWith("subtab."))
+  .map((key) => {
+    const [, page, tab] = key.split(".")
+    return { page: page as PageId, tab, key }
+  })
 
 type SettingEntry = { id: string; title: string; trail: string; keywords: string[]; target: ReturnType<typeof locateSection> }
 
@@ -292,13 +271,13 @@ export function CommandPalette() {
       const nav = navItems.get(sub.page)!
       pages.push({
         key: `${sub.page}:${sub.tab}`,
-        keywords: [sub[lang], lang === "ko" ? sub.en : sub.ko, uiKo[nav.label], uiEn[nav.label]],
+        keywords: [t(sub.key), lang === "ko" ? uiEn[sub.key] : uiKo[sub.key], uiKo[nav.label], uiEn[nav.label]],
         onSelect: () => goToTarget({ page: sub.page, tab: sub.tab }),
         content: (
           <>
             <nav.icon />
             <span className="text-muted-foreground">{t(nav.label)} ›</span>
-            {sub[lang]}
+            {t(sub.key)}
           </>
         ),
       })

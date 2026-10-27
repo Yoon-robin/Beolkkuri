@@ -40,12 +40,13 @@ function CycleCard({ cycle }: { cycle: number }) {
   const used = SLOTS.filter((s) => planterKey(get(s, "planter")) !== "none" && planterKey(get(s, "field")) !== "none" && get(s, "planter") && get(s, "field")).length
 
   return (
-    <Card className={cn(used === 0 && "opacity-90")}>
+    <Card className={cn("@container/cycle", used === 0 && "opacity-90")}>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle className="text-base">{t("cycle", { n: cycle })}</CardTitle>
         <Badge variant={used ? "default" : "outline"}>{used ? t("cycleUsed", { count: used }) : t("cycleEmpty")}</Badge>
       </CardHeader>
-      <CardContent className="grid gap-3 md:grid-cols-3">
+      {/* three slots side by side only when the card (not the window) is wide enough for their switch labels */}
+      <CardContent className="grid gap-3 @min-[38rem]/cycle:grid-cols-3">
         {SLOTS.map((slot) => {
           const id = (what: string) => `cycle${cycle}_${slot}_${what}`
           return (

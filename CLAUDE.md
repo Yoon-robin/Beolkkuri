@@ -58,7 +58,7 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
   - `.rm-stagger`, `.rm-shimmer`, `.rm-glow`, `.rm-pop` and `.rm-flash` are opt-in.
   - There is a global `prefers-reduced-motion` override.
   - Theme switching uses a view-transition circle (`ui/src/lib/theme.tsx`).
-- **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. A new sub-tab or custom row needs the same hooks, plus an entry in the palette's sub-tab table.
+- **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. Sub-tab labels live in `ui.ts` as `subtab.<page>.<tab value>`; the page and the palette both read them, so a new sub-tab needs that key plus the same hooks. A custom row needs `useFocusTarget`.
 - **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts.
 - **Permissions:** `state/permissions.ts` polls `getPermissionStatus` in `gui.py`.
 - **Components:** use the shadcn components in `ui/src/components/ui` and Tailwind. Don't add dependencies casually.
@@ -116,9 +116,5 @@ Not yet verified on a real Mac, so test these first:
 
 Open items:
 - **Releases:** none exist yet. Create v1.0.0 once the Mac test passes; the updater and `install.sh` use releases.
-- **Small UI leftovers** from the review passes:
-  - The palette keeps its own copy of the sub-tab labels.
-  - Some buff names stay English in Korean mode, because they are game names.
-  - In English at about 960px, the planter cycle cards wrap.
-  - Moving a token row to the top loses keyboard focus.
+- **Small UI leftover:** some buff names stay English in Korean mode, because they are game names.
 - **Old UI for reference:** the original UI code is in the upstream repo (https://github.com/Fuzzy-Team/Fuzzy-Macro, `src/webapp`), if a legacy behaviour needs checking. Don't copy branding from it.

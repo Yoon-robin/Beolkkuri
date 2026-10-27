@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useStrings, type PageStrings } from "@/i18n"
+import { useI18n, useStrings, type PageStrings } from "@/i18n"
 import { useTabRequest } from "@/lib/focus"
 import { callPy } from "@/lib/py"
 import { cn } from "@/lib/utils"
@@ -56,11 +56,6 @@ function readSubtab(): TabId {
 const strings: PageStrings<
   | "title"
   | "subtitle"
-  | "tab.autoclicker"
-  | "tab.hotbar-buff"
-  | "tab.bond-calculator"
-  | "tab.ticket-calculator"
-  | "tab.auto-gifted-basic-bee"
   | "running"
   | "stopAll"
   | "stopAllTitle"
@@ -73,11 +68,6 @@ const strings: PageStrings<
   ko: {
     title: "도구",
     subtitle: "매크로를 멈춘 상태에서 직접 플레이할 때 쓰는 보조 도구와 계산기예요.",
-    "tab.autoclicker": "오토 클릭",
-    "tab.hotbar-buff": "핫바 버프",
-    "tab.bond-calculator": "유대감 계산기",
-    "tab.ticket-calculator": "티켓 계산기",
-    "tab.auto-gifted-basic-bee": "기프티드 기본 벌",
     running: "실행 중",
     stopAll: "모든 도구 멈추기",
     stopAllTitle: "실행 중인 도구를 모두 멈출까요?",
@@ -90,11 +80,6 @@ const strings: PageStrings<
   en: {
     title: "Tools",
     subtitle: "Helpers and calculators for when you play by hand with the macro stopped.",
-    "tab.autoclicker": "Auto Clicker",
-    "tab.hotbar-buff": "Hotbar Buff",
-    "tab.bond-calculator": "Bond Calculator",
-    "tab.ticket-calculator": "Ticket Price Calculator",
-    "tab.auto-gifted-basic-bee": "Auto Gifted Basic Bee",
     running: "Running",
     stopAll: "Stop all tools",
     stopAllTitle: "Stop every running tool?",
@@ -116,6 +101,7 @@ const ICONS: Record<TabId, LucideIcon> = {
 
 export default function ToolsPage() {
   const t = useStrings(strings)
+  const { t: tc } = useI18n()
   const [tab, setTab] = useState<TabId>(readSubtab)
   const [clicker, refreshClicker] = useToolStatus<AutoClickerStatus>("getAutoClickerStatus")
   const [hotbar, refreshHotbar] = useToolStatus<HotbarBuffStatus>("getHotbarBuffStatus")
@@ -193,7 +179,7 @@ export default function ToolsPage() {
             return (
               <TabsTrigger key={id} value={id} className="gap-1.5">
                 <Icon className="size-4" />
-                {t(`tab.${id}`)}
+                {tc(`subtab.tools.${id}`)}
                 {running[id] && (
                   <span className="relative flex size-2" title={t("running")}>
                     <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-60" />

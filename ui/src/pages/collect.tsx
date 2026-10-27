@@ -15,11 +15,6 @@ import { isLootSproutModel } from "./collect/sprout-tokens"
 
 const ko = {
   description: "디스펜서, 이벤트, 새싹, 블렌더처럼 맵 곳곳에서 챙길 것들을 정해요.",
-  dispensers: "디스펜서",
-  activities: "활동",
-  seasonal: "시즌 이벤트",
-  sprouts: "새싹",
-  blender: "블렌더",
   tokenButton: "토큰 고르기",
   zoomHint: "눌러서 크게 보기",
   petalsAlt: "꽃잎과 블룸 정리표",
@@ -29,11 +24,6 @@ const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
     description: "Dispensers, events, sprouts, the blender and other things to collect around the map.",
-    dispensers: "Dispensers",
-    activities: "Activities",
-    seasonal: "Seasonal",
-    sprouts: "Sprouts",
-    blender: "Blender",
     tokenButton: "Customize Tokens",
     zoomHint: "Click to enlarge",
     petalsAlt: "Petals and Blooms Cheat Sheet",
@@ -118,17 +108,17 @@ export default function CollectPage() {
         tabs={[
           {
             value: "collect-dispensers",
-            label: t("dispensers"),
+            label: tr("subtab.collect.collect-dispensers"),
             content: <SchemaSections sections={sectionsFor("collect", "collect-dispensers-tab")} />,
           },
           {
             value: "collect-activities",
-            label: t("activities"),
+            label: tr("subtab.collect.collect-activities"),
             content: <ActivitiesPanel />,
           },
-          { value: "collect-seasonal", label: t("seasonal"), content: <SeasonalPanel /> },
-          { value: "collect-sprouts", label: t("sprouts"), content: <SproutsPanel /> },
-          { value: "collect-blender", label: t("blender"), content: <BlenderPanel /> },
+          { value: "collect-seasonal", label: tr("subtab.collect.collect-seasonal"), content: <SeasonalPanel /> },
+          { value: "collect-sprouts", label: tr("subtab.collect.collect-sprouts"), content: <SproutsPanel /> },
+          { value: "collect-blender", label: tr("subtab.collect.collect-blender"), content: <BlenderPanel /> },
         ]}
       />
     </Page>

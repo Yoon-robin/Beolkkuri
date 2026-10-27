@@ -169,7 +169,7 @@ export const strings: PageStrings<K> = {
     slot: "Slot {n}",
     planter: "Planter",
     field: "Field",
-    slotGather: "Gather in this field",
+    slotGather: "Gather here",
     "slotGather.hint": "Uses the field's settings from the Gather tab.",
     slotGlitter: "Use Glitter",
     "slotGlitter.hint": "Use Glitter when placing. Speeds up growth by 25%.",

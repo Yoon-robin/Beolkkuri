@@ -7,19 +7,11 @@ import { SubTabs } from "./collect/shared"
 
 const ko = {
   description: "어떤 몹과 보스를 잡을지, 리스폰 시간은 어떻게 계산할지 정해요.",
-  settings: "설정",
-  regular: "일반 몹",
-  boss: "보스",
-  misc: "기타",
 }
 const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
     description: "Choose which mobs and bosses to kill and how respawn timers are calculated.",
-    settings: "Settings",
-    regular: "Regular",
-    boss: "Bosses",
-    misc: "Misc",
   },
 }
 
@@ -35,10 +27,10 @@ export default function KillPage() {
         storageKey="activeKillSubtab"
         fallback="kill-settings"
         tabs={[
-          { value: "kill-settings", label: t("settings"), content: panel("kill-settings") },
-          { value: "kill-regular", label: t("regular"), content: panel("kill-regular") },
-          { value: "kill-boss", label: t("boss"), content: panel("kill-boss") },
-          { value: "kill-misc", label: t("misc"), content: panel("kill-misc") },
+          { value: "kill-settings", label: tr("subtab.kill.kill-settings"), content: panel("kill-settings") },
+          { value: "kill-regular", label: tr("subtab.kill.kill-regular"), content: panel("kill-regular") },
+          { value: "kill-boss", label: tr("subtab.kill.kill-boss"), content: panel("kill-boss") },
+          { value: "kill-misc", label: tr("subtab.kill.kill-misc"), content: panel("kill-misc") },
         ]}
       />
     </Page>

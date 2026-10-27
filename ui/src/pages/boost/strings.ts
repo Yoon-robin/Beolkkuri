@@ -2,9 +2,6 @@ import type { PageStrings } from "@/i18n"
 
 const ko = {
   subtitle: "핫바 아이템, 필드 부스터, 스티커 스택 같은 버프를 관리해요.",
-  "tab.hotbar": "핫바",
-  "tab.buffs": "버프",
-  "tab.tad": "TAD 부계정 동기화",
 
   hotbarTitle: "핫바 자동 사용",
   hotbarDesc: "아래 핫바에서 칸을 골라, 그 칸의 아이템을 언제 얼마나 자주 쓸지 정해요.",
@@ -43,9 +40,6 @@ export const strings: PageStrings<K> = {
   ko,
   en: {
     subtitle: "Manage hotbar items, field boosters, the sticker stack and other buffs.",
-    "tab.hotbar": "Hotbar",
-    "tab.buffs": "Buffs",
-    "tab.tad": "TAD Alt Sync",
 
     hotbarTitle: "Hotbar",
     hotbarDesc: "Choose a slot from the bar and configure when it should activate.",

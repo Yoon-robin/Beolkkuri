@@ -5,7 +5,7 @@ import { Page } from "@/components/page"
 import { SchemaSection, type SectionOverrides } from "@/components/settings/schema-section"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useStrings, type PageStrings } from "@/i18n"
+import { useI18n, useStrings, type PageStrings } from "@/i18n"
 import { useTabRequest } from "@/lib/focus"
 import { callPy } from "@/lib/py"
 import { sectionsFor, type SectionDef } from "@/schema"
@@ -16,29 +16,17 @@ import { PrioritySection } from "./settings/priorities"
 import { ProfilesSection } from "./settings/profiles"
 
 const strings: PageStrings<
-  "title" | "subtitle" | "tab.bss" | "tab.priorities" | "tab.other" | "tab.discord" | "tab.stream" | "tab.profiles" | "legacyBot"
+  "title" | "subtitle" | "legacyBot"
 > = {
   ko: {
     title: "설정",
     subtitle: "게임 정보, 재접속, 디스코드 알림, 프로필 같은 매크로 전체 설정이에요.",
-    "tab.bss": "게임 설정",
-    "tab.priorities": "작업 우선순위",
-    "tab.other": "기타 설정",
-    "tab.discord": "디스코드",
-    "tab.stream": "화면 공유",
-    "tab.profiles": "프로필",
     legacyBot:
       "이 macOS 버전에서는 봇 명령어를 / 대신 robin!으로 시작해요. 예: robin!status. 서버 채널에서 robin! 명령어를 쓰려면 Discord 개발자 포털에서 Message Content 권한을 켜 주세요. 켤 수 없다면 봇을 멘션해서 써도 돼요. 예: @Bot status",
   },
   en: {
     title: "Settings",
     subtitle: "Macro-wide settings: game info, rejoining, Discord notifications and profiles.",
-    "tab.bss": "Game",
-    "tab.priorities": "Task priorities",
-    "tab.other": "Other",
-    "tab.discord": "Discord",
-    "tab.stream": "Stream",
-    "tab.profiles": "Profiles",
     legacyBot:
       "On this macOS version, bot commands start with robin! instead of /, e.g. robin!status. To use robin! commands in server channels, enable Message Content access in the Discord Developer Portal. If that isn't possible, mention the bot instead, e.g. @Bot status.",
   },
@@ -140,6 +128,7 @@ function PanelSections({ panel }: { panel: string }) {
 
 export default function SettingsPage() {
   const t = useStrings(strings)
+  const { t: tc } = useI18n()
   const [tab, setTab] = useState<TabId>(lastTab)
 
   const change = (value: string) => {
@@ -156,7 +145,7 @@ export default function SettingsPage() {
         <TabsList>
           {TABS.map((id) => (
             <TabsTrigger key={id} value={id}>
-              {t(`tab.${id}`)}
+              {tc(`subtab.settings.${id}`)}
             </TabsTrigger>
           ))}
         </TabsList>

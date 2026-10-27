@@ -11,8 +11,6 @@ import { SubTabs } from "./collect/shared"
 
 const ko = {
   description: "곰과 벌 NPC의 퀘스트를 자동으로 진행해요.",
-  quests: "퀘스트",
-  settings: "설정",
   overrideTitle: "퀘스트별 채집 설정",
   overrideDesc: "퀘스트를 할 때만 채집 시간과 하이브 복귀 방법을 따로 정할 수 있어요. 시간을 0으로 두면 원래 채집 설정을 그대로 써요.",
   quest: "퀘스트",
@@ -23,8 +21,6 @@ const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
     description: "Complete quests from the bear and bee NPCs automatically.",
-    quests: "Quests",
-    settings: "Settings",
     overrideTitle: "Override Gather Settings",
     overrideDesc: "Per-quest gather overrides (mins / return). Set mins to 0 for no override.",
     quest: "Quest",
@@ -110,10 +106,10 @@ export default function QuestsPage() {
         storageKey="activeQuestsSubtab"
         fallback="quests-quests"
         tabs={[
-          { value: "quests-quests", label: t("quests"), content: <SchemaSections sections={sectionsFor("quests", "quests-quests-tab")} /> },
+          { value: "quests-quests", label: tr("subtab.quests.quests-quests"), content: <SchemaSections sections={sectionsFor("quests", "quests-quests-tab")} /> },
           {
             value: "quests-settings",
-            label: t("settings"),
+            label: tr("subtab.quests.quests-settings"),
             content: (
               <>
                 <QuestOverrides />
