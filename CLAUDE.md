@@ -76,6 +76,11 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
   - The guide's "벌집 정하기" step and the dialog save the settings in TypeScript (`saveStartMode`); the overlay saves them through `startSetup.choose`. Keep the two in step.
   - The Discord bot's start command doesn't ask: nobody is at the PC to answer.
 - **Rejoin load check** (`rejoin` in `macro.py`, both platforms): the game counts as loaded when the sprinkler shows on the hotbar or the honey bar shows at the top. Before 1.0.3 only the sprinkler counted, so a player with an empty hotbar got "Game load was not confirmed" on every attempt.
+- **Hive claim** (`claimHiveByCheckMethod` / `claimHiveByDetectMethod` in `macro.py`): raised slabs between spawn and the outer hives stopped the old diagonal walks (the owner's player got stuck on them). Now:
+  - every route walks into hive 3 first (`walkSpawnToHiveRow`, the same as a reset's fallback), then along the pad row with `walkHiveSlots`;
+  - it stops before reading a pad's prompt (`readHivePrompt`), because the prompt check can fall back to OCR, which is too slow to run while walking;
+  - after E it waits for the Claim prompt to go away, and presses again up to twice;
+  - it waits 2 s after the load check before walking.
 - **OCR:** Apple Vision (`ocrmac`) on macOS. On Windows, `modules/screen/winOcr.py` uses the built-in Windows.Media.Ocr through `winocr`. It upscales 4x because the engine misses small text otherwise. It prefers en-US and falls back to the user's languages; Korean Windows often has only `ko`, which still reads digits and most English.
 - **Image matching:** the compiled `bitmap_matcher` `.so` is macOS only. Elsewhere `bitmap_matcher/numpy_matcher.py` provides the same three functions in NumPy.
 - **Screen:** Windows coordinates are physical pixels (pyautogui makes the process DPI aware), so `screenData` reports a `built-in` display with no Retina factor. `screenshot.pillowGrab` uses `ImageGrab` instead of Quartz.
@@ -249,7 +254,7 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
-- Not released yet: the cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar.
+- Not released yet: the hive claim route (see "Hive claim"), checked only against a pretend hive row, not the game. The cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar.
 - v1.0.5:
   - the start setup (see "Start setup"), asked over the game or in the app before the first start;
   - log lines in Korean (see "Log lines in Korean").

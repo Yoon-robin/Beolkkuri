@@ -3057,72 +3057,12 @@ class macro:
 
     # Hive path distances are in studs; 1 tile == 4 studs.
     _STUDS_PER_TILE = 4.0
-    # Spawn → hive pad walks (overlap async+sync legs, then a short nudge).
-    # Values: (async_key, async_studs, sync_key, sync_studs, nudge_key, nudge_studs)
-    # hive_3 is a single Forward walk (async_key is None).
-    _HIVE_SPAWN_PATHS = {
-        1: ("w", 82, "d", 96, "d", 4),
-        2: ("d", 50, "w", 75, "w", 4),
-        3: (None, 0, "w", 58, "w", 4),
-        4: ("a", 50, "w", 75, "w", 4),
-        5: ("w", 82, "a", 100, "a", 4),
-        6: ("w", 82, "a", 132, "a", 4),
-    }
 
     def walkStuds(self, key, studs):
         studs = float(studs or 0)
         if studs <= 0 or not key:
             return
         self.keyboard.tileWalk(key, studs / self._STUDS_PER_TILE)
-
-    def walkStudsAsyncThen(self, async_key, async_studs, sync_key, sync_studs):
-        """Walk two keys at once for the shorter leg, then finish the longer leg alone."""
-        async_studs = max(0.0, float(async_studs or 0))
-        sync_studs = max(0.0, float(sync_studs or 0))
-        if not async_key or async_studs <= 0:
-            self.walkStuds(sync_key, sync_studs)
-            return
-        if not sync_key or sync_studs <= 0:
-            self.walkStuds(async_key, async_studs)
-            return
-
-        overlap = min(async_studs, sync_studs)
-        self.keyboard.keyDown(async_key, False)
-        self.keyboard.keyDown(sync_key, False)
-        self.keyboard.tileWait(overlap / self._STUDS_PER_TILE)
-        if async_studs <= sync_studs:
-            self.keyboard.keyUp(async_key, False)
-            remaining = sync_studs - overlap
-            if remaining > 0:
-                self.keyboard.tileWait(remaining / self._STUDS_PER_TILE)
-            self.keyboard.keyUp(sync_key, False)
-        else:
-            self.keyboard.keyUp(sync_key, False)
-            remaining = async_studs - overlap
-            if remaining > 0:
-                self.keyboard.tileWait(remaining / self._STUDS_PER_TILE)
-            self.keyboard.keyUp(async_key, False)
-
-    def walkSpawnToHiveSlot(self, slot):
-        """Walk from spawn to the given hive pad using _HIVE_SPAWN_PATHS."""
-        path = self._HIVE_SPAWN_PATHS.get(int(slot))
-        if not path:
-            return False
-        async_key, async_studs, sync_key, sync_studs, _, _ = path
-        if async_key:
-            self.walkStudsAsyncThen(async_key, async_studs, sync_key, sync_studs)
-        else:
-            self.walkStuds(sync_key, sync_studs)
-        time.sleep(0.3)
-        return True
-
-    def nudgeHiveCheckpoint(self, slot):
-        path = self._HIVE_SPAWN_PATHS.get(int(slot))
-        if not path:
-            return
-        _, _, _, _, nudge_key, nudge_studs = path
-        self.walkStuds(nudge_key, nudge_studs)
-        time.sleep(0.25)
 
     def claimHivePromptVisible(self):
         try:
@@ -3152,17 +3092,37 @@ class macro:
             return "occupied"
         return None
 
-    def waitForHivePrompt(self, slot, max_attempts=3):
-        """Wait for a hive prompt and return its type; nudge as needed."""
-        time.sleep(0.2)
-        for attempt in range(max(1, int(max_attempts))):
+    def walkSpawnToHiveRow(self):
+        """Spawn → hive 3's pad: walk into hive 3, then step back onto its pad.
+
+        Walking into the hive lines the player up whatever the walk speed, like
+        the route a reset takes back to its hive.
+        """
+        self.keyboard.walk("w", 5)
+        self.keyboard.walk("s", 0.55)
+
+    def readHivePrompt(self):
+        """Stand still on a pad, then read its prompt kind (None when no prompt shows)."""
+        for _ in range(2):
+            time.sleep(0.5)
             prompt = self.hivePromptKind()
             if prompt:
                 return prompt
-            if attempt + 1 >= max_attempts:
-                break
-            self.nudgeHiveCheckpoint(slot)
-        return self.hivePromptKind()
+        return None
+
+    def walkSpawnToHiveSlot(self, slot):
+        """Walk from spawn to ``slot``'s pad and return its prompt kind, or None.
+
+        Raised slabs sit between spawn and the outer hives, and a diagonal walk
+        from spawn gets stuck on them. The lane straight to hive 3 and the pad
+        row are clear, so go to hive 3 first, then along the row.
+        """
+        slot = max(1, min(6, int(slot)))
+        self.walkSpawnToHiveRow()
+        if slot != 3:
+            # "a" walks toward hive 6, "d" toward hive 1
+            self.walkHiveSlots("a" if slot > 3 else "d", abs(slot - 3))
+        return self.readHivePrompt()
 
     def tryClaimHiveSlot(self, slot, excluded_slots=None, prompt_confirmed=False):
         """Claim ``slot`` when its Claim prompt has just been observed.
@@ -3178,35 +3138,41 @@ class macro:
             return 0
         if not prompt_confirmed and not self.claimHivePromptVisible():
             return 0
-        self.keyboard.press("e")
-        return slot
+        # the Claim prompt goes away once the hive is ours; press again while it stays
+        for _ in range(3):
+            self.keyboard.press("e")
+            if self.claimPromptGone():
+                return slot
+        return 0
+
+    def claimPromptGone(self):
+        """True once the Claim prompt has been missing three checks in a row (about a second at most)."""
+        misses = 0
+        for _ in range(20):
+            if self.claimHivePromptVisible():
+                misses = 0
+            else:
+                misses += 1
+                if misses >= 3:
+                    return True
+            time.sleep(0.05)
+        return False
 
     def moveToNextHiveSlot(self, slot, direction, excluded_slots=None):
-        """Leave the current pad and stop when the next hive prompt appears."""
+        """Step to the next pad and claim it when its Claim prompt shows.
+
+        It stops before looking: reading the prompt (OCR when the image doesn't
+        match) is too slow to do while walking, and the player overshot pads.
+        """
         excluded_slots = excluded_slots or set()
-        self.keyboard.keyDown(direction, False)
-        # Wait until the current pad's prompt disappears.
-        for _ in range(40):
-            if not self.anyHivePromptVisible():
-                break
-            time.sleep(0.01)
-        # Walk until the next pad's claim/occupied prompt appears.
+        self.walkHiveSlots(direction, 1)
+        prompt = self.readHivePrompt()
         claimed = 0
-        for _ in range(200):
-            if self.claimHivePromptVisible():
-                self.keyboard.keyUp("a", False)
-                self.keyboard.keyUp("d", False)
-                self.logger.webhook("", f"Hive {slot} detected as available", "dark brown")
-                claimed = self.tryClaimHiveSlot(
-                    slot, excluded_slots, prompt_confirmed=True
-                )
-                break
-            if self.occupiedHivePromptVisible():
-                self.logger.webhook("", f"Hive {slot} occupied", "dark brown")
-                break
-            time.sleep(0.01)
-        self.keyboard.keyUp("a", False)
-        self.keyboard.keyUp("d", False)
+        if prompt == "claim":
+            self.logger.webhook("", f"Hive {slot} detected as available", "dark brown")
+            claimed = self.tryClaimHiveSlot(slot, excluded_slots, prompt_confirmed=True)
+        elif prompt == "occupied":
+            self.logger.webhook("", f"Hive {slot} occupied", "dark brown")
         time.sleep(0.1)
         return claimed
 
@@ -3254,17 +3220,9 @@ class macro:
         excluded_slots = set(excluded_slots or set())
         preferred_slot = max(1, min(6, int(preferred_slot)))
         self.logger.webhook("", f"Walking spawn → hive {preferred_slot} (check)", "dark brown")
-        self.walkSpawnToHiveSlot(preferred_slot)
-        prompt = self.waitForHivePrompt(preferred_slot, max_attempts=3)
+        prompt = self.walkSpawnToHiveSlot(preferred_slot)
         if not prompt:
-            for _ in range(3):
-                self.stepBackOntoHivePad()
-                time.sleep(0.35)
-                prompt = self.hivePromptKind()
-                if prompt:
-                    break
-            else:
-                return 0
+            return 0
 
         claimed = self.tryClaimHiveSlot(
             preferred_slot, excluded_slots, prompt_confirmed=(prompt == "claim")
@@ -3631,15 +3589,11 @@ class macro:
             self.setCameraPitch(0, pitch)
             self.setCameraZoom(0, zoom)
             time.sleep(0.15)
-            self.walkSpawnToHiveSlot(target)
-            prompt = self.waitForHivePrompt(target, max_attempts=3)
+            prompt = self.walkSpawnToHiveSlot(target)
             if not prompt:
-                for _ in range(3):
-                    self.stepBackOntoHivePad()
-                    time.sleep(0.35)
-                    prompt = self.hivePromptKind()
-                    if prompt:
-                        break
+                # lost count of the pads on the way, so the position is unknown
+                self.logger.webhook("", f"Hive {target} prompt missing after walk", "dark brown")
+                return 0
             claimed = self.tryClaimHiveSlot(
                 target, excluded_slots, prompt_confirmed=(prompt == "claim")
             )
@@ -3649,10 +3603,7 @@ class macro:
 
             # First pick was wrong/occupied — try other spawn-detected pads before a full scan.
             failed = {target}
-            if self.occupiedHivePromptVisible():
-                self.logger.webhook("", f"Hive {target} occupied after walk", "dark brown")
-            else:
-                self.logger.webhook("", f"Hive {target} prompt missing after walk", "dark brown")
+            self.logger.webhook("", f"Hive {target} occupied after walk", "dark brown")
 
             current = target
             while True:
@@ -3681,27 +3632,17 @@ class macro:
         self.setCameraZoom(0, zoom)
         time.sleep(0.15)
 
-        self.keyboard.keyDown("w", False)
-        found = False
-        for _ in range(500):
-            if self.anyHivePromptVisible():
-                self.keyboard.keyUp("w", False)
-                self.walkStuds("s", 2)
-                found = True
-                break
-            time.sleep(0.01)
-        self.keyboard.keyUp("w", False)
-        if not found:
+        prompt = self.walkSpawnToHiveSlot(3)
+        if not prompt:
             return 0
 
-        time.sleep(0.1)
-        if self.claimHivePromptVisible() and 3 not in excluded_slots:
+        if prompt == "claim" and 3 not in excluded_slots:
             self.logger.webhook("", "Hive 3 detected as available", "dark brown")
             claimed = self.tryClaimHiveSlot(3, excluded_slots, prompt_confirmed=True)
             if claimed:
                 self.walkStuds("s", 4)
                 return claimed
-        elif self.occupiedHivePromptVisible():
+        elif prompt == "occupied":
             self.logger.webhook("", "Hive 3 occupied", "dark brown")
 
         return self.scanHivesForClaim(3, excluded_slots)
@@ -4197,7 +4138,8 @@ class macro:
             # from there — do not treat the player as already on a hive pad.
             self.location = "spawn"
             mouse.click()
-            time.sleep(0.35)
+            # the character and camera are still settling when the hotbar shows
+            time.sleep(2)
             self.setRobloxWindowInfo()
             preferredHiveSlot = self.setdat.get("preferred_hive_slot", 1)
             try:
