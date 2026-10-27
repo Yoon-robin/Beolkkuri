@@ -1,0 +1,26 @@
+# Python packages for RobinMacro on Windows (Python 3.12, 64-bit).
+# install_dependencies.ps1 installs these into %USERPROFILE%\robin-macro-env.
+# macOS keeps its own list in install_dependencies.command because it pins
+# versions per macOS release and adds the Apple-only packages (pyobjc, ocrmac, coremltools).
+
+numpy<2
+# OpenCV also loads the ONNX models used by AI gathering (Core ML is macOS only).
+opencv-python-headless<4.11
+pillow
+mss
+pyautogui
+pynput
+eel
+gevent
+requests
+certifi
+discord-webhook
+discord.py
+aiohttp==3.10.5
+pypresence
+fuzzywuzzy
+python-Levenshtein
+ImageHash
+flask
+# Windows' built-in OCR engine (Windows.Media.Ocr); replaces ocrmac.
+winocr

@@ -11,7 +11,11 @@ import time
 import os
 import tempfile
 import subprocess
-import Quartz.CoreGraphics as CG
+import sys
+if sys.platform == "darwin":
+    import Quartz.CoreGraphics as CG
+else:
+    from PIL import ImageGrab
 from modules.screen.screenData import getScreenData
 from modules.misc.appManager import getWindowSize
 
@@ -24,6 +28,8 @@ This seems to affect any screenshots taken with quartz, but not those taken with
 usePillow = False
 
 def pillowGrab(x,y,w,h):
+    if sys.platform == "win32":
+        return ImageGrab.grab(bbox=(x, y, x + w, y + h), all_screens=True)
     fh, filepath = tempfile.mkstemp(".png")
     os.close(fh)
     args = ["screencapture"]

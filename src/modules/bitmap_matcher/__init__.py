@@ -77,8 +77,12 @@ def find_compatible_so():
 
 def load_bitmap_matcher():
     """Dynamically load the bitmap_matcher module."""
+    # The bundled .so files are macOS (Mach-O) builds
+    if sys.platform != "darwin":
+        raise ImportError(f"The compiled bitmap_matcher is macOS only; using the NumPy version on {sys.platform}.")
+
     so_path = find_compatible_so()
-    
+
     if so_path is None:
         raise ImportError(
             f"Could not find compatible bitmap_matcher extension for "
@@ -112,17 +116,13 @@ try:
         globals()[name] = getattr(_bitmap_matcher, name)
         
 except ImportError as e:
-    # Provide helpful error message
-    print(f"Warning: {e}")
-    print("bitmap_matcher extension not available.")
-    
-    # You could provide fallback implementations here if needed
-    def fallback_function():
-        raise RuntimeError("bitmap_matcher extension not loaded. Please build the extension first.")
-    
-    # Example fallback (adjust based on your actual functions)
-    __all__ = ['match_bitmap']  # Add your actual function names
-    match_bitmap = fallback_function
+    if sys.platform == "darwin":
+        print(f"Warning: {e}")
+        print("bitmap_matcher extension not available, using the NumPy version.")
+
+    # Same functions in NumPy (slower, but works on every platform)
+    from .numpy_matcher import find_bitmap_cython, find_all_bitmap_cython, create_bitmap_from_base64
+    __all__ = ['find_bitmap_cython', 'find_all_bitmap_cython', 'create_bitmap_from_base64']
 
 # bitmap_matcher_loader.py - Alternative standalone loader
 """

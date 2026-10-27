@@ -18,6 +18,7 @@ import { sectionKey, useI18n, useStrings, type PageStrings } from "@/i18n"
 import schemaKo from "@/i18n/settings-ko.json"
 import { en as uiEn, ko as uiKo, type UiKey } from "@/i18n/ui"
 import { goToTarget, locateSection } from "@/lib/focus"
+import { isMac } from "@/lib/platform"
 import type { PageId } from "@/lib/route"
 import { plainText } from "@/lib/rich-text"
 import { useTheme } from "@/lib/theme"
@@ -81,7 +82,6 @@ const strings: PageStrings<
 }
 
 const navItems = new Map(NAV.flatMap((g) => g.items).map((i) => [i.id, i]))
-const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
 const ko = schemaKo as { settings: Record<string, { title?: string } | undefined>; sections: Record<string, { title?: string } | undefined> }
 
 // ---------------------------------------------------------------- search

@@ -6,6 +6,11 @@ from modules.submacros.hasteCompensation import HasteCompensationRevamped
 import threading
 from collections import deque
 
+if sys.platform == "win32":
+    #roblox ignores pyautogui's windows key events, send scan codes instead
+    from modules.controls import winInput
+    winInput.install()
+
 
 class keyboard:
     def __init__(self, walkspeed, enableHasteCompensation, hasteCompensation: HasteCompensationRevamped):
@@ -93,7 +98,8 @@ class keyboard:
     @staticmethod
     def keyDown(k, pause = True):
         #for some reason, the function key is sometimes held down, causing it to open the dock or enable dictation
-        keyboard.keyUp('fn', False)
+        if sys.platform == "darwin":
+            keyboard.keyUp('fn', False)
         pag.keyDown(k, _pause = pause)
 
     @staticmethod

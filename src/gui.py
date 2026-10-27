@@ -498,6 +498,9 @@ def getPermissionStatus():
     import ctypes
     import subprocess
     status = {"accessibility": None, "screenRecording": None, "fullKeyboardAccess": None}
+    # Windows needs no permissions for input or screen capture
+    if sys.platform != "darwin":
+        return status
     try:
         services = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/ApplicationServices.framework/ApplicationServices")
         services.AXIsProcessTrusted.restype = ctypes.c_bool
@@ -522,7 +525,7 @@ def getPermissionStatus():
 def openPrivacySettings(kind):
     import subprocess
     pane = _PRIVACY_PANES.get(kind)
-    if pane:
+    if pane and sys.platform == "darwin":
         subprocess.run(["open", pane])
 
 @eel.expose
@@ -969,7 +972,9 @@ def exportDebugZip(profile_name=None):
                 macrov = settingsManager.getMacroVersion()
                 # Determine chip label
                 mlow = machine.lower()
-                if "x86" in mlow or "amd64" in mlow:
+                if sys.platform == "win32":
+                    chip = platform.processor() or machine
+                elif "x86" in mlow or "amd64" in mlow:
                     chip = "Intel"
                 elif "arm" in mlow or "aarch" in mlow:
                     chip = "Apple Silicon"
@@ -1465,7 +1470,12 @@ def launch():
         eel.start('index.html', mode = "chrome", app_mode = True, block = False, port=port, cmdline_args=["--incognito", f"--app={port_url}"])
     except EnvironmentError:
         try:
-            eel.start('index.html', mode = "chrome-app", app_mode = True, block = False, port=port, cmdline_args=["--incognito", f"--app={port_url}"])
+            if sys.platform == "win32":
+                # Edge comes with Windows, so it can open the app window when Chrome is missing
+                print("Chrome could not be found. Opening in Microsoft Edge...")
+                eel.start('index.html', mode = "edge", app_mode = True, block = False, port=port, cmdline_args=["--inprivate"])
+            else:
+                eel.start('index.html', mode = "chrome-app", app_mode = True, block = False, port=port, cmdline_args=["--incognito", f"--app={port_url}"])
         except EnvironmentError:
             print("Chrome/Chromium could not be found. Opening in default browser...")
             openInDefaultBrowser()

@@ -5,6 +5,7 @@ from PIL import Image
 import os
 import time
 import platform
+import sys
 import mss
 import mss.darwin
 mss.darwin.IMAGE_OPTIONS = 0
@@ -26,6 +27,15 @@ if len(mac_version) >= 2 and mac_version >= (12, 0):
         ocrLib = "ocrmac"
     except:
         pass
+
+#windows has its own ocr engine (Windows.Media.Ocr), the counterpart of apple vision
+if sys.platform == "win32":
+    try:
+        from modules.screen import winOcr
+        ocrLib = "winocr"
+        print(f"Using Windows OCR ({winOcr.language})")
+    except Exception as e:
+        print(f"Windows OCR is not available: {e}")
 
 if ocrLib is None:
     try:
@@ -179,6 +189,8 @@ if ocrLib == "ocrmac":
         print(e)
         print("Language Preferences for ocrmac is disabled")
         useLangPref = False
+elif ocrLib == "winocr":
+    ocrFunc = winOcr.ocr
 elif ocrLib == "paddleocr":
     ocrFunc = ocrPaddle
 elif ocrLib == "easyocr":

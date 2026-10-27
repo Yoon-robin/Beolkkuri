@@ -10,6 +10,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Toaster } from "@/components/ui/sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { I18nProvider, useI18n } from "@/i18n"
+import { isMac } from "@/lib/platform"
 import { isDesktopApp } from "@/lib/py"
 import { usePage, type PageId } from "@/lib/route"
 import BoostPage from "@/pages/boost"
@@ -24,8 +25,6 @@ import SettingsPage from "@/pages/settings"
 import ToolsPage from "@/pages/tools"
 import { RunStateProvider } from "@/state/run-state"
 import { SettingsProvider, useSettings } from "@/state/settings"
-
-const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || navigator.userAgent)
 
 const PAGE_COMPONENTS: Record<PageId, ComponentType> = {
   home: HomePage,

@@ -1816,6 +1816,8 @@ class macro:
         return cooldownSeconds
 
     def isFullScreen(self):
+        if sys.platform == "win32":
+            return appManager.isAppFullScreen()
         windows = gw.getAllTitles()
         for win in windows:
             if "roblox roblox" in win.lower():
@@ -1826,15 +1828,18 @@ class macro:
 
     def toggleFullScreen(self):
         self.logger.webhook("", "Toggling fullscreen mode", "dark brown", "screen")
-        self.keyboard.keyDown("command")
-        time.sleep(0.05)
-        self.keyboard.keyDown("ctrl")
-        time.sleep(0.05)
-        self.keyboard.keyDown("f")
-        time.sleep(0.1)
-        self.keyboard.keyUp("command")
-        self.keyboard.keyUp("ctrl")
-        self.keyboard.keyUp("f")
+        if sys.platform == "win32":
+            self.keyboard.press("f11", 0.1)
+        else:
+            self.keyboard.keyDown("command")
+            time.sleep(0.05)
+            self.keyboard.keyDown("ctrl")
+            time.sleep(0.05)
+            self.keyboard.keyDown("f")
+            time.sleep(0.1)
+            self.keyboard.keyUp("command")
+            self.keyboard.keyUp("ctrl")
+            self.keyboard.keyUp("f")
         time.sleep(0.5)
         self.setRobloxWindowInfo(setYOffset=True)
 
@@ -9355,14 +9360,16 @@ class macro:
         time.sleep(1)
         #check roblox scaling
         #this is done by checking if all pixels at the top of the screen are black
-        topScreen = mssScreenshot(0, 0, self.robloxWindow.mw, 2)
-        extrema = topScreen.convert("L").getextrema()
-        #all are black
-        if extrema == (0, 0):
-            messageBox.msgBox(text='It seems like you have not enabled roblox scaling. The macro will not work properly.\n1. Close Roblox\n2. Go to finder -> applications -> right click roblox -> get info -> enable "scale to fit below built-in camera"', title='Roblox scaling')
-        #make sure game mode is disabled (macOS 14.0 and above and apple chips)
-        macVersion, _, _ = platform.mac_ver()
-        macVersion = float('.'.join(macVersion.split('.')[:2]))
+        #(only macs with a notch need the scaling option)
+        if sys.platform == "darwin":
+            topScreen = mssScreenshot(0, 0, self.robloxWindow.mw, 2)
+            extrema = topScreen.convert("L").getextrema()
+            #all are black
+            if extrema == (0, 0):
+                messageBox.msgBox(text='It seems like you have not enabled roblox scaling. The macro will not work properly.\n1. Close Roblox\n2. Go to finder -> applications -> right click roblox -> get info -> enable "scale to fit below built-in camera"', title='Roblox scaling')
+            #make sure game mode is disabled (macOS 14.0 and above and apple chips)
+            macVersion, _, _ = platform.mac_ver()
+            macVersion = float('.'.join(macVersion.split('.')[:2]))
 
         # Removed lines that were un-fullscreening Roblox on startup
         # appManager.setAppFullscreen(fullscreen=False)
@@ -9391,7 +9398,8 @@ class macro:
         mouse.moveBy(100, 0)
         time.sleep(0.15)
         newX = mouse.getPos()[0]
-        if originalX == newX:
+        #windows needs no accessibility permission
+        if originalX == newX and sys.platform == "darwin":
             messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit https://github.com/Yoon-robin/RobinMacro/blob/main/docs/permissions.md for detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
         time.sleep(1)
         # img1 = pillowToHash(mssScreenshot())
