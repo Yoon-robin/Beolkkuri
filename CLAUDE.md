@@ -93,7 +93,7 @@ The Discord bot prefix is `robin!`. Discord Rich Presence is off until `ROBINMAC
 - Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/RobinMacro`. `install.sh` installs the latest release zipball, or `main` if there are no releases.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
-## Status and next steps (as of 2026-10-26)
+## Status and next steps (as of 2026-10-27)
 
 Done:
 - Rebrand.
@@ -111,7 +111,7 @@ Done:
 Not yet verified on a real Mac, so test these first:
 1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/RobinMacro.app` with its Desktop alias.
 2. `getPermissionStatus` / `openPrivacySettings` in `gui.py` (ctypes `AXIsProcessTrusted`, `CGPreflightScreenCaptureAccess`).
-3. The eel return path: Python calls `eel.getElementProperty(...)()` from `main.py` for keybind recording. On Windows, `ui/dev/eel_harness.py` confirmed JS → Python and Python → JS `log`, but never got a returned value back.
+3. Keybind recording versus the hotkeys. `main.py`'s pynput `on_press` asks `eel.getElementProperty(...)()` synchronously whether a keybind field is recording. On Windows, `ui/dev/eel_harness.py` asks the same way from a plain thread and gets `'true'` while a field records, in a few ms, so the eel round trip works. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
 4. The real macro run, start/stop hotkeys and the hourly report with the new UI.
 
 Open items:
