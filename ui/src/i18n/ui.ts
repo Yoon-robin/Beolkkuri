@@ -1,6 +1,8 @@
 // App-wide UI strings. Page-specific strings live next to each page and are
 // read with useStrings() so pages can be worked on independently.
 
+import { isMac } from "@/lib/platform"
+
 export const ko = {
   "app.name": "벌꿀이",
   "app.tagline": "비 스웜 시뮬레이터 자동 매크로",
@@ -79,10 +81,10 @@ export const ko = {
   "common.off": "꺼짐",
   "common.retry": "다시 시도",
   "load.failedTitle": "설정을 불러오지 못했어요",
-  "load.failedDesc": "매크로 프로그램과 연결이 끊긴 것 같아요. 터미널 창이 켜져 있는지 확인하고 다시 시도해 주세요.",
+  "load.failedDesc": `매크로 프로그램과 연결이 끊긴 것 같아요. ${isMac ? "터미널 창이" : "벌꿀이 명령 창이"} 켜져 있는지 확인하고 다시 시도해 주세요.`,
   "keybind.record": "눌러서 키 지정",
   "keybind.recording": "키를 누르세요…",
-  "keybind.needKey": "수정키(Ctrl/Alt/Shift/Cmd) 말고 일반 키도 함께 눌러 주세요.",
+  "keybind.needKey": `수정키(${isMac ? "Ctrl/Alt/Shift/Cmd" : "Ctrl/Alt/Shift/Win"}) 말고 일반 키도 함께 눌러 주세요.`,
   "keybind.conflict": "이미 '{name}'에 쓰고 있는 키예요.",
   "keybind.reserved": "매크로가 실행 중에 쓰는 키라서 지정할 수 없어요.",
   "keybind.browser": "브라우저나 운영체제가 쓰는 단축키라서 지정할 수 없어요.",
@@ -179,7 +181,7 @@ export const en: Record<UiKey, string> = {
   "common.off": "Off",
   "common.retry": "Try again",
   "load.failedTitle": "Couldn't load your settings",
-  "load.failedDesc": "The macro doesn't seem to be responding. Check that the Terminal window is still open, then try again.",
+  "load.failedDesc": `The macro doesn't seem to be responding. Check that the ${isMac ? "Terminal" : "Beolkkuri console"} window is still open, then try again.`,
   "keybind.record": "Click to record",
   "keybind.recording": "Press keys…",
   "keybind.needKey": "Include a non-modifier key in the keybind.",

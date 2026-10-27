@@ -3,6 +3,8 @@
 *.command text eol=lf
 *.sh text eol=lf
 *.py text eol=lf
+# cmd needs CRLF in Windows batch files.
+*.bat text eol=crlf
 *.png binary
 *.ico binary
 *.jpg binary

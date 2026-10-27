@@ -9,6 +9,7 @@ import time
 import re
 import os
 import gc
+import shutil
 import sys
 from collections import deque
 import logging
@@ -173,9 +174,9 @@ class cloudflaredStream:
         gc.enable()
         gc.set_threshold(700, 10, 5)
 
-        #get the cloudflared path
+        #get the cloudflared path (on windows, winget puts cloudflared.exe on the PATH)
         paths = [
-            "cloudflared",
+            shutil.which("cloudflared") or "cloudflared",
             "/opt/homebrew/bin/cloudflared",
             "/usr/local/Homebrew/bin/cloudflared",
             "/usr/local/bin/cloudflared"

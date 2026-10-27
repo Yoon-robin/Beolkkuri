@@ -2673,7 +2673,7 @@
     "tab": "config",
     "panel": "other",
     "title": "Export Debug",
-    "desc": "Create a zip with your exported profile, recent logs, macOS + macro version and chip info.",
+    "desc": "Create a zip with your exported profile, recent logs, OS + macro version and chip info.",
     "settings": [
       {
         "id": "export_debug_button",

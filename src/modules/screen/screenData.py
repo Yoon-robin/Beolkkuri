@@ -1,6 +1,7 @@
 #update the screen user data
 import pyautogui as pag
 import os
+import sys
 import mss
 import mss.darwin
 mss.darwin.IMAGE_OPTIONS = 0
@@ -101,13 +102,18 @@ def setScreenData():
     ndisplay = "{}x{}".format(sw,sh)
     # Determine the true (physical) screen resolution using mss monitors
     sct = mss.mss()
-    try:
-        mon = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
-        physical_w, physical_h = mon['width'], mon['height']
-    except Exception:
-        # fallback: grab a full-screen shot
-        shot = sct.grab({'top': 0, 'left': 0, 'width': wwd, 'height': whd})
-        physical_w, physical_h = shot.width, shot.height
+    if sys.platform == "win32":
+        # pyautogui and mss both make the process DPI aware, so pyautogui already reports
+        # physical pixels of the main monitor (mss.monitors[1] is not always the main one)
+        physical_w, physical_h = wwd, whd
+    else:
+        try:
+            mon = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
+            physical_w, physical_h = mon['width'], mon['height']
+        except Exception:
+            # fallback: grab a full-screen shot
+            shot = sct.grab({'top': 0, 'left': 0, 'width': wwd, 'height': whd})
+            physical_w, physical_h = shot.width, shot.height
 
     detected_resolution = f"{physical_w}x{physical_h}"
 

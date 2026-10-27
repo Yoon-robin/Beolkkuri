@@ -7,11 +7,15 @@ try:
     import requests
 except ModuleNotFoundError:
     try:
-        script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "install_dependencies.command"))
+        installer = "install_dependencies.bat" if sys.platform == "win32" else "install_dependencies.command"
+        script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", installer))
         if os.path.exists(script):
-            subprocess.Popen(["open", "-a", "Terminal", script])
+            if sys.platform == "win32":
+                os.startfile(script)
+            else:
+                subprocess.Popen(["open", "-a", "Terminal", script])
         else:
-            messageBox.msgBox(title="Dependencies not installed", text="필요한 프로그램이 설치되지 않았어요. install_dependencies.command 를 먼저 실행해 주세요.\n\nDependencies are not installed. Run install_dependencies.command first.")
+            messageBox.msgBox(title="Dependencies not installed", text=f"필요한 프로그램이 설치되지 않았어요. {installer} 를 먼저 실행해 주세요.\n\nDependencies are not installed. Run {installer} first.")
     except Exception:
         pass
     sys.exit(0)
@@ -57,18 +61,20 @@ try:
 except Exception:
     pass
 
-try:
-	from modules.misc.ColorProfile import DisplayColorProfile
-except ModuleNotFoundError:
+#the color profile check uses ColorSync, which only exists on macOS
+if sys.platform == "darwin":
     try:
-        script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "install_dependencies.command"))
-        if os.path.exists(script):
-            subprocess.Popen(["/bin/bash", script])
-        else:
-            messageBox.msgBox(title="Dependencies not installed", text="The new update requires new dependencies. Refer to Discord for help.")
-    except Exception:
-        pass
-    quit()
+        from modules.misc.ColorProfile import DisplayColorProfile
+    except ModuleNotFoundError:
+        try:
+            script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "install_dependencies.command"))
+            if os.path.exists(script):
+                subprocess.Popen(["/bin/bash", script])
+            else:
+                messageBox.msgBox(title="Dependencies not installed", text="The new update requires new dependencies. Refer to Discord for help.")
+        except Exception:
+            pass
+        quit()
 from modules.submacros.hourlyReport import HourlyReport
 from modules.submacros.tadAltSync import TadAltSync
 mw, mh = pag.size()
@@ -2059,7 +2065,7 @@ def macro(status, logQueue, updateGUI, run, skipTask, presence=None, discordMess
                                     from PIL import ImageDraw, ImageFont
                                     draw = ImageDraw.Draw(img)
                                     try:
-                                        font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 20)
+                                        font = ImageFont.truetype("arial.ttf" if sys.platform == "win32" else "/Library/Fonts/Arial.ttf", 20)
                                     except Exception:
                                         font = ImageFont.load_default()
 
@@ -2894,6 +2900,11 @@ def watch_for_hotkeys(run):
     def convert_key_to_string(key):
         """Convert pynput key objects to the same canonical names saved by the UI."""
         try:
+            #on windows, char is a control code while ctrl is held and hangul while the korean IME is on,
+            #so read letters and digits from the virtual key code instead
+            key_vk = getattr(key, "vk", None)
+            if sys.platform == "win32" and key_vk is not None and (0x30 <= key_vk <= 0x39 or 0x41 <= key_vk <= 0x5A):
+                return chr(key_vk)
             key_char = getattr(key, "char", None)
             if key_char:
                 return normalize_key_name(key_char)
@@ -3252,6 +3263,10 @@ if __name__ == "__main__":
     def stopStandbyKeepAwake():
         """Stop only the caffeinate instance started by this macro."""
         global standbyCaffeinateProc
+        if sys.platform == "win32":
+            #ES_CONTINUOUS on its own clears the request made in startStandbyKeepAwake
+            ctypes.windll.kernel32.SetThreadExecutionState(0x80000000)
+            return
         if standbyCaffeinateProc is None:
             return
         if standbyCaffeinateProc.poll() is None:
@@ -3268,6 +3283,9 @@ if __name__ == "__main__":
 
     def startStandbyKeepAwake():
         global standbyCaffeinateProc
+        if sys.platform == "win32":
+            #ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED, the same as caffeinate -di
+            return bool(ctypes.windll.kernel32.SetThreadExecutionState(0x80000003))
         if standbyCaffeinateProc is not None and standbyCaffeinateProc.poll() is None:
             return True
         try:
@@ -3386,43 +3404,46 @@ if __name__ == "__main__":
     
     #use run.value to control the macro loop
 
-    #check color profile
-    try:
-        colorProfileManager = DisplayColorProfile()
-        currentProfileColor = colorProfileManager.getCurrentColorProfile()
-        if not "sRGB" in currentProfileColor:
-            try:
-                if messageBox.msgBoxOkCancel(title="Incorrect Color Profile", text=f"You current display's color profile is {currentProfileColor} but sRGB is required for the macro.\nPress 'Ok' to change color profiles"):
-                    colorProfileManager.resetDisplayProfile()
-                    colorProfileManager.setCustomProfile("/System/Library/ColorSync/Profiles/sRGB Profile.icc")
-                    messageBox.msgBox(title="Color Profile Success", text="Successfully changed the current color profile to sRGB")
+    #check color profile (macOS only)
+    if sys.platform == "darwin":
+        try:
+            colorProfileManager = DisplayColorProfile()
+            currentProfileColor = colorProfileManager.getCurrentColorProfile()
+            if not "sRGB" in currentProfileColor:
+                try:
+                    if messageBox.msgBoxOkCancel(title="Incorrect Color Profile", text=f"You current display's color profile is {currentProfileColor} but sRGB is required for the macro.\nPress 'Ok' to change color profiles"):
+                        colorProfileManager.resetDisplayProfile()
+                        colorProfileManager.setCustomProfile("/System/Library/ColorSync/Profiles/sRGB Profile.icc")
+                        messageBox.msgBox(title="Color Profile Success", text="Successfully changed the current color profile to sRGB")
 
-            except Exception as e:
-                messageBox.msgBox(title="Failed to change color profile", text=e)
-    except Exception as e:
-        pass
+                except Exception as e:
+                    messageBox.msgBox(title="Failed to change color profile", text=e)
+        except Exception as e:
+            pass
     
-    #check screen recording permissions
-    try:
-        cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
-        cg.CGRequestScreenCaptureAccess.restype = ctypes.c_bool
-        if not cg.CGRequestScreenCaptureAccess():
-            messageBox.msgBox(title="Screen Recording Permission", text='Terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
-    except AttributeError:
-        pass
-    #check full keyboard access
-    try:
-        result = subprocess.run(
-            ["defaults", "read", "com.apple.universalaccess", "KeyboardAccessEnabled"],
-            capture_output=True,
-            text=True
-        )
-        value = result.stdout.strip()
-        if value == "1":
-            messageBox.msgBox(text = f"Full Keyboard Access is enabled. The macro will not work properly\
-                \nTo disable it, go to System Settings -> Accessibility -> Keyboard -> uncheck 'Full Keyboard Access'")
-    except Exception as e:
-        print("Error reading Full Keyboard Access:", e)
+    #macOS permission checks; windows has no screen recording or accessibility permissions
+    if sys.platform == "darwin":
+        #check screen recording permissions
+        try:
+            cg = ctypes.cdll.LoadLibrary("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg.CGRequestScreenCaptureAccess.restype = ctypes.c_bool
+            if not cg.CGRequestScreenCaptureAccess():
+                messageBox.msgBox(title="Screen Recording Permission", text='Terminal does not have the screen recording permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Screen Recording -> add and enable Terminal. After that, restart the macro')
+        except AttributeError:
+            pass
+        #check full keyboard access
+        try:
+            result = subprocess.run(
+                ["defaults", "read", "com.apple.universalaccess", "KeyboardAccessEnabled"],
+                capture_output=True,
+                text=True
+            )
+            value = result.stdout.strip()
+            if value == "1":
+                messageBox.msgBox(text = f"Full Keyboard Access is enabled. The macro will not work properly\
+                    \nTo disable it, go to System Settings -> Accessibility -> Keyboard -> uncheck 'Full Keyboard Access'")
+        except Exception as e:
+            print("Error reading Full Keyboard Access:", e)
 
     discordBotProc = None
     prevDiscordBotToken = None

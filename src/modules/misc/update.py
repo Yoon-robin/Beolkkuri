@@ -788,6 +788,23 @@ def _discover_remote_version(remote_version_url, timeout=15):
         return None
 
 
+def _start_windows_dependency_install(destination):
+    """Install any packages a new version added, in the background (Windows)."""
+    script = os.path.join(destination, "scripts", "windows", "install_dependencies.ps1")
+    if not os.path.exists(script):
+        return
+    try:
+        import subprocess
+        subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script, "-Quiet"],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         stdin=subprocess.DEVNULL,
+                         creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP,
+                         close_fds=True)
+    except Exception:
+        pass
+
+
 def update(t="main", update_channel="stable", progress_callback=None):
     """Install the latest release from the selected update channel."""
     _report_update_progress(progress_callback, 0, "Starting update")
@@ -1011,8 +1028,10 @@ def update(t="main", update_channel="stable", progress_callback=None):
     # Attempt to run install dependencies script (non-blocking). Fail silently.
     try:
         _report_update_progress(progress_callback, 96, "Finishing update")
+        if sys.platform == "win32":
+            _start_windows_dependency_install(destination)
         install_script = os.path.join(destination, "install_dependencies.command")
-        if os.path.exists(install_script):
+        if sys.platform == "darwin" and os.path.exists(install_script):
             try:
                 st = os.stat(install_script)
                 os.chmod(install_script, st.st_mode | stat.S_IEXEC)
@@ -1185,8 +1204,10 @@ def update_from_commit(commit_hash, progress_callback=None):
     # Attempt to run install dependencies script (non-blocking). Fail silently.
     try:
         _report_update_progress(progress_callback, 96, "Finishing update")
+        if sys.platform == "win32":
+            _start_windows_dependency_install(destination)
         install_script = os.path.join(destination, "install_dependencies.command")
-        if os.path.exists(install_script):
+        if sys.platform == "darwin" and os.path.exists(install_script):
             try:
                 st = os.stat(install_script)
                 os.chmod(install_script, st.st_mode | stat.S_IEXEC)

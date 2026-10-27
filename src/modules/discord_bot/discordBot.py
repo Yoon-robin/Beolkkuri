@@ -86,6 +86,32 @@ def format_standby_duration(seconds):
     return " ".join(parts) or "0 seconds"
 
 
+def _windows_battery_message():
+    """/battery on Windows, from GetSystemPowerStatus (pmset is macOS only)."""
+    import ctypes
+
+    class SYSTEM_POWER_STATUS(ctypes.Structure):
+        _fields_ = [
+            ("ACLineStatus", ctypes.c_ubyte),
+            ("BatteryFlag", ctypes.c_ubyte),
+            ("BatteryLifePercent", ctypes.c_ubyte),
+            ("SystemStatusFlag", ctypes.c_ubyte),
+            ("BatteryLifeTime", ctypes.c_ulong),
+            ("BatteryFullLifeTime", ctypes.c_ulong),
+        ]
+
+    power = SYSTEM_POWER_STATUS()
+    if not ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(power)) or power.BatteryFlag == 128 or power.BatteryLifePercent == 255:
+        return "Battery information not found."
+    if power.BatteryFlag & 8:
+        state = "charging"
+    elif power.ACLineStatus == 1:
+        state = "plugged in"
+    else:
+        state = "discharging"
+    return f"Battery is at {power.BatteryLifePercent}% and is currently {state}."
+
+
 def response_footer():
     return f"Beolkkuri - Version {settingsManager.getMacroVersion()}"
 
@@ -2800,7 +2826,7 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
             run.value = 0
             await interaction.response.send_message(f"Stopping Macro. Error: {str(e)}")
 
-    @bot.tree.command(name="standby", description="Stop the macro, quit Roblox, and keep the Mac awake")
+    @bot.tree.command(name="standby", description="Stop the macro, quit Roblox, and keep the computer awake")
     @app_commands.describe(duration="Optional: 30m, 2h, 1h 30m; omit to run until disabled")
     @requires_discord_permission("macro_control")
     async def standby(interaction: discord.Interaction, duration: Optional[str] = None):
@@ -2821,7 +2847,7 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
         standby_command_queue.put({"action": "enable", "duration_seconds": seconds})
         await interaction.response.send_message(
             f"Entering Macro Standby for {format_standby_duration(seconds)}. "
-            "The macro will stop, Roblox will quit, and this Mac will stay awake."
+            "The macro will stop, Roblox will quit, and this computer will stay awake."
         )
 
     @bot.tree.command(name = "pause", description = "Pause the macro")
@@ -3119,7 +3145,7 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
                     # Build text overlay
                     draw = ImageDraw.Draw(img)
                     try:
-                        font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 20)
+                        font = ImageFont.truetype("arial.ttf" if sys.platform == "win32" else "/Library/Fonts/Arial.ttf", 20)
                     except Exception:
                         font = ImageFont.load_default()
 
@@ -3194,6 +3220,9 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
     @requires_discord_permission("observation")
     async def battery(interaction: discord.Interaction):
         try:
+            if sys.platform == "win32":
+                await interaction.response.send_message(_windows_battery_message())
+                return
             output = subprocess.check_output(["pmset", "-g", "batt"], text=True)
             for line in output.split("\n"):
                 if "InternalBattery" in line:
@@ -4208,7 +4237,7 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
         """Show available commands"""
         embed = discord.Embed(title="BSS Macro Discord Bot", description="Available Commands:", color=0x0099ff)
 
-        embed.add_field(name="**Basic Controls**", value="`/ping` - Check if bot is online\n`/start` - Start the macro\n`/stop` - Stop the macro\n`/standby [duration]` - Stop, quit Roblox, and keep the Mac awake. Use 30m or 1h 30m; repeat to disable\n`/pause` - Pause the macro\n`/resume` - Resume the macro\n`/status` - Get macro status and current task\n`/reroll` - Reroll Auto Field Boost\n`/rejoin` - Make macro rejoin game\n`/skipserver` - Skip the current private-server join\n`/screenshot` - Get screenshot\n`/settings` - Open settings panel\n`/hiveslot <1-6>` - Change hive slot number\n`/shiftlock <on/off/toggle>` - Control shift lock", inline=False)
+        embed.add_field(name="**Basic Controls**", value="`/ping` - Check if bot is online\n`/start` - Start the macro\n`/stop` - Stop the macro\n`/standby [duration]` - Stop, quit Roblox, and keep the computer awake. Use 30m or 1h 30m; repeat to disable\n`/pause` - Pause the macro\n`/resume` - Resume the macro\n`/status` - Get macro status and current task\n`/reroll` - Reroll Auto Field Boost\n`/rejoin` - Make macro rejoin game\n`/skipserver` - Skip the current private-server join\n`/screenshot` - Get screenshot\n`/settings` - Open settings panel\n`/hiveslot <1-6>` - Change hive slot number\n`/shiftlock <on/off/toggle>` - Control shift lock", inline=False)
 
         embed.add_field(name="**Field Management**", value="`/fields` - View field configuration\n`/field <field> <true/false>` - Enable or disable a field\n`/swapfield <current> <new>` - Swap one field for another (new can be any field)", inline=False)
 

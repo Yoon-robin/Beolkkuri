@@ -10,11 +10,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
+import { isMac } from "@/lib/platform"
 import { callPy, py } from "@/lib/py"
 import { cn } from "@/lib/utils"
 import { useSettings } from "@/state/settings"
 
 import { ConfirmDialog, CustomRow, base64ToBlob, downloadBlob } from "./shared"
+
+const computer = isMac ? "Mac" : "PC"
 
 const strings: PageStrings<
   | "fallback.button"
@@ -90,7 +93,7 @@ const strings: PageStrings<
     "debug.done": "{file} 파일로 저장했어요.",
     "debug.failed": "디버그 파일을 만들지 못했어요: {message}",
     "models.title": "AI 모델",
-    "models.desc": "이 Mac에 없는 AI 모델만 골라서 내려받아요.",
+    "models.desc": `이 ${computer}에 없는 AI 모델만 골라서 내려받아요.`,
     "models.checking": "설치된 모델을 확인하는 중…",
     "models.allInstalled": "필요한 모델이 모두 설치돼 있어요.",
     "models.missingCount": "모델 {count}개가 없어요.",
@@ -112,7 +115,7 @@ const strings: PageStrings<
     "models.loot": "전리품 인식",
     "models.bloom": "블룸 인식",
     "models.other": "AI 모델",
-    "models.none": "이 Mac에서 쓸 수 있는 모델이 없어요.",
+    "models.none": `이 ${computer}에서 쓸 수 있는 모델이 없어요.`,
   },
   en: {
     "fallback.button": "Manage servers",
@@ -139,7 +142,7 @@ const strings: PageStrings<
     "debug.done": "Saved as {file}.",
     "debug.failed": "Couldn't export the debug folder: {message}",
     "models.title": "AI models",
-    "models.desc": "Download only the AI models that are missing from this Mac.",
+    "models.desc": `Download only the AI models that are missing from this ${computer}.`,
     "models.checking": "Checking installed models…",
     "models.allInstalled": "All supported models are installed.",
     "models.missingCount": "{count} model(s) missing.",
@@ -161,7 +164,7 @@ const strings: PageStrings<
     "models.loot": "Loot detection",
     "models.bloom": "Bloom detection",
     "models.other": "AI model",
-    "models.none": "No models are available for this Mac.",
+    "models.none": `No models are available for this ${computer}.`,
   },
 }
 

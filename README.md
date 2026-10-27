@@ -4,14 +4,14 @@
 
 # 벌꿀이 (Beolkkuri)
 
-**맥(macOS)용 비 스웜 시뮬레이터(Bee Swarm Simulator) 자동 매크로**<br>
+**맥(macOS)·윈도우(Windows)용 비 스웜 시뮬레이터(Bee Swarm Simulator) 자동 매크로**<br>
 코딩을 몰라도 더블클릭 몇 번이면 설치하고, 한국어 화면에서 바로 설정할 수 있어요.
 
-![Platform](https://img.shields.io/badge/platform-macOS-lightgrey?logo=apple)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)
 ![Stars](https://img.shields.io/github/stars/Yoon-robin/Beolkkuri?style=flat&color=f5b301&logo=github)
 ![Version](https://img.shields.io/github/v/release/Yoon-robin/Beolkkuri?include_prereleases)
 
-**[🌐 홈페이지](https://yoon-robin.github.io/Beolkkuri/)** · [설치하기](#-설치하기) · [처음 실행하기](#-처음-실행하기) · [자주 묻는 질문](#-자주-묻는-질문) · [English](#english)
+**[🌐 홈페이지](https://yoon-robin.github.io/Beolkkuri/)** · [설치하기](#-설치하기) · [윈도우](#-윈도우에-설치하기) · [처음 실행하기](#-처음-실행하기) · [자주 묻는 질문](#-자주-묻는-질문) · [English](#english)
 
 </div>
 
@@ -36,6 +36,8 @@
 ---
 
 ## 📦 설치하기
+
+> 윈도우 PC라면 [윈도우에 설치하기](#-윈도우에-설치하기)로 건너뛰세요.
 
 > **필요한 것:** 인터넷이 되는 맥 (애플 실리콘 M1 이상은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상), 로블록스, 약 3GB의 저장 공간
 
@@ -74,19 +76,38 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 
 앱의 **시작 가이드** 에서 권한이 제대로 켜졌는지 초록 체크로 바로 확인할 수 있어요. 자세한 설명: [docs/permissions.md](docs/permissions.md)
 
+### 🪟 윈도우에 설치하기
+
+> **필요한 것:** 64비트 윈도우 10(1809 이상) 또는 윈도우 11, 로블록스, 약 1.5GB의 저장 공간
+> 윈도우 버전은 새로 추가돼서 실제 게임에서 아직 충분히 확인되지 않았어요. 이상한 점은 [Issues](https://github.com/Yoon-robin/Beolkkuri/issues)로 알려 주세요.
+
+1. **시작 버튼을 마우스 오른쪽 클릭 → 터미널**을 열어요. (윈도우 10은 **Windows PowerShell**)
+2. 아래 한 줄을 **복사해서 붙여넣고(Ctrl+V) 엔터**를 눌러요.
+
+```powershell
+irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex
+```
+
+3. **5~10분** 정도 기다려요. 파이썬이 없으면 알아서 받아서 내 계정에만 설치해요(관리자 권한 필요 없음).
+   - 영어 글자 인식(OCR)을 설치할지 물으면 엔터를 눌러요. 관리자 확인 창이 뜨면 **예** 를 눌러요.
+4. 끝나면 **바탕화면과 시작 메뉴에 벌꿀이 바로가기**가 생겨요. 설치 위치는 `내 사용자 폴더\Beolkkuri` 예요.
+
+ZIP으로 설치하려면 ZIP을 받아 **압축 풀기**를 한 뒤 폴더 안의 **`install_dependencies.bat`** 을 더블클릭하세요. ("Windows의 PC 보호" 창이 뜨면 **추가 정보 → 실행**)
+윈도우는 **권한을 따로 줄 필요가 없어요.** 디스플레이 배율은 **100%** 를 추천해요. 자세한 설명: [docs/windows.md](docs/windows.md)
+
 ---
 
 ## ▶️ 처음 실행하기
 
 1. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요.
-2. 바탕화면의 **벌꿀이**를 더블클릭해요. (또는 폴더 안의 `run_macro.command`)
+2. 바탕화면의 **벌꿀이**를 더블클릭해요. (또는 폴더 안의 `run_macro.command`, 윈도우는 `run_macro.bat`)
 3. 매크로 화면이 열리면 왼쪽의 **시작 가이드** 를 따라 해요.
    - **설정 → 게임 설정** 에서 내 **벌집 번호**를 맞추고,
    - **채집** 에서 갈 필드를 켜고,
    - **홈** 에서 **시작** 을 누르면 끝!
 4. 단축키: **F1** 시작 · **F2** 일시정지 · **F3** 정지 (설정에서 바꿀 수 있어요)
 
-> 매크로가 도는 동안 로블록스 창을 가리거나 움직이지 마세요. 터미널 창은 닫으면 안 돼요(최소화는 괜찮아요).
+> 매크로가 도는 동안 로블록스 창을 가리거나 움직이지 마세요. 터미널 창(윈도우는 벌꿀이 명령 창)은 닫으면 안 돼요(최소화는 괜찮아요).
 
 ### 업데이트
 왼쪽 아래 **업데이트 확인** 을 누르면 최신 버전으로 알아서 바꿔 줘요. 내 설정은 그대로 남아요.
@@ -99,6 +120,8 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 <summary><b>시작을 눌러도 캐릭터가 안 움직여요</b></summary>
 
 거의 항상 권한 문제예요. [권한 주기](#2-권한-주기-꼭-필요해요)를 다시 확인하고, 목록에 터미널이 이미 켜져 있다면 **껐다가 다시 켜고** 터미널을 재시작해 보세요.
+
+윈도우라면 권한은 필요 없어요. 시작하기 전에 로블록스 창을 한 번 클릭해 두고, 로블록스를 **관리자 권한으로 실행하지 않았는지** 확인해 주세요.
 </details>
 
 <details>
@@ -124,6 +147,8 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 <summary><b>처음부터 다시 설치하고 싶어요</b></summary>
 
 터미널에서 `rm -rf ~/beolkkuri-env ~/robin-macro-env` 를 실행한 뒤, [한 줄 설치](#1-한-줄로-설치하기-추천) 명령을 다시 붙여넣으세요.
+
+윈도우는 터미널에서 `Remove-Item -Recurse -Force $HOMEeolkkuri-env` 를 실행한 뒤 [윈도우 한 줄 설치](#-윈도우에-설치하기)를 다시 하면 돼요.
 </details>
 
 ---
@@ -135,6 +160,7 @@ Beolkkuri/
 ├── src/            파이썬 매크로 (main.py, gui.py, modules/)
 │   └── webapp/     빌드된 화면 (ui/ 에서 자동 생성, 직접 고치지 마세요)
 ├── ui/             React + TypeScript + Tailwind + shadcn/ui 화면 소스
+├── scripts/windows/ 윈도우 설치·실행 스크립트 (install.ps1, *.bat 이 부르는 것)
 ├── paths/          이동 경로 스크립트
 ├── settings/       기본 설정과 채집 패턴
 └── docs/           도움말 문서
@@ -156,10 +182,11 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 
 ## English
 
-**Beolkkuri** (벌꿀이) is a Bee Swarm Simulator macro for macOS with a React + shadcn/ui interface in Korean and English.
+**Beolkkuri** (벌꿀이) is a Bee Swarm Simulator macro for macOS and Windows with a React + shadcn/ui interface in Korean and English.
 
 **Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
-**Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app the installer put on your Desktop (or run `run_macro.command`). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
+**Install on Windows:** Open Terminal (or Windows PowerShell) and paste `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex`. (Or extract the ZIP and double-click `install_dependencies.bat`.) Windows needs no permissions; 100% display scaling is recommended. Windows support is new, so please report anything odd. See [docs/windows.md](docs/windows.md).
+**Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer put on your Desktop (or run `run_macro.command` on macOS, `run_macro.bat` on Windows). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
 
 Features: field gathering with patterns and AI token gathering, dispensers/collectibles, mob and boss runs, quests, manual and auto planters, hotbar and field boosts, rejoining, death recovery, profiles, Discord webhooks, a bot and streaming, and hourly reports.
 

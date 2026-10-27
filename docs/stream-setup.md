@@ -6,6 +6,8 @@
 
 스트리밍에는 무료 프로그램 **cloudflared** 가 필요해요.
 
+### 맥
+
 1. [Homebrew](https://brew.sh) 가 없다면 먼저 설치해요. 터미널에 아래를 붙여넣고 엔터:
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -15,6 +17,15 @@
    brew install cloudflared
    ```
 3. 설치 확인: `cloudflared --version` 을 입력해서 버전이 나오면 성공이에요.
+
+### 윈도우
+
+1. 시작 버튼을 마우스 오른쪽 클릭 → **터미널**을 열고 아래를 붙여넣고 엔터:
+   ```powershell
+   winget install --id Cloudflare.cloudflared
+   ```
+2. 터미널을 새로 열어 `cloudflared --version` 을 입력해서 버전이 나오면 성공이에요.
+3. 벌꿀이가 켜져 있었다면 껐다가 다시 열어야 cloudflared를 찾아요.
 
 ## 2. 매크로에서 켜기
 
@@ -26,4 +37,4 @@
 
 ---
 
-**English:** Streaming needs **cloudflared**. Install Homebrew, then run `brew install cloudflared`, and check it with `cloudflared --version`. Turn streaming on under *Settings → Stream*. A resolution of 0.5-0.75 works well. The temporary `trycloudflare.com` link is sent to Discord when the macro starts. Anyone who has the link can watch, so keep it private.
+**English:** Streaming needs **cloudflared**. On macOS, install Homebrew, then run `brew install cloudflared`; on Windows, run `winget install --id Cloudflare.cloudflared` and restart Beolkkuri. Check it with `cloudflared --version`. Turn streaming on under *Settings → Stream*. A resolution of 0.5-0.75 works well. The temporary `trycloudflare.com` link is sent to Discord when the macro starts. Anyone who has the link can watch, so keep it private.

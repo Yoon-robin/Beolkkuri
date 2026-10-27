@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>벌꿀이 · 맥용 비 스웜 시뮬레이터 매크로</title>
-<meta name="description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 터미널에 한 줄 붙여 넣으면 설치되고, 메뉴는 전부 한국어예요. 무료, 오픈소스." />
+<title>벌꿀이 · 맥·윈도우용 비 스웜 시뮬레이터 매크로</title>
+<meta name="description" content="맥과 윈도우에서 비 스웜 시뮬레이터를 대신 돌려 주는 매크로. 터미널에 한 줄 붙여 넣으면 설치되고, 메뉴는 전부 한국어예요. 무료, 오픈소스." />
 <meta name="theme-color" content="#ffc83d" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="벌꿀이 · 꿀 파밍은 맥한테 맡겨요" />
-<meta property="og:description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 한 줄 설치, 한국어 화면, 무료 오픈소스." />
+<meta property="og:title" content="꿀 파밍은 벌꿀이한테 맡겨요" />
+<meta property="og:description" content="맥과 윈도우에서 비 스웜 시뮬레이터를 대신 돌려 주는 매크로. 한 줄 설치, 한국어 화면, 무료 오픈소스." />
 <meta property="og:image" content="https://yoon-robin.github.io/Beolkkuri/assets/og.png" />
 <meta property="og:url" content="https://yoon-robin.github.io/Beolkkuri/" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -118,7 +118,7 @@ h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .hero { position: relative; margin-top: -70px; padding: 130px 0 0; background-color: var(--honey); }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 30px; align-items: center; }
 .hero-grid > * { min-width: 0; }
-h1.title { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 7vw, 100px); line-height: 0.98; letter-spacing: -0.02em; }
+h1.title { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 6vw, 84px); line-height: 0.98; letter-spacing: -0.02em; }
 html[lang="en"] h1.title { font-size: clamp(34px, 4.6vw, 66px); }
 .title .ln { display: block; width: fit-content; max-width: 100%; animation: popIn 0.9s var(--spring) backwards; }
 .title .ln.alt { margin-top: 10px; padding: 2px 18px 8px; border-radius: 20px; background: var(--ink); color: var(--honey); rotate: -2deg; box-shadow: 7px 7px 0 var(--red); animation-delay: 0.14s; }
@@ -316,13 +316,18 @@ kbd { font-family: ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px;
 .install-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 50px; align-items: center; }
 .install-grid > * { min-width: 0; }
 .install h2 { color: var(--honey); }
-.steps { margin: 30px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 16px; }
+.steps { margin: 22px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 16px; }
 .steps li { counter-increment: s; display: flex; gap: 16px; align-items: flex-start; font-size: 16.5px; color: var(--on-ink-muted); }
 .steps li::before {
   content: counter(s); flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
   background: var(--honey); color: var(--ink); font-family: var(--display); font-size: 19px; border: 2.5px solid var(--on-ink);
 }
 .steps li b { color: var(--on-ink); }
+.os-tabs { display: inline-flex; gap: 4px; margin-top: 26px; padding: 4px; border: 2.5px solid var(--on-ink); border-radius: 999px; }
+.os-tab { font: inherit; font-size: 15px; font-weight: 800; padding: 7px 18px; border: 0; border-radius: 999px; background: transparent; color: var(--on-ink-muted); cursor: pointer; transition: background-color 0.2s var(--out), color 0.2s var(--out); }
+.os-tab:hover { color: var(--on-ink); }
+.os-tab[aria-selected="true"] { background: var(--honey); color: var(--ink); }
+[data-os-only][hidden] { display: none; }
 .install .cmd { margin-top: 26px; border-color: var(--on-ink); box-shadow: 5px 5px 0 var(--honey); }
 .alt-link { display: inline-flex; margin-top: 20px; color: var(--on-ink-muted); font-size: 15px; font-weight: 600; border-bottom: 2px dashed currentColor; }
 .alt-link:hover { color: var(--honey); }
@@ -486,9 +491,9 @@ footer a:hover { color: var(--honey); }
         <div class="hero-copy">
           <h1 class="title">
             <span class="ln" data-i18n="hero.t1">꿀 파밍은</span>
-            <span class="ln alt" data-i18n="hero.t2">맥한테 맡겨요</span>
+            <span class="ln alt" data-i18n="hero.t2">벌꿀이한테 맡겨요</span>
           </h1>
-          <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">벌꿀이는 비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
+          <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">벌꿀이는 맥과 윈도우에서 비 스웜 시뮬레이터를 대신 돌려 주는 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
 
           <div class="cmd rise" style="animation-delay:.42s">
             <span class="prompt">$</span>
@@ -506,8 +511,8 @@ footer a:hover { color: var(--honey); }
             </a>
           </div>
           <div class="hero-meta rise" style="animation-delay:.62s">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.1">Apple Silicon · Intel</span></span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 10~20분</span></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.1">macOS · Windows</span></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 20분 이내</span></span>
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.3">코딩 몰라도 돼요</span></span>
           </div>
         </div>
@@ -517,7 +522,7 @@ footer a:hover { color: var(--honey); }
           <svg viewBox="0 0 128 128">
             <defs><path id="badgeCircle" d="M64 64 m-48 0 a48 48 0 1 1 96 0 a48 48 0 1 1 -96 0"/></defs>
             <circle cx="64" cy="64" r="62" fill="#fff" stroke="#1c1409" stroke-width="3"/>
-            <text><textPath href="#badgeCircle" textLength="296" lengthAdjust="spacing">FREE ✦ OPEN SOURCE ✦ FOR MAC ✦ </textPath></text>
+            <text><textPath href="#badgeCircle" textLength="296" lengthAdjust="spacing">FREE ✦ OPEN SOURCE ✦ MAC + WINDOWS ✦ </textPath></text>
           </svg>
           <span class="core"><img src="assets/bee.png" alt="" /></span>
         </div>
@@ -596,7 +601,7 @@ footer a:hover { color: var(--honey); }
         <article class="card c-search reveal pop">
           <span class="tag label" style="background:var(--blue)">⌘K</span>
           <h3 data-i18n="f.search.t">설정이 246개라 검색을 넣었어요</h3>
-          <p data-i18n="f.search.d">⌘K를 누르고 '벌집'을 치면 관련 설정이 바로 나와요. 초성만 쳐도 찾을 수 있어요.</p>
+          <p data-i18n="f.search.d">⌘K(윈도우는 Ctrl+K)를 누르고 '벌집'을 치면 관련 설정이 바로 나와요. 초성만 쳐도 찾을 수 있어요.</p>
           <div class="mini-search" aria-hidden="true">
             <div class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span id="typed"></span><span class="caret"></span></div>
             <div class="r" data-i18n-html="f.search.r1"><span>벌집 번호</span><small>설정 › 게임 설정</small></div>
@@ -653,7 +658,7 @@ footer a:hover { color: var(--honey); }
     <div class="wrap">
       <div class="head reveal">
         <h2 data-i18n="scr.title">이렇게 생겼어요</h2>
-        <p class="sub" data-i18n="scr.sub">처음 켜면 시작 가이드가 맥 권한부터 하나씩 확인해 줘요.</p>
+        <p class="sub" data-i18n="scr.sub">처음 켜면 시작 가이드가 할 일을 하나씩 짚어 줘요.</p>
       </div>
       <div class="reveal" style="--d:.08s">
         <div class="tabs" role="tablist" id="tabs">
@@ -686,18 +691,29 @@ footer a:hover { color: var(--honey); }
     <div class="wrap install-grid">
       <div class="reveal">
         <h2 data-i18n-html="ins.title">설치는<br />터미널에 한 줄</h2>
-        <ol class="steps">
+        <div class="os-tabs" role="tablist" aria-label="OS">
+          <button type="button" class="os-tab" role="tab" data-os="mac" aria-selected="true">macOS</button>
+          <button type="button" class="os-tab" role="tab" data-os="win" aria-selected="false">Windows</button>
+        </div>
+        <ol class="steps" data-os-only="mac">
           <li><span data-i18n-html="ins.1"><b>⌘ + 스페이스</b>를 누르고 <b>터미널</b>을 열어요.</span></li>
           <li><span data-i18n-html="ins.2">아래 명령어를 <b>붙여 넣고 엔터</b>. 설치 창이 뜨면 <b>계속</b>, <b>설치</b>를 눌러요.</span></li>
           <li><span data-i18n-html="ins.3"><b>손쉬운 사용</b>과 <b>화면 기록</b>에서 터미널을 켜요. 켜졌는지는 앱이 초록 체크로 알려 줘요.</span></li>
           <li><span data-i18n-html="ins.4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
+        </ol>
+        <ol class="steps" data-os-only="win" hidden>
+          <li><span data-i18n-html="ins.w1"><b>시작</b> 버튼을 마우스 오른쪽으로 누르고 <b>터미널</b>을 열어요. (Windows PowerShell도 돼요)</span></li>
+          <li><span data-i18n-html="ins.w2">아래 명령어를 <b>붙여 넣고 엔터</b>. 파이썬이 없으면 같이 설치돼요.</span></li>
+          <li><span data-i18n-html="ins.w3">윈도우는 <b>권한을 따로 줄 필요가 없어요</b>. 디스플레이 배율은 100%를 추천해요.</span></li>
+          <li><span data-i18n-html="ins.w4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
         </ol>
         <div class="cmd">
           <span class="prompt">$</span>
           <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash</code>
           <button class="copy" type="button" data-copy="cmd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
         </div>
-        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri#-설치하기" target="_blank" rel="noopener" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
+        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri#-설치하기" target="_blank" rel="noopener" data-os-only="mac" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
+        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/windows.md" target="_blank" rel="noopener" data-os-only="win" hidden data-i18n="ins.walt">ZIP 설치와 윈도우 도움말 →</a>
       </div>
       <div class="terminal reveal" style="--d:.12s">
         <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · 벌꿀이 설치</span></div>
@@ -714,10 +730,10 @@ footer a:hover { color: var(--honey); }
       </div>
       <div class="faq" id="faqList">
         <details class="reveal"><summary><span data-i18n="q1">돈 내야 하나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a1">아니요, 무료예요. 코드도 GitHub에 전부 공개돼 있어요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q2">윈도우에서도 되나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">아직은 맥 전용이에요. 애플 실리콘(M1 이상)은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상이 필요해요. 윈도우 버전은 준비하고 있어요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록에 초록 체크가 있는지 보고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q2">어떤 컴퓨터에서 돌아가요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">맥과 윈도우 둘 다 돼요. 맥은 애플 실리콘(M1 이상)이면 macOS 13 Ventura 이상, 인텔 맥이면 macOS 10.12 이상이 필요해요. 윈도우는 64비트 윈도우 10(1809 이상)이나 윈도우 11이면 돼요. 윈도우 버전은 새로 나와서, 이상한 점이 있으면 알려 주세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">맥이라면 거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록에 초록 체크가 있는지 보고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요. 윈도우라면 디스플레이 배율이 100%인지, 로블록스를 관리자 권한으로 실행하지 않았는지 확인해 주세요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">앱 왼쪽 아래의 <b>업데이트 확인</b>을 누르거나, 설치 명령을 한 번 더 붙여 넣으면 돼요. 설정은 그대로 남아요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">터미널에서 <code>rm -rf ~/beolkkuri-env</code> 를 실행한 다음 설치 명령을 다시 붙여 넣으세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">매크로 전용 환경을 지운 다음 설치 명령을 다시 붙여 넣으면 돼요.<br />맥: <code>rm -rf ~/beolkkuri-env</code><br />윈도우: <code>Remove-Item -Recurse -Force $HOME\beolkkuri-env</code></div></div></details>
         <details class="reveal"><summary><span data-i18n="q6">매크로 써도 괜찮나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a6">매크로 사용에 대한 책임은 사용자에게 있어요. 게임 규칙을 확인하고 본인 판단으로 사용해 주세요. 벌꿀이는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요.</div></div></details>
       </div>
     </div>
@@ -728,7 +744,7 @@ footer a:hover { color: var(--honey); }
   <section class="final honeycomb" id="final">
     <div class="wrap">
       <img class="logo-big" src="assets/logo.png" alt="" />
-      <h2 class="fill-text" id="fillText" data-i18n-html="end.title">오늘 밤엔<br />맥 켜 두고 자요</h2>
+      <h2 class="fill-text" id="fillText" data-i18n-html="end.title">오늘 밤엔<br />켜 두고 자요</h2>
       <p class="sub" data-i18n="end.sub">설치는 한 줄이면 되고, 나머지는 시작 가이드가 알려 줘요.</p>
       <div class="hero-cta">
         <a class="btn btn-ink" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg><span data-i18n="hero.cta">설치하기</span></a>
@@ -746,7 +762,8 @@ footer a:hover { color: var(--honey); }
     </div>
     <div class="foot-links">
       <a href="https://github.com/Yoon-robin/Beolkkuri" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/permissions.md" target="_blank" rel="noopener" data-i18n="foot.perm">권한 설정 도움말</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/permissions.md" target="_blank" rel="noopener" data-i18n="foot.perm">맥 권한 도움말</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/windows.md" target="_blank" rel="noopener" data-i18n="foot.win">윈도우 도움말</a>
       <a href="https://github.com/Yoon-robin/Beolkkuri/issues" target="_blank" rel="noopener" data-i18n="foot.issues">문제 알리기</a>
       <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
     </div>
@@ -767,10 +784,10 @@ footer a:hover { color: var(--honey); }
   const EN = {
     brand: "Beolkkuri",
     "nav.hour": "What it does", "nav.features": "Features", "nav.screens": "Screens", "nav.install": "Install", "nav.faq": "FAQ",
-    "hero.t1": "Let your Mac", "hero.t2": "farm the honey",
-    "hero.lead": "Beolkkuri plays Bee Swarm Simulator for you on macOS. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
+    "hero.t1": "Let Beolkkuri", "hero.t2": "farm the honey",
+    "hero.lead": "Beolkkuri plays Bee Swarm Simulator for you on Mac and Windows. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
     "hero.cta": "Install", "hero.gh": "View on GitHub", copy: "Copy",
-    "meta.1": "Apple Silicon & Intel", "meta.2": "10–20 min install", "meta.3": "No coding needed",
+    "meta.1": "macOS & Windows", "meta.2": "Installs in under 20 min", "meta.3": "No coding needed",
     "float.1": "Press F1 to start", "float.2": "Running <span class=\"clock\">1:02:13</span>", "float.3": "Search 246 settings",
     "hour.tag": "Example", "hour.title": "What an hour<br />looks like",
     "m1.t": "F1, and off it goes", "m1.d": "Flies from your hive to the first field.",
@@ -782,31 +799,35 @@ footer a:hover { color: var(--honey); }
     "m7.t": "Report's in", "m7.d": "Sends the honey you made and what it did this hour to Discord.",
     "hour.note": "The real order and timing depend on your settings.",
     "feat.title": "Things you'll use<br />every day", "feat.sub": "The longer you leave it running, the less it should need you.",
-    "f.search.t": "246 settings, so there's search", "f.search.d": "Press ⌘K, type \"hive\" and jump straight to it.",
+    "f.search.t": "246 settings, so there's search", "f.search.d": "Press ⌘K (Ctrl+K on Windows), type \"hive\" and jump straight to it.",
     "f.search.r1": "<span>Hive slot</span><small>Settings › Game</small>", "f.search.r2": "<span>Return to hive</span><small>Gather › Field</small>", "f.search.r3": "<span>Hive claim method</span><small>Settings › Game</small>",
     "f.discord.t": "Check in from your phone", "f.discord.d": "Discord alerts, hourly reports, a remote-control bot and screen streaming.",
     "n.1": "Your hourly report is here 📊", "n.2": "Defeated Vicious Bee 🐝", "n.3": "Planters harvested 🌱",
     "f.planter.t": "No more planter timers", "f.planter.d": "Plant on your own cycles or let it pick by nectar. Harvest times show on Home.",
     "f.safe.t": "Disconnects don't stop it", "f.safe.1": "Rejoins your private server", "f.safe.2": "Picks up again after a death", "f.safe.3": "Tells you when Mac permissions are off", "f.safe.4": "F1 start · F2 pause · F3 stop",
     "f.lang.t": "Korean first, English too", "f.lang.d": "Switch to English with one button. Dark and light themes included.",
-    "scr.title": "Here's the app", "scr.sub": "The first time you open it, Getting Started checks your Mac permissions one by one.",
+    "scr.title": "Here's the app", "scr.sub": "The first time you open it, Getting Started walks you through setup step by step.",
     "tab.home": "Home", "tab.gather": "Gather", "tab.guide": "Getting Started", "tab.search": "Search", "tab.light": "Light theme",
     "ins.title": "Install with<br />one line",
     "ins.1": "Press <b>⌘ + Space</b> and open <b>Terminal</b>.",
     "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>.",
     "ins.3": "Turn on Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. The app shows a green check when they're on.",
     "ins.4": "Open <b>Beolkkuri</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
-    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.term": "Terminal · Installing Beolkkuri",
+    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.walt": "ZIP install and Windows help →",
+    "ins.w1": "Right-click the <b>Start</b> button and open <b>Terminal</b> (Windows PowerShell works too).",
+    "ins.w2": "<b>Paste the command and press Enter.</b> Python is installed too if you don't have it.",
+    "ins.w3": "Windows <b>needs no permissions</b>. 100% display scaling is recommended.",
+    "ins.w4": "Open <b>벌꿀이 (Beolkkuri)</b> from your Desktop, join Bee Swarm in Roblox and press Start.", "ins.term": "Terminal · Installing Beolkkuri",
     "faq.title": "Questions",
     q1: "Does it cost anything?", a1: "No, it's free, and all the code is on GitHub.",
-    q2: "Does it work on Windows?", a2: "Not yet. It's Mac only for now: Apple Silicon Macs need macOS 13 Ventura or later, Intel Macs need macOS 10.12 or later. A Windows version is in the works.",
-    q3: "I pressed Start but nothing moves", a3: "It's almost always permissions. Check that Accessibility and Screen Recording show a green check in the app's <b>Getting Started</b> page, then quit Terminal (⌘Q) and open it again.",
+    q2: "What computers does it run on?", a2: "Both Mac and Windows. Apple Silicon Macs need macOS 13 Ventura or later, Intel Macs need macOS 10.12 or later. On Windows you need 64-bit Windows 10 (1809 or later) or Windows 11. The Windows version is new, so please report anything odd.",
+    q3: "I pressed Start but nothing moves", a3: "On a Mac it's almost always permissions. Check that Accessibility and Screen Recording show a green check in the app's <b>Getting Started</b> page, then quit Terminal (⌘Q) and open it again. On Windows, check that display scaling is 100% and that Roblox isn't running as administrator.",
     q4: "How do I update?", a4: "Press <b>Check for updates</b> at the bottom left of the app, or paste the install command again. Your settings are kept.",
-    q5: "I want a clean reinstall", a5: "Run <code>rm -rf ~/beolkkuri-env</code> in Terminal, then paste the install command again.",
+    q5: "I want a clean reinstall", a5: "Delete the macro's environment, then paste the install command again.<br />Mac: <code>rm -rf ~/beolkkuri-env</code><br />Windows: <code>Remove-Item -Recurse -Force $HOME\\beolkkuri-env</code>",
     q6: "Is using a macro OK?", a6: "You use macros at your own risk, so check the game's rules first. Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox.",
-    "end.title": "Leave your Mac on<br />tonight", "end.sub": "Install takes one line. Getting Started walks you through the rest.", "end.help": "Get help",
+    "end.title": "Leave it running<br />tonight", "end.sub": "Install takes one line. Getting Started walks you through the rest.", "end.help": "Get help",
     "foot.legal": "Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox. See LICENSE for the licenses of included code. This product includes software developed by exihs (Existance Macro).",
-    "foot.perm": "Permission help", "foot.issues": "Report a problem", copied: "Copied. Paste it into Terminal",
+    "foot.perm": "Mac permissions help", "foot.win": "Windows help", "foot.issues": "Report a problem", copied: "Copied. Paste it into Terminal",
     "alt.home": "Beolkkuri Home screen with the start button, task list and live log",
   }
   const CAPTIONS = {
@@ -831,7 +852,7 @@ footer a:hover { color: var(--honey); }
     $$("[data-i18n-html]").forEach((el) => { const v = dict[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v })
     $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "벌꿀이 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
     $("#langLabel").textContent = next === "ko" ? "English" : "한국어"
-    document.title = next === "ko" ? "벌꿀이 · 맥용 비 스웜 시뮬레이터 매크로" : "Beolkkuri · Bee Swarm Simulator macro for macOS"
+    document.title = next === "ko" ? "벌꿀이 · 맥·윈도우용 비 스웜 시뮬레이터 매크로" : "Beolkkuri · Bee Swarm Simulator macro for Mac and Windows"
     // the headline pops in again in the new language
     $$(".title .ln").forEach((s) => { s.style.animation = "none"; void s.offsetWidth; s.style.animation = "" })
     buildTapes(); setCaption(current); moveKnob(); layout()
@@ -1050,10 +1071,27 @@ footer a:hover { color: var(--honey); }
   tabs.forEach((t, i) => t.addEventListener("click", () => show(i, true)))
   auto = setInterval(() => show((current + 1) % tabs.length), 6000)
 
+  /* ---------------- macOS / Windows ---------------- */
+  // the install commands and steps follow the visitor's OS; the tabs in #install switch them
+  const CMD = {
+    mac: "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash",
+    win: "irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex",
+  }
+  let os = /win/i.test(navigator.userAgentData?.platform || navigator.platform || "") ? "win" : "mac"
+  function setOS(next) {
+    os = next
+    $("#cmd1").textContent = $("#cmd2").textContent = CMD[os]
+    $$(".cmd .prompt").forEach((p) => (p.textContent = os === "win" ? "PS>" : "$"))
+    $$("[data-os-only]").forEach((el) => (el.hidden = el.dataset.osOnly !== os))
+    $$(".os-tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.os === os)))
+    if (termStarted) runTerminal()
+  }
+  $$(".os-tab").forEach((b) => b.addEventListener("click", () => os !== b.dataset.os && setOS(b.dataset.os)))
+
   /* ---------------- installer terminal ---------------- */
   const term = $("#term")
-  const SCRIPT = () => [
-    ["", "$ ", "t-amber"], ["type", "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash"],
+  const MAC_SCRIPT = () => [
+    ["", "$ ", "t-amber"], ["type", CMD.mac],
     ["ln", lang === "ko" ? "🐝 벌꿀이 내려받는 중..." : "🐝 Downloading Beolkkuri...", "t-amber"],
     ["ln", lang === "ko" ? "~/Beolkkuri 에 내려받았어요." : "Downloaded to ~/Beolkkuri", "t-green"],
     ["ln", "==============================================", "t-amber"],
@@ -1069,27 +1107,54 @@ footer a:hover { color: var(--honey); }
     ["ln", lang === "ko" ? "바탕화면에 벌꿀이 앱을 만들었어요." : "Created the Beolkkuri app on your Desktop.", "t-green"],
     ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
   ]
+  // what scripts/windows/install_dependencies.ps1 prints, shortened
+  const WIN_SCRIPT = () => [
+    ["", "PS> ", "t-amber"], ["type", CMD.win],
+    ["ln", lang === "ko" ? "🐝 벌꿀이 내려받는 중..." : "🐝 Downloading Beolkkuri...", "t-amber"],
+    ["ln", lang === "ko" ? "C:\\Users\\me\\Beolkkuri 에 내려받았어요." : "Downloaded to C:\\Users\\me\\Beolkkuri", "t-green"],
+    ["ln", "==============================================", "t-amber"],
+    ["ln", "   벌꿀이 설치 / Beolkkuri installer", "t-amber"],
+    ["ln", "==============================================", "t-amber"],
+    ["ln", lang === "ko" ? "[1/5] Windows 버전 확인" : "[1/5] Checking Windows", "t-cyan"],
+    ["ln", lang === "ko" ? "쓸 수 있는 PC예요 / Your PC is compatible" : "Your PC is compatible", "t-green"],
+    ["ln", lang === "ko" ? "[2/5] 파이썬 확인" : "[2/5] Checking Python", "t-cyan"],
+    ["ln", lang === "ko" ? "[3/5] 글자 인식(OCR) 확인" : "[3/5] Checking text recognition (OCR)", "t-cyan"],
+    ["ln", lang === "ko" ? "[4/5] 매크로 전용 환경과 라이브러리 설치 (가장 오래 걸려요)" : "[4/5] Installing libraries (this takes the longest)", "t-cyan"],
+    ["pkg", "numpy<2"], ["pkg", "opencv-python-headless<4.11"], ["pkg", "pyautogui"], ["pkg", "mss"], ["pkg", "discord.py"], ["pkg", "eel"], ["pkg", "winocr"],
+    ["ln", lang === "ko" ? "[5/5] 바로가기 만들기" : "[5/5] Creating shortcuts", "t-cyan"],
+    ["ln", lang === "ko" ? "바탕화면과 시작 메뉴에 벌꿀이 바로가기를 만들었어요." : "Created 벌꿀이 (Beolkkuri) shortcuts on your Desktop and in the Start menu.", "t-green"],
+    ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
+  ]
+  // each run gets an id; switching OS starts a new run and the old one stops at its next step
+  let termRun = 0, termStarted = false
   async function runTerminal() {
+    termStarted = true
+    const id = ++termRun
+    const alive = () => id === termRun
     for (;;) {
       term.innerHTML = ""
+      const script = os === "win" ? WIN_SCRIPT() : MAC_SCRIPT()
       let line
-      for (const [kind, text, cls] of SCRIPT()) {
+      for (const [kind, text, cls] of script) {
+        if (!alive()) return
         if (kind === "") { line = document.createElement("div"); line.className = "ln"; line.innerHTML = `<span class="${cls}">${text}</span>`; term.append(line); continue }
         if (kind === "type") {
           const span = document.createElement("span"); line.append(span); const cur = document.createElement("span"); cur.className = "cursor"; line.append(cur)
-          for (const ch of text) { span.textContent += ch; await sleep(reduced ? 0 : 14) }
+          for (const ch of text) { if (!alive()) return; span.textContent += ch; await sleep(reduced ? 0 : 14) }
           await sleep(500); cur.remove(); continue
         }
         const div = document.createElement("div"); div.className = "ln"
-        if (kind === "pkg") { div.innerHTML = `   <span class="t-dim">• ${text}</span> `; term.append(div); await sleep(420); div.innerHTML += `<span class="t-ok">✓</span>` }
+        if (kind === "pkg") { div.innerHTML = `   <span class="t-dim">• ${text.replace("<", "&lt;")}</span> `; term.append(div); await sleep(420); div.innerHTML += `<span class="t-ok">✓</span>` }
         else { div.innerHTML = `<span class="${cls}">${text}</span>`; term.append(div); await sleep(380) }
         term.scrollTop = term.scrollHeight
       }
-      const end = document.createElement("div"); end.className = "ln"; end.innerHTML = `<span class="t-amber">$ </span><span class="cursor"></span>`; term.append(end)
+      if (!alive()) return
+      const end = document.createElement("div"); end.className = "ln"; end.innerHTML = `<span class="t-amber">${os === "win" ? "PS> " : "$ "}</span><span class="cursor"></span>`; term.append(end)
       term.scrollTop = term.scrollHeight
       await sleep(5000)
     }
   }
+  setOS(os)
   new IntersectionObserver((entries, obs) => { if (entries[0].isIntersecting) { runTerminal(); obs.disconnect() } }, { threshold: 0.3 }).observe(term)
 
   /* ---------------- smooth faq ---------------- */

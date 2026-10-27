@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
+import { isMac } from "@/lib/platform"
 import { py, type PermissionKind } from "@/lib/py"
 import type { PageId } from "@/lib/route"
 import { cn } from "@/lib/utils"
@@ -95,8 +96,9 @@ const strings: PageStrings<
     "perm.keyboardOn": "끄러 가기",
     "perm.restart": "설정에서 켠 뒤에는 터미널을 완전히 껐다가(⌘Q) 벌꿀이를 다시 열어야 적용돼요.",
     "display.title": "화면 설정 확인",
-    "display.body":
-      "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요.",
+    "display.body": isMac
+      ? "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요."
+      : "Windows 디스플레이 배율은 100%로, 야간 모드와 HDR은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요.",
     "game.title": "비 스웜 시뮬레이터 들어가기",
     "game.body":
       "로블록스에서 비 스웜 시뮬레이터에 들어가요. 다른 사람 방해를 덜 받는 비공개 서버를 추천해요. 링크를 넣어 두면 튕겼을 때 알아서 다시 들어가요.",
@@ -116,7 +118,7 @@ const strings: PageStrings<
     "keys.stop": "정지",
     "tips.title": "알아 두면 좋아요",
     "tips.1": "매크로가 도는 동안 로블록스 창을 가리거나 움직이지 마세요.",
-    "tips.2": "터미널 창은 닫으면 안 돼요. 최소화는 괜찮아요.",
+    "tips.2": isMac ? "터미널 창은 닫으면 안 돼요. 최소화는 괜찮아요." : "벌꿀이 명령 창은 닫으면 안 돼요. 최소화는 괜찮아요.",
     "tips.3": "디스펜서, 몹 사냥, 퀘스트는 각 메뉴에서 하나씩 켜 보면서 늘려 가요.",
     "tips.4": "디스코드 웹후크를 넣으면 휴대폰으로 진행 상황을 받아볼 수 있어요.",
     "help.title": "잘 안 되나요?",
@@ -142,8 +144,9 @@ const strings: PageStrings<
     "perm.keyboardOn": "Turn off",
     "perm.restart": "After turning them on, quit Terminal (⌘Q) and open Beolkkuri again for it to take effect.",
     "display.title": "Check display settings",
-    "display.body":
-      "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor.",
+    "display.body": isMac
+      ? "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor."
+      : "Set Windows display scale to 100% and turn off Night light and HDR. Run Roblox maximised on your main monitor.",
     "game.title": "Join Bee Swarm Simulator",
     "game.body":
       "Open Bee Swarm Simulator in Roblox. A private server is best. If you save its link, the macro rejoins on its own after a disconnect.",
@@ -163,7 +166,7 @@ const strings: PageStrings<
     "keys.stop": "Stop",
     "tips.title": "Good to know",
     "tips.1": "Don't cover or move the Roblox window while the macro runs.",
-    "tips.2": "Keep the Terminal window open. Minimising it is fine.",
+    "tips.2": isMac ? "Keep the Terminal window open. Minimising it is fine." : "Keep the Beolkkuri console window open. Minimising it is fine.",
     "tips.3": "Turn on dispensers, mobs and quests one at a time from their menus.",
     "tips.4": "Add a Discord webhook to follow progress from your phone.",
     "help.title": "Something not working?",
@@ -291,7 +294,9 @@ export default function GuidePage() {
   const pauseKey = keybindDisplay(useSetting<string>("pause_keybind", "F2") || "F2")
   const stopKey = keybindDisplay(useSetting<string>("stop_keybind", "F3") || "F3")
 
-  const checks = [permsOk, !!privateServer, enabledFields > 0]
+  // Windows needs no permissions, so its guide starts at the display step.
+  const checks = [...(isMac ? [permsOk] : []), !!privateServer, enabledFields > 0]
+  const first = isMac ? 1 : 0
   const doneCount = checks.filter(Boolean).length
 
   return (
@@ -311,30 +316,32 @@ export default function GuidePage() {
     >
       <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
         <div className="space-y-4">
-          <Step n={1} icon={<ShieldCheckIcon />} title={s("perm.title")} done={perms ? permsOk : undefined}>
-            <p>{s("perm.body")}</p>
-            <div className="space-y-2">
-              <PermissionRow label={s("perm.accessibility")} value={perms ? perms.accessibility : undefined} kind="accessibility" onOpened={refreshPerms} />
-              <PermissionRow label={s("perm.screen")} value={perms ? perms.screenRecording : undefined} kind="screenRecording" onOpened={refreshPerms} />
-              {perms?.fullKeyboardAccess && (
-                <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">
-                  <span className="flex-1">{s("perm.keyboard")}</span>
-                  <Button size="sm" variant="outline" onClick={() => void py.openPrivacySettings("keyboard").finally(refreshPerms)}>
-                    {s("perm.keyboardOn")}
-                  </Button>
-                </div>
-              )}
-            </div>
-            <p className="text-xs">{s("perm.restart")}</p>
-            <DocLink doc="permissions" />
-          </Step>
+          {isMac && (
+            <Step n={1} icon={<ShieldCheckIcon />} title={s("perm.title")} done={perms ? permsOk : undefined}>
+              <p>{s("perm.body")}</p>
+              <div className="space-y-2">
+                <PermissionRow label={s("perm.accessibility")} value={perms ? perms.accessibility : undefined} kind="accessibility" onOpened={refreshPerms} />
+                <PermissionRow label={s("perm.screen")} value={perms ? perms.screenRecording : undefined} kind="screenRecording" onOpened={refreshPerms} />
+                {perms?.fullKeyboardAccess && (
+                  <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">
+                    <span className="flex-1">{s("perm.keyboard")}</span>
+                    <Button size="sm" variant="outline" onClick={() => void py.openPrivacySettings("keyboard").finally(refreshPerms)}>
+                      {s("perm.keyboardOn")}
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs">{s("perm.restart")}</p>
+              <DocLink doc="permissions" />
+            </Step>
+          )}
 
-          <Step n={2} icon={<MonitorIcon />} title={s("display.title")}>
+          <Step n={first + 1} icon={<MonitorIcon />} title={s("display.title")}>
             <p>{s("display.body")}</p>
             <DocLink doc="display-settings" />
           </Step>
 
-          <Step n={3} icon={<GamepadIcon />} title={s("game.title")} done={!!privateServer}>
+          <Step n={first + 2} icon={<GamepadIcon />} title={s("game.title")} done={!!privateServer}>
             <p>{s("game.body")}</p>
             {privateServer ? (
               <p className="text-emerald-600 dark:text-emerald-400">{s("game.psSet")}</p>
@@ -345,7 +352,7 @@ export default function GuidePage() {
             )}
           </Step>
 
-          <Step n={4} icon={<HomeIcon />} title={s("hive.title")}>
+          <Step n={first + 3} icon={<HomeIcon />} title={s("hive.title")}>
             <p>{s("hive.body")}</p>
             <div className="flex items-center gap-3">
               <span className="text-foreground">{s("hive.slot")}</span>
@@ -364,7 +371,7 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step n={5} icon={<FlowerIcon />} title={s("fields.title")} done={enabledFields > 0}>
+          <Step n={first + 4} icon={<FlowerIcon />} title={s("fields.title")} done={enabledFields > 0}>
             <p>{s("fields.body")}</p>
             <div className="flex flex-wrap items-center gap-3">
               <span className={cn(enabledFields > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
@@ -376,7 +383,7 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step n={6} icon={<KeyboardIcon />} title={s("start.title")}>
+          <Step n={first + 5} icon={<KeyboardIcon />} title={s("start.title")}>
             <p>{s("start.body")}</p>
             <div className="flex flex-wrap items-center gap-4">
               <RunButton size="lg" />
