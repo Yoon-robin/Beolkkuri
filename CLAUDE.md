@@ -254,7 +254,9 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
-- Not released yet: the hive claim route (see "Hive claim"), checked only against a pretend hive row, not the game. The cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar.
+- v1.0.6:
+  - the cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar;
+  - the hive claim route (see "Hive claim"), released after checks against a pretend hive row only, not the game.
 - v1.0.5:
   - the start setup (see "Start setup"), asked over the game or in the app before the first start;
   - log lines in Korean (see "Log lines in Korean").
