@@ -1,7 +1,7 @@
 import { LanguagesIcon, MoonIcon, PlayIcon, SearchIcon, SearchXIcon, SquareIcon, SunIcon } from "lucide-react"
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react"
 
-import { NAV } from "@/components/app-sidebar"
+import { NAV } from "@/components/page-tabs"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -22,6 +22,7 @@ import { isMac } from "@/lib/platform"
 import type { PageId } from "@/lib/route"
 import { plainText } from "@/lib/rich-text"
 import { useTheme } from "@/lib/theme"
+import { cn } from "@/lib/utils"
 import { sections } from "@/schema"
 import { useRun } from "@/state/run-state"
 
@@ -81,7 +82,7 @@ const strings: PageStrings<
   },
 }
 
-const navItems = new Map(NAV.flatMap((g) => g.items).map((i) => [i.id, i]))
+const navItems = new Map(NAV.map((i) => [i.id, i]))
 const ko = schemaKo as { settings: Record<string, { title?: string } | undefined>; sections: Record<string, { title?: string } | undefined> }
 
 // ---------------------------------------------------------------- search
@@ -143,7 +144,7 @@ type SettingEntry = { id: string; title: string; trail: string; keywords: string
 function useSettingEntries(): SettingEntry[] {
   const { t, lang, setting, section } = useI18n()
   return useMemo(() => {
-    const pageLabel = new Map(NAV.flatMap((g) => g.items).map((i) => [i.id, t(i.label)]))
+    const pageLabel = new Map(NAV.map((i) => [i.id, t(i.label)]))
     const seen = new Set<string>()
     const out: SettingEntry[] = []
     for (const sec of sections) {
@@ -181,7 +182,7 @@ function Key({ children }: { children: string }) {
 type Row = { key: string; keywords: string[]; onSelect: () => void; content: ReactNode }
 
 /** Ctrl/⌘+K search over pages, quick actions and every setting. */
-export function CommandPalette() {
+export function CommandPalette({ className }: { className?: string }) {
   const s = useStrings(strings)
   const { t, lang, setLang } = useI18n()
   const { resolvedTheme, setTheme } = useTheme()
@@ -254,7 +255,8 @@ export function CommandPalette() {
     },
   ]
 
-  const pages: Row[] = [...navItems.values()].map((item) => ({
+  // Home is the control panel (or, in a narrow window, the first tab), not a place to jump to
+  const pages: Row[] = [...navItems.values()].filter((item) => item.id !== "home").map((item) => ({
     key: item.id,
     keywords: [t(item.label), lang === "ko" ? uiEn[item.label] : uiKo[item.label], item.id],
     onSelect: () => goToTarget({ page: item.id }),
@@ -324,7 +326,7 @@ export function CommandPalette() {
       <Button
         variant="outline"
         size="sm"
-        className="h-8 gap-2 text-muted-foreground md:w-52 md:justify-start"
+        className={cn("h-8 gap-2 text-muted-foreground md:w-52 md:justify-start", className)}
         onClick={() => openPalette(true)}
         aria-label={s("trigger")}
         aria-keyshortcuts={isMac ? "Meta+K" : "Control+K"}

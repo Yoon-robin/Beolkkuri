@@ -324,7 +324,7 @@ export function BetaUpdateControl() {
   const start = async () => {
     const code = hash.trim()
     setRunning(true)
-    // show progress in the sidebar update panel, like the old window.updateProgress call
+    // show progress next to the version in the control panel, like the old window.updateProgress call
     window.__beolkkuriBridge?.handlers.updateProgress?.(...([0, t("beta.starting", { hash: code })] as never[]))
     try {
       const res = await callPy("updateFromHash", code)

@@ -158,10 +158,15 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
   - Easing tokens `--ease-out-soft` (things arriving) and `--ease-glide` (things moving between two places), also usable as `ease-out-soft` / `ease-glide`.
   - `.bk-page` staggers a page's children automatically (rise + slight blur, under ~0.4s in total). Tab panels use the shorter `.bk-tab-in`.
   - `.bk-stagger`, `.bk-shimmer`, `.bk-pop`, `.bk-swap` (an icon/label replacing another in place) and `.bk-flash` are opt-in.
-  - The selected tab (`components/ui/tabs.tsx`) and sidebar item (`NavGlider` in `app-sidebar.tsx`) have one sliding highlight (`.bk-glider`) instead of per-item backgrounds.
+  - The selected sub-tab (`components/ui/tabs.tsx`) and page tab (`components/page-tabs.tsx`, an underline) each have one sliding highlight (`.bk-glider`) instead of per-item backgrounds.
   - No looping attention effects (glows, pulsing buttons): the macro can run for hours. The small status dot is the one exception.
   - There is a global `prefers-reduced-motion` override.
   - Theme switching uses a view-transition circle (`ui/src/lib/theme.tsx`).
+- **Window layout** (`App.tsx`):
+  - The control panel stays on the left beside every page. It is `ControlPanel` in `pages/home.tsx`, with search, start/stop, the macro mode, the task order, planter timers, logs, language and theme, and the version.
+  - The pages are tabs along the top (`NAV` and `PageTabs` in `components/page-tabs.tsx`).
+  - Below 768 px (`useIsMobile`), the panel becomes the first tab, Home, and the header gets the search and start buttons. In a wide window, `#/home` shows Gather.
+  - The launch update check and the update dialogs live in `UpdateProvider` (`update-panel.tsx`), which is mounted once, so the panel can come and go.
 - **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. Sub-tab labels live in `ui.ts` as `subtab.<page>.<tab value>`; the page and the palette both read them, so a new sub-tab needs that key plus the same hooks. A custom row needs `useFocusTarget`.
 - **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts. It also flags Python as unresponsive after 6 s without an answer: a "응답 없음" badge and a toast pointing at the console window.
 - **First launch:** `useFirstRunGuide` in `App.tsx` opens the 시작 가이드 once and saves `guide_shown`. It skips that when a private server link is already set (an install from before the setting).
@@ -244,6 +249,7 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
+- Not released yet: the cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar.
 - v1.0.5:
   - the start setup (see "Start setup"), asked over the game or in the app before the first start;
   - log lines in Korean (see "Log lines in Korean").

@@ -1,24 +1,22 @@
 import { ThemeProvider, useTheme } from "@/lib/theme"
 import { useEffect, useLayoutEffect, useRef, type ComponentType } from "react"
 
-import { AppSidebar, NAV } from "@/components/app-sidebar"
 import { CommandPalette } from "@/components/command-palette"
 import { PageError, PageLoading } from "@/components/page"
-import { RunButton, RunStatusBadge } from "@/components/run-controls"
+import { NAV, PageTabs } from "@/components/page-tabs"
+import { RunButton } from "@/components/run-controls"
 import { StartSetupDialog } from "@/components/start-setup"
-import { Separator } from "@/components/ui/separator"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { UpdateProvider } from "@/components/update-panel"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { I18nProvider, useI18n } from "@/i18n"
-import { isMac } from "@/lib/platform"
-import { isDesktopApp } from "@/lib/py"
 import { usePage, type PageId } from "@/lib/route"
 import BoostPage from "@/pages/boost"
 import CollectPage from "@/pages/collect"
 import GatherPage from "@/pages/gather"
 import GuidePage from "@/pages/guide"
-import HomePage from "@/pages/home"
+import HomePage, { ControlPanel } from "@/pages/home"
 import KillPage from "@/pages/kill"
 import PlantersPage from "@/pages/planters"
 import QuestsPage from "@/pages/quests"
@@ -83,14 +81,24 @@ function useFirstRunGuide(setPage: (page: PageId) => void) {
   }, [settings, setPage, saveGeneral])
 }
 
+const SIDE_TABS = NAV.filter((item) => item.id !== "home")
+
+/**
+ * The control panel (start, mode, tasks, logs) stays on the left beside every page, and the
+ * pages are tabs along the top. A narrow window has no room for both, so there the panel
+ * becomes the first tab, Home.
+ */
 function Shell() {
   usePersistedPreferences()
   const { t } = useI18n()
   const [page, setPage] = usePage()
   useFirstRunGuide(setPage)
+  const wide = !useIsMobile()
+  // Home is the panel itself in a wide window, so its link opens the first task page beside it
+  const shown: PageId = wide && page === "home" ? "gather" : page
   const { settings, loadError, refresh } = useSettings()
-  const Current = PAGE_COMPONENTS[page]
-  const label = NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label
+  const Current = PAGE_COMPONENTS[shown]
+  const label = NAV.find((i) => i.id === shown)?.label
 
   useEffect(() => {
     document.title = label ? `${t(label)} · ${t("app.name")}` : t("app.name")
@@ -99,35 +107,25 @@ function Shell() {
   // each page starts at the top instead of keeping the previous page's scroll position
   useLayoutEffect(() => {
     window.scrollTo(0, 0)
-  }, [page])
+  }, [shown])
 
   return (
-    <SidebarProvider>
-      <AppSidebar page={page} onNavigate={setPage} />
-      <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <SidebarTrigger label={t("nav.toggle")} />
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {t("nav.toggle")} <kbd className="ml-1 rounded bg-background/20 px-1 font-mono text-[0.7rem]">{isMac ? "⌘B" : "Ctrl+B"}</kbd>
-            </TooltipContent>
-          </Tooltip>
-          <Separator orientation="vertical" className="mx-1 h-5 data-vertical:self-center" />
-          {/* the page name keeps its room; the dev-mode note gives way first */}
-          <span className="shrink-0 text-sm font-medium">{label ? t(label) : ""}</span>
-          {!isDesktopApp() && <span className="hidden min-w-0 truncate text-xs text-muted-foreground md:inline">· {t("devBanner")}</span>}
-          <div className="ml-auto flex items-center gap-2">
-            <CommandPalette />
-            <RunStatusBadge className="hidden sm:inline-flex" />
-            {page !== "home" && <RunButton />}
-          </div>
+    <div className="flex min-h-svh">
+      {wide && <ControlPanel layout="side" />}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 backdrop-blur">
+          <PageTabs page={shown} items={wide ? SIDE_TABS : NAV} />
+          {/* the panel holds these in a wide window */}
+          {!wide && (
+            <div className="flex shrink-0 items-center gap-2 pr-3">
+              <CommandPalette />
+              {shown !== "home" && <RunButton />}
+            </div>
+          )}
         </header>
-        {/* SidebarInset is already the page's <main> */}
-        <div className="min-w-0 flex-1">{settings ? <Current key={page} /> : loadError ? <PageError onRetry={refresh} /> : <PageLoading />}</div>
-      </SidebarInset>
-    </SidebarProvider>
+        <main className="min-w-0 flex-1">{settings ? <Current key={shown} /> : loadError ? <PageError onRetry={refresh} /> : <PageLoading />}</main>
+      </div>
+    </div>
   )
 }
 
@@ -138,7 +136,9 @@ export default function App() {
         <TooltipProvider delayDuration={300}>
           <SettingsProvider>
             <RunStateProvider>
-              <Shell />
+              <UpdateProvider>
+                <Shell />
+              </UpdateProvider>
               <StartSetupDialog />
               <Toaster richColors position="bottom-right" />
             </RunStateProvider>

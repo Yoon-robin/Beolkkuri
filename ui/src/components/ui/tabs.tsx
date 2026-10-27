@@ -69,7 +69,11 @@ function useOverflowingTabs(list: React.RefObject<HTMLDivElement | null>) {
     }
     reveal("instant")
     update()
-    const resize = new ResizeObserver(update)
+    // a narrower window can push the active tab out of view
+    const resize = new ResizeObserver(() => {
+      reveal("instant")
+      update()
+    })
     resize.observe(el)
     const tabs = new MutationObserver(() => reveal("smooth"))
     tabs.observe(el, { subtree: true, attributes: true, attributeFilter: ["data-state"] })
@@ -199,4 +203,4 @@ function TabsContent({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }
+export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants, useOverflowingTabs }

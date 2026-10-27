@@ -1,7 +1,8 @@
-import { CompassIcon, DownloadIcon, FlowerIcon, ListTodoIcon, ScrollTextIcon, SearchIcon, ShieldAlertIcon, SproutIcon, Trash2Icon, TimerResetIcon } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { DownloadIcon, FlowerIcon, LanguagesIcon, ListTodoIcon, MoonIcon, ScrollTextIcon, SearchIcon, ShieldAlertIcon, SunIcon, Trash2Icon, TimerResetIcon } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 
-import { EmptyState, Page } from "@/components/page"
+import { CommandPalette } from "@/components/command-palette"
+import { EmptyState } from "@/components/page"
 import { RunButton, RunStatusBadge } from "@/components/run-controls"
 import {
   AlertDialog,
@@ -17,25 +18,23 @@ import {
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { UpdatePanel } from "@/components/update-panel"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
 import { usePythonEvent } from "@/lib/bridge"
-import { callPy, py, type LogEntry, type Settings } from "@/lib/py"
+import { callPy, isDesktopApp, py, type LogEntry, type Settings } from "@/lib/py"
 import { RichText } from "@/lib/rich-text"
 import { buildTaskList, type TaskItem } from "@/lib/tasks"
+import { useTheme } from "@/lib/theme"
 import { cn } from "@/lib/utils"
 import { usePermissions } from "@/state/permissions"
 import { useSettings } from "@/state/settings"
 
 const strings: PageStrings<
-  | "title"
-  | "subtitle"
   | "control"
-  | "controlDesc"
   | "mode"
   | "mode.normal"
   | "mode.alt"
@@ -48,10 +47,8 @@ const strings: PageStrings<
   | "mode.quest.desc"
   | "mode.bug.desc"
   | "tasks"
-  | "tasksDesc"
   | "tasksEmpty"
   | "tasksGo"
-  | "firstTime"
   | "logs"
   | "logsEmpty"
   | "logsSearch"
@@ -75,10 +72,7 @@ const strings: PageStrings<
   | "planterReset"
 > = {
   ko: {
-    title: "홈",
-    subtitle: "매크로를 시작하고 지금 무슨 일을 하는지 확인해요.",
     control: "매크로 조작",
-    controlDesc: "로블록스에서 비 스웜 시뮬레이터를 켜 두고 시작을 누르세요.",
     mode: "매크로 모드",
     "mode.normal": "일반 모드",
     "mode.alt": "부계정 모드",
@@ -91,10 +85,8 @@ const strings: PageStrings<
     "mode.quest.desc": "퀘스트만 해요.",
     "mode.bug.desc": "몹과 보스 사냥만 해요.",
     tasks: "할 일 목록",
-    tasksDesc: "매크로가 이 순서대로 작업해요.",
     tasksEmpty: "켜진 작업이 없어요. 채집이나 수집 탭에서 작업을 켜 주세요.",
     tasksGo: "채집 필드 고르기",
-    firstTime: "처음이세요?",
     logs: "기록",
     logsEmpty: "아직 기록이 없어요.",
     logsSearch: "기록 검색 (예: 벌집)",
@@ -118,16 +110,13 @@ const strings: PageStrings<
     planterReset: "이 타이머 초기화",
   },
   en: {
-    title: "Home",
     permTitle: "macOS permissions are off",
     permDesc: "Without them the macro can't move the mouse and keyboard or see the screen.",
     permFix: "Fix it",
     permKbTitle: "Full Keyboard Access is on",
     permKbDesc: "It can confuse the macro, so please turn it off.",
     permKbFix: "Fix it",
-    subtitle: "Start the macro and watch what it's doing.",
     control: "Macro control",
-    controlDesc: "Open Bee Swarm Simulator in Roblox, then press Start.",
     mode: "Macro mode",
     "mode.normal": "Normal",
     "mode.alt": "Alt",
@@ -140,10 +129,8 @@ const strings: PageStrings<
     "mode.quest.desc": "Does quests only.",
     "mode.bug.desc": "Mob and boss runs only.",
     tasks: "Tasks",
-    tasksDesc: "The macro works through these in order.",
     tasksEmpty: "No tasks are enabled. Turn some on in Gather or Collect.",
     tasksGo: "Choose a field",
-    firstTime: "New here?",
     logs: "Logs",
     logsEmpty: "Nothing logged yet.",
     logsSearch: "Search logs (e.g. claimed hive)",
@@ -196,7 +183,21 @@ function useLogs() {
   return { logs, clear: () => setLogs([]) }
 }
 
-function LogsCard() {
+/** One block of the control panel: a small heading, with room for a count or buttons on the right. */
+function PanelSection({ title, aside, className, children }: { title: ReactNode; aside?: ReactNode; className?: string; children: ReactNode }) {
+  return (
+    <section className={cn("flex flex-col gap-2", className)}>
+      <div className="flex min-h-7 items-center justify-between gap-2">
+        <h2 className="text-xs font-semibold text-muted-foreground">{title}</h2>
+        {aside}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+/** `fill`: grow into the panel's leftover height (side panel) instead of a fixed height (Home tab). */
+function LogsSection({ fill }: { fill: boolean }) {
   const t = useStrings(strings)
   const { t: tc } = useI18n()
   const { logs, clear } = useLogs()
@@ -225,8 +226,16 @@ function LogsCard() {
     const onScroll = () => {
       stick.current = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 32
     }
+    // in the side panel the box shrinks when the task list above it loads or grows
+    const resize = new ResizeObserver(() => {
+      if (stick.current) viewport.scrollTop = viewport.scrollHeight
+    })
     viewport.addEventListener("scroll", onScroll, { passive: true })
-    return () => viewport.removeEventListener("scroll", onScroll)
+    resize.observe(viewport)
+    return () => {
+      viewport.removeEventListener("scroll", onScroll)
+      resize.disconnect()
+    }
   }, [])
   useEffect(() => {
     const viewport = bottom.current?.closest<HTMLElement>("[data-slot=scroll-area-viewport]")
@@ -246,10 +255,11 @@ function LogsCard() {
   }
 
   return (
-    <Card className="flex min-h-[22rem] flex-col">
-      <CardHeader>
-        <CardTitle>{t("logs")}</CardTitle>
-        <CardAction className="flex gap-1">
+    <PanelSection
+      title={t("logs")}
+      className={fill ? "min-h-64 flex-1" : undefined}
+      aside={
+        <div className="flex gap-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-sm" onClick={exportLogs} aria-label={t("logsExport")}>
@@ -289,34 +299,33 @@ function LogsCard() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2">
-        <div className="relative">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("logsSearch")} className="pl-8" type="search" />
-          {terms.length > 0 && (
-            <span className="absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground">
-              {t("logsMatch", { count: shown.length, total: logs.length })}
-            </span>
-          )}
         </div>
-        <ScrollArea className="h-80 flex-1 rounded-md border bg-muted/20">
-          <div className="space-y-1 p-2 font-mono text-xs">
-            {shown.length === 0 && (
-              <p className="flex flex-col items-center gap-2 px-2 py-10 text-center font-sans text-sm text-muted-foreground">
-                <ScrollTextIcon className="size-5 opacity-60" />
-                {terms.length ? tc("common.noResults") : t("logsEmpty")}
-              </p>
-            )}
-            {shown.map((l) => (
-              <LogRow key={l.key} line={l} fresh={l.key > seenUpTo.current} />
-            ))}
-            <div ref={bottom} />
-          </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+      }
+    >
+      <div className="relative">
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("logsSearch")} className="pl-8" type="search" />
+        {terms.length > 0 && (
+          <span className="absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground">
+            {t("logsMatch", { count: shown.length, total: logs.length })}
+          </span>
+        )}
+      </div>
+      <ScrollArea className={cn("rounded-md border bg-muted/20", fill ? "min-h-0 flex-1" : "h-96")}>
+        <div className="space-y-1 p-2 font-mono text-xs">
+          {shown.length === 0 && (
+            <p className="flex flex-col items-center gap-2 px-2 py-10 text-center font-sans text-sm text-muted-foreground">
+              <ScrollTextIcon className="size-5 opacity-60" />
+              {terms.length ? tc("common.noResults") : t("logsEmpty")}
+            </p>
+          )}
+          {shown.map((l) => (
+            <LogRow key={l.key} line={l} fresh={l.key > seenUpTo.current} />
+          ))}
+          <div ref={bottom} />
+        </div>
+      </ScrollArea>
+    </PanelSection>
   )
 }
 
@@ -354,14 +363,42 @@ function LogRow({ line: l, fresh }: { line: LogLine; fresh: boolean }) {
 
 function TaskRow({ task }: { task: TaskItem }) {
   return (
-    <li className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2">
-      <Badge variant="secondary" className="w-20 shrink-0 justify-center text-[0.65rem]">
+    <li className="flex items-center gap-2.5 rounded-md border bg-card px-2.5 py-1.5">
+      <Badge variant="secondary" className="w-16 shrink-0 justify-center text-[0.65rem]">
         {task.kind}
       </Badge>
       <div className="min-w-0 text-sm">
         <RichText text={task.label} />
       </div>
     </li>
+  )
+}
+
+function TasksSection({ tasks }: { tasks: TaskItem[] }) {
+  const t = useStrings(strings)
+  return (
+    <PanelSection title={t("tasks")} aside={tasks.length > 0 && <span className="text-xs text-muted-foreground tabular-nums">{tasks.length}</span>}>
+      {tasks.length === 0 ? (
+        <EmptyState
+          icon={ListTodoIcon}
+          description={t("tasksEmpty")}
+          className="py-5"
+          action={
+            <Button variant="outline" size="sm" onClick={() => (window.location.hash = "/gather")}>
+              <FlowerIcon />
+              {t("tasksGo")}
+            </Button>
+          }
+        />
+      ) : (
+        // a long list scrolls on its own so the logs below keep their room
+        <ol className="bk-stagger max-h-52 space-y-1 overflow-y-auto [scrollbar-width:thin]">
+          {taskKeys(tasks).map(([key, task]) => (
+            <TaskRow key={key} task={task} />
+          ))}
+        </ol>
+      )}
+    </PanelSection>
   )
 }
 
@@ -421,157 +458,198 @@ function PlanterTimers({ settings }: { settings: Settings }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("planters")}</CardTitle>
-        <CardDescription>{mode === 1 ? t("manual") : t("auto")}</CardDescription>
-        <CardAction>
-          <Button variant="outline" size="sm" onClick={resetAll}>
+    <PanelSection
+      title={`${t("planters")} · ${mode === 1 ? t("manual") : t("auto")}`}
+      aside={
+        timers.length > 0 && (
+          <Button variant="ghost" size="xs" onClick={resetAll}>
             <TimerResetIcon />
             {t("plantersReset")}
           </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
-        {timers.length === 0 ? (
-          <EmptyState icon={SproutIcon} description={t("noPlanters")} className="py-6" />
-        ) : (
-          <div className="bk-stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {timers.map((p) => {
-              const remaining = formatRemaining(p.harvestTime - now)
-              return (
-                <div key={p.index} className="flex flex-col items-center gap-1 rounded-lg border p-3 text-center">
-                  <img src={`./assets/icons/${p.planter.replaceAll(" ", "_")}_planter.png`} alt="" className="size-10 object-contain" />
-                  <span className="text-xs capitalize">{p.field}</span>
-                  <span className={cn("text-sm font-semibold tabular-nums", !remaining && "text-emerald-600 dark:text-emerald-400")}>
-                    {remaining ?? t("planterReady")}
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon-xs" onClick={() => reset(p.index)} aria-label={t("planterReset")}>
-                        <TimerResetIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("planterReset")}</TooltipContent>
-                  </Tooltip>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        )
+      }
+    >
+      {timers.length === 0 ? (
+        <p className="rounded-md border border-dashed px-3 py-3 text-center text-xs text-muted-foreground">{t("noPlanters")}</p>
+      ) : (
+        <ul className="bk-stagger space-y-1">
+          {timers.map((p) => {
+            const remaining = formatRemaining(p.harvestTime - now)
+            return (
+              <li key={p.index} className="flex items-center gap-2.5 rounded-md border bg-card py-1 pr-1 pl-2">
+                <img src={`./assets/icons/${p.planter.replaceAll(" ", "_")}_planter.png`} alt="" className="size-6 shrink-0 object-contain" />
+                <span className="min-w-0 flex-1 truncate text-sm capitalize">{p.field}</span>
+                <span className={cn("text-sm font-semibold tabular-nums", !remaining && "text-emerald-600 dark:text-emerald-400")}>
+                  {remaining ?? t("planterReady")}
+                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon-xs" onClick={() => reset(p.index)} aria-label={t("planterReset")}>
+                      <TimerResetIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("planterReset")}</TooltipContent>
+                </Tooltip>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </PanelSection>
   )
 }
 
-export default function HomePage() {
+function PermissionAlert() {
   const t = useStrings(strings)
-  const { lang, t: tc } = useI18n()
-  const { settings, saveGeneral, refresh } = useSettings()
+  const { status: perms, missing } = usePermissions(5000)
+  if (!missing) return null
+  // only Full Keyboard Access is wrong: that one has to be turned off, not on
+  const keyboardOnly = !!perms && perms.accessibility !== false && perms.screenRecording !== false
+  return (
+    <Alert variant="warning" className="animate-in fade-in slide-in-from-top-2 duration-300">
+      <ShieldAlertIcon />
+      <AlertTitle>{keyboardOnly ? t("permKbTitle") : t("permTitle")}</AlertTitle>
+      <AlertDescription>{keyboardOnly ? t("permKbDesc") : t("permDesc")}</AlertDescription>
+      <AlertAction>
+        <Button size="sm" variant="outline" onClick={() => (window.location.hash = "/guide")}>
+          {keyboardOnly ? t("permKbFix") : t("permFix")}
+        </Button>
+      </AlertAction>
+    </Alert>
+  )
+}
+
+function RunCard() {
+  const t = useStrings(strings)
+  const { settings, saveGeneral } = useSettings()
   const mode = String(settings?.macro_mode ?? "normal") as (typeof MODES)[number]
+
+  return (
+    <section className="space-y-3 rounded-xl border bg-gradient-to-br from-primary/15 via-card to-card p-3.5 shadow-xs">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">{t("control")}</h2>
+        <RunStatusBadge />
+      </div>
+      <RunButton size="lg" className="w-full" />
+      <div className="space-y-1.5 border-t border-foreground/10 pt-3">
+        <div className="flex items-center justify-between gap-2">
+          <span id="home-macro-mode" className="text-sm font-medium">
+            {t("mode")}
+          </span>
+          <Select value={mode} onValueChange={(v) => void saveGeneral("macro_mode", v)}>
+            <SelectTrigger className="w-40" aria-labelledby="home-macro-mode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MODES.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {t(`mode.${m}` as "mode.normal")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* keyed so a new mode's description fades in rather than swapping silently */}
+        <p key={mode} className="bk-tab-in text-xs text-muted-foreground">
+          {t(`mode.${mode}.desc` as "mode.normal.desc")}
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function HomeSections({ fill }: { fill: boolean }) {
+  const { lang } = useI18n()
+  const { settings, refresh } = useSettings()
   const tasks = useMemo(() => (settings ? buildTaskList(settings, lang) : []), [settings, lang])
 
   // the macro asks the UI to reload its task list after it changes settings itself
   usePythonEvent("loadTasks", () => void refresh())
   usePythonEvent("updateMacroMode", () => void refresh())
-  const { status: perms, missing: permissionsMissing } = usePermissions(5000)
-  // only Full Keyboard Access is wrong: that one has to be turned off, not on
-  const keyboardOnly = !!perms && perms.accessibility !== false && perms.screenRecording !== false
 
   return (
-    <Page title={t("title")} description={t("subtitle")}>
-      {permissionsMissing && (
-        <Alert variant="warning" className="animate-in fade-in slide-in-from-top-2 duration-300">
-          <ShieldAlertIcon />
-          <AlertTitle>{keyboardOnly ? t("permKbTitle") : t("permTitle")}</AlertTitle>
-          <AlertDescription>{keyboardOnly ? t("permKbDesc") : t("permDesc")}</AlertDescription>
-          <AlertAction>
-            <Button size="sm" variant="outline" onClick={() => (window.location.hash = "/guide")}>
-              {keyboardOnly ? t("permKbFix") : t("permFix")}
-            </Button>
-          </AlertAction>
-        </Alert>
-      )}
-      {/* left: what runs and in which order; right: what it is doing, as tall as the left side */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-4">
-          <Card className="bg-gradient-to-br from-primary/15 via-card to-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {t("control")}
-                <RunStatusBadge />
-              </CardTitle>
-              <CardDescription>{t("controlDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <RunButton size="lg" className="w-full" />
-                <p className="flex flex-wrap items-center justify-center gap-x-1 text-xs text-muted-foreground">
-                  {t("firstTime")}
-                  <a
-                    href="#/guide"
-                    className="inline-flex items-center gap-1 rounded-sm font-medium text-primary underline-offset-4 hover:underline"
-                  >
-                    <CompassIcon className="size-3.5" />
-                    {tc("nav.guide")}
-                  </a>
-                </p>
-              </div>
-              <div className="space-y-1.5 border-t border-foreground/10 pt-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span id="home-macro-mode" className="text-sm font-medium">
-                    {t("mode")}
-                  </span>
-                  <Select value={mode} onValueChange={(v) => void saveGeneral("macro_mode", v)}>
-                    <SelectTrigger className="w-full sm:w-52" aria-labelledby="home-macro-mode">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MODES.map((m) => (
-                        <SelectItem key={m} value={m}>
-                          {t(`mode.${m}` as "mode.normal")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {/* keyed so a new mode's description fades in rather than swapping silently */}
-                <p key={mode} className="bk-tab-in text-xs text-muted-foreground">
-                  {t(`mode.${mode}.desc` as "mode.normal.desc")}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("tasks")}</CardTitle>
-              <CardDescription>{t("tasksDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {tasks.length === 0 ? (
-                <EmptyState
-                  icon={ListTodoIcon}
-                  description={t("tasksEmpty")}
-                  action={
-                    <Button variant="outline" size="sm" onClick={() => (window.location.hash = "/gather")}>
-                      <FlowerIcon />
-                      {t("tasksGo")}
-                    </Button>
-                  }
-                />
-              ) : (
-                <ol className="bk-stagger space-y-1.5">
-                  {taskKeys(tasks).map(([key, task]) => (
-                    <TaskRow key={key} task={task} />
-                  ))}
-                </ol>
-              )}
-            </CardContent>
-          </Card>
-          {settings && <PlanterTimers settings={settings} />}
-        </div>
-        <LogsCard />
-      </div>
-    </Page>
+    <>
+      <PermissionAlert />
+      <RunCard />
+      {settings && <TasksSection tasks={tasks} />}
+      {settings && <PlanterTimers settings={settings} />}
+      <LogsSection fill={fill} />
+    </>
   )
+}
+
+/** Language and theme switches, then the version and update button. */
+function PanelFooter() {
+  const { t, lang, setLang } = useI18n()
+  const { resolvedTheme, setTheme } = useTheme()
+  const nextLang = lang === "ko" ? "English" : "한국어"
+  const themeLabel = resolvedTheme === "dark" ? t("theme.light") : t("theme.dark")
+
+  return (
+    <footer className="space-y-1 border-t px-3 py-2">
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex-1 justify-start"
+          aria-label={`${t("lang.label")}: ${lang === "ko" ? "한국어" : "English"} → ${nextLang}`}
+          onClick={() => setLang(lang === "ko" ? "en" : "ko")}
+        >
+          <LanguagesIcon />
+          {lang === "ko" ? "한국어" : "English"}
+        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon-sm" aria-label={themeLabel} onClick={(e) => setTheme(resolvedTheme === "dark" ? "light" : "dark", { x: e.clientX, y: e.clientY })}>
+              <span key={resolvedTheme} className="bk-pop inline-flex">
+                {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
+              </span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">{themeLabel}</TooltipContent>
+        </Tooltip>
+      </div>
+      <UpdatePanel />
+      {!isDesktopApp() && <p className="px-2 pb-1 text-[0.7rem] text-muted-foreground">{t("devBanner")}</p>}
+    </footer>
+  )
+}
+
+/**
+ * Home's contents: start and stop, the macro mode, the task order and the logs. Wide windows
+ * keep them beside every page as the control panel; narrow ones show them as the Home tab.
+ */
+export function ControlPanel({ layout }: { layout: "side" | "page" }) {
+  const { t } = useI18n()
+
+  if (layout === "page") {
+    return (
+      <div className="bk-page mx-auto flex w-full max-w-xl flex-col gap-5 p-4">
+        <HomeSections fill={false} />
+        <PanelFooter />
+      </div>
+    )
+  }
+
+  return (
+    <aside className="sticky top-0 flex h-svh w-72 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground lg:w-80 xl:w-[22rem]">
+      {/* as tall as the page tabs, so the two borders meet in one line */}
+      <div className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
+        <img src="./icon.png" alt="" className="size-8 shrink-0 rounded-lg" draggable={false} />
+        <div className="grid min-w-0 leading-tight">
+          <span className="truncate font-semibold">{t("app.name")}</span>
+          <span className="truncate text-xs text-muted-foreground">{t("app.tagline")}</span>
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-3">
+        <CommandPalette className="w-full md:w-full" />
+        <HomeSections fill />
+      </div>
+      <PanelFooter />
+    </aside>
+  )
+}
+
+export default function HomePage() {
+  return <ControlPanel layout="page" />
 }

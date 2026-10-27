@@ -1,5 +1,5 @@
 import { DownloadIcon, Loader2Icon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { toast } from "sonner"
 
 import {
@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n } from "@/i18n"
 import { usePythonEvent } from "@/lib/bridge"
 import { callPy, callPyQuiet, isDesktopApp, py, RunState } from "@/lib/py"
@@ -59,11 +58,19 @@ function stepText(message: string, lang: string) {
   return message
 }
 
-/** Version label, update button/progress, the "update available" prompt, and the install dialog. */
-export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
+type UpdateProgress = { percent: number; message: string }
+type UpdateState = { version: string; progress: UpdateProgress | null; installing: boolean; checkAndUpdate: () => Promise<void> }
+
+const UpdateContext = createContext<UpdateState | null>(null)
+
+/**
+ * Checks for an update on launch and owns the "update available" prompt and the install
+ * dialog. Mounted once around the app, so the panel showing the version can come and go.
+ */
+export function UpdateProvider({ children }: { children: ReactNode }) {
   const { t, lang } = useI18n()
   const [version, setVersion] = useState<string>("")
-  const [progress, setProgress] = useState<{ percent: number; message: string } | null>(null)
+  const [progress, setProgress] = useState<UpdateProgress | null>(null)
   const [offer, setOffer] = useState<UpdateInfo | null>(null)
   const [dontShow, setDontShow] = useState(false)
   // the update being installed; the macro restarts when it's done
@@ -127,32 +134,9 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
     else toast.error(t("update.checkFailed"))
   }
 
-  const label = progress ? (installing ? t("update.updating") : t("update.checking")) : t("update.check")
-
   return (
-    <div className="space-y-2 px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:px-0">
-      <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
-        <span className="font-mono group-data-[collapsible=icon]:hidden">{version}</span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => void checkAndUpdate()}
-              disabled={!!progress}
-              aria-label={iconOnly ? label : undefined}
-              className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 [&_svg]:transition-transform hover:[&_svg]:translate-y-px"
-            >
-              {progress ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
-              <span className="group-data-[collapsible=icon]:hidden">{label}</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right" hidden={!iconOnly}>
-            {progress && installing ? `${label} · ${Math.round(progress.percent)}%` : `${label} · ${version}`}
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
+    <UpdateContext.Provider value={{ version, progress, installing: !!installing, checkAndUpdate }}>
+      {children}
       <AlertDialog open={!!offer} onOpenChange={(open) => !open && setOffer(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -200,6 +184,25 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
           {installing?.auto && <p className="text-xs text-muted-foreground">{t("update.autoNote")}</p>}
         </AlertDialogContent>
       </AlertDialog>
+    </UpdateContext.Provider>
+  )
+}
+
+/** Version label and the update button, for the control panel's footer. */
+export function UpdatePanel() {
+  const { t } = useI18n()
+  const update = useContext(UpdateContext)
+  if (!update) return null
+  const { version, progress, installing, checkAndUpdate } = update
+  const label = progress ? (installing ? t("update.updating") : t("update.checking")) : t("update.check")
+
+  return (
+    <div className="flex items-center justify-between gap-2 px-2 text-xs text-muted-foreground">
+      <span className="font-mono">{version}</span>
+      <Button variant="ghost" size="xs" onClick={() => void checkAndUpdate()} disabled={!!progress} className="[&_svg]:transition-transform hover:[&_svg]:translate-y-px">
+        {progress ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
+        {label}
+      </Button>
     </div>
   )
 }
