@@ -126,7 +126,7 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - `Beolkkuri.exe` runs `runtime\python.exe src\main.py` with `PYTHONUTF8=1`, `PYTHONNOUSERSITE=1`, `BEOLKKURI_LAUNCHER=1`, and starts it again on exit code 75.
 - `runtime/`, `Beolkkuri.exe` and `uninstall.exe` are in `.gitignore`, and the updater never touches gitignored or protected folders, so in-app updates leave them alone.
 - Look: the website's honey poster style, drawn by hand in GDI+ (Black Han Sans embedded as `title.ttf`, Malgun Gothic text, Segoe UI for paths because Malgun Gothic draws `\` as `₩`). Korean or English follows the Windows UI language.
-- CI: `.github/workflows/windows-installer.yml` builds and tests it on every published release and uploads `Beolkkuri-Setup.exe` to that release (or run it by hand with a tag).
+- CI: `.github/workflows/windows-installer.yml` builds and tests it, and uploads `Beolkkuri-Setup.exe` to the release named by its `tag` input. It runs only by hand (`workflow_dispatch`); since v1.0.4, publishing a release no longer starts it, because the owner builds releases on their PC (see "Releasing").
 
 ## Settings schema
 
@@ -227,7 +227,7 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 - `.gitattributes` forces LF, except CRLF for `*.bat`. Windows has `core.autocrlf=true`, so expect CRLF warnings; they are harmless.
 - `*.command` files must keep mode 100755. When adding one from Windows: `git update-index --chmod=+x <file>`.
 - Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/Beolkkuri` (tags like `v1.0.0`; the leading `v` is ignored). `install.sh` installs the latest release zipball, or `main` if there are no releases.
-- **Releasing:** bump `ui/public/version.txt`, rebuild the UI, commit and push, then publish a GitHub release whose tag matches (`v1.0.1`). The owner wants `Beolkkuri-Setup.exe` built on their PC, not by CI: `git fetch --tags`, `scripts/windows/build_installer.ps1 -Ref <tag>`, then `gh release upload <tag> dist/Beolkkuri-Setup.exe --clobber` (this replaces the file the windows-installer workflow attached). The website's Windows button and `install.ps1` download that file from the latest release.
+- **Releasing:** bump `ui/public/version.txt`, rebuild the UI, commit and push, then publish a GitHub release whose tag matches (`v1.0.1`). The owner wants `Beolkkuri-Setup.exe` built on their PC, not by CI: `git fetch --tags`, `scripts/windows/build_installer.ps1 -Ref <tag>`, then `gh release upload <tag> dist/Beolkkuri-Setup.exe --clobber`. The website's Windows button and `install.ps1` download that file from the latest release.
 - **Updates:** `update.py` downloads the release zip, swaps the files (keeping gitignored and protected paths such as profiles, `runtime/` and the exes), and on Windows installs new requirements with the bundled Python (`runtime\python.exe`) or the venv. When the app opens, `update-panel.tsx` checks for a new release and, with `auto_update` on (default) and the macro stopped, installs it and calls `restart_app()`. That exits with code **75** when `BEOLKKURI_LAUNCHER` is set (`Beolkkuri.exe`, `run_macro.ps1` start it again), uses `os.execv` on macOS, and on older Windows launchers starts `run_macro.bat` itself. With `auto_update` off it offers the update instead. Git checkouts never auto-update.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
