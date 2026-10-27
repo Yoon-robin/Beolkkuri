@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils"
 import { usePermissions } from "@/state/permissions"
 import { useSettings, useSetting } from "@/state/settings"
 
-const DOCS = "https://github.com/Yoon-robin/RobinMacro/blob/main/docs"
-const ISSUES = "https://github.com/Yoon-robin/RobinMacro/issues"
+const DOCS = "https://github.com/Yoon-robin/Beolkkuri/blob/main/docs"
+const ISSUES = "https://github.com/Yoon-robin/Beolkkuri/issues"
 
 const strings: PageStrings<
   | "subtitle"
@@ -93,7 +93,7 @@ const strings: PageStrings<
     "perm.unknown": "확인 불가",
     "perm.turnOn": "켜기",
     "perm.keyboardOn": "끄러 가기",
-    "perm.restart": "설정에서 켠 뒤에는 터미널을 완전히 껐다가(⌘Q) RobinMacro를 다시 열어야 적용돼요.",
+    "perm.restart": "설정에서 켠 뒤에는 터미널을 완전히 껐다가(⌘Q) 벌꿀이를 다시 열어야 적용돼요.",
     "display.title": "화면 설정 확인",
     "display.body":
       "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요.",
@@ -140,7 +140,7 @@ const strings: PageStrings<
     "perm.unknown": "Can't check",
     "perm.turnOn": "Turn on",
     "perm.keyboardOn": "Turn off",
-    "perm.restart": "After turning them on, quit Terminal (⌘Q) and open RobinMacro again for it to take effect.",
+    "perm.restart": "After turning them on, quit Terminal (⌘Q) and open Beolkkuri again for it to take effect.",
     "display.title": "Check display settings",
     "display.body":
       "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor.",
@@ -200,7 +200,7 @@ function Step({
               done && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
             )}
           >
-            <span key={String(!!done)} className={cn("inline-flex", done && "rm-pop")}>
+            <span key={String(!!done)} className={cn("inline-flex", done && "bk-pop")}>
               {done ? <CheckCircle2Icon /> : icon}
             </span>
           </div>
@@ -246,7 +246,7 @@ function PermissionRow({
         {loading ? (
           <Loader2Icon className="size-3.5 animate-spin" />
         ) : (
-          <span key={String(value)} className={cn("inline-flex", value && "rm-pop")}>
+          <span key={String(value)} className={cn("inline-flex", value && "bk-pop")}>
             {value ? <CheckCircle2Icon className="size-3.5" /> : <CircleIcon className="size-3.5" />}
           </span>
         )}

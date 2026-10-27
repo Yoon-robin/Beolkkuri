@@ -35,7 +35,7 @@ class TadAltSync:
         request = urllib.request.Request(
             url,
             data=body,
-            headers={"Content-Type": "application/json", "User-Agent": "RobinMacro-TAD-Alt-Sync"},
+            headers={"Content-Type": "application/json", "User-Agent": "Beolkkuri-TAD-Alt-Sync"},
             method="POST",
         )
         with urllib.request.urlopen(request, timeout=10) as response:

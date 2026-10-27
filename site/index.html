@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RobinMacro · 맥용 비 스웜 시뮬레이터 매크로</title>
+<title>벌꿀이 · 맥용 비 스웜 시뮬레이터 매크로</title>
 <meta name="description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 터미널에 한 줄 붙여 넣으면 설치되고, 메뉴는 전부 한국어예요. 무료, 오픈소스." />
 <meta name="theme-color" content="#ffc83d" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="RobinMacro · 꿀 파밍은 맥한테 맡겨요" />
+<meta property="og:title" content="벌꿀이 · 꿀 파밍은 맥한테 맡겨요" />
 <meta property="og:description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 한 줄 설치, 한국어 화면, 무료 오픈소스." />
-<meta property="og:image" content="https://yoon-robin.github.io/RobinMacro/assets/og.png" />
-<meta property="og:url" content="https://yoon-robin.github.io/RobinMacro/" />
+<meta property="og:image" content="https://yoon-robin.github.io/Beolkkuri/assets/og.png" />
+<meta property="og:url" content="https://yoon-robin.github.io/Beolkkuri/" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" href="favicon.png" />
+<link rel="apple-touch-icon" href="assets/logo.png" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -96,7 +97,7 @@ h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(
 .nav.on-honey:not(.scrolled) { background: transparent; }
 .nav .wrap { display: flex; align-items: center; gap: 18px; height: 70px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-size: 22px; }
-.brand img { width: 38px; height: 38px; border-radius: 11px; border: 2.5px solid var(--ink); transition: rotate 0.5s var(--spring); }
+.brand img { width: 40px; height: 40px; transition: rotate 0.5s var(--spring); }
 .brand:hover img { rotate: -12deg; }
 .nav-links { display: flex; gap: 2px; margin-left: 14px; }
 .nav-links a { padding: 8px 12px; border-radius: 10px; font-size: 15px; font-weight: 700; transition: background 0.2s; }
@@ -128,7 +129,8 @@ html[lang="en"] h1.title { font-size: clamp(34px, 4.6vw, 66px); }
 .badge { position: absolute; z-index: 2; left: -4%; top: -2%; width: 128px; height: 128px; rotate: -8deg; }
 .badge svg { width: 100%; height: 100%; animation: spin 18s linear infinite; }
 .badge text { font-family: var(--display); font-size: 15px; fill: var(--ink); }
-.badge .core { position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; }
+.badge .core { position: absolute; inset: 0; display: grid; place-items: center; }
+.badge .core img { width: 46%; rotate: 8deg; }
 @keyframes spin { to { rotate: 360deg; } }
 
 .cmd {
@@ -167,6 +169,8 @@ html[lang="en"] h1.title { font-size: clamp(34px, 4.6vw, 66px); }
 .hive .drop { transform-box: fill-box; transform-origin: 50% 0; }
 .wing { transform-box: fill-box; transform-origin: 50% 100%; animation: flap 0.11s ease-in-out infinite alternate; }
 @keyframes flap { to { transform: scaleY(0.35); } }
+.cell-bee { transform-box: fill-box; transform-origin: 50% 90%; animation: sway 2.6s ease-in-out infinite alternate; }
+@keyframes sway { from { rotate: -6deg; } to { rotate: 6deg; } }
 
 /* screenshot stage under the hero */
 .stage { position: relative; margin: 70px auto 0; width: min(1100px, 100%); padding-bottom: 30px; }
@@ -270,7 +274,7 @@ kbd { font-family: ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px;
   animation: notify 7.5s var(--out) infinite; opacity: 0;
 }
 .note b { display: block; font-size: 13px; color: #c4b5fd; }
-.note .av { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: url("assets/logo.png") center / cover; }
+.note .av { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; border: 2px solid var(--ink); background: var(--honey) url("assets/bee.png") center 40% / 84% no-repeat; }
 .note:nth-child(2) { animation-delay: 2.5s; } .note:nth-child(3) { animation-delay: 5s; }
 @keyframes notify { 0% { opacity: 0; transform: translateY(40px) scale(0.9) rotate(-2deg); } 8%, 30% { opacity: 1; transform: none; } 40%, 100% { opacity: 0; transform: translateY(-36px) scale(0.94); } }
 
@@ -365,7 +369,6 @@ html[lang="en"] .fill-text { font-size: clamp(46px, 7.6vw, 108px); }
 footer { background: var(--ink); color: var(--on-ink-muted); padding: 50px 0 64px; font-size: 14px; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 40px; justify-content: space-between; }
 footer .brand { color: var(--on-ink); }
-footer .brand img { border-color: var(--on-ink); }
 footer a:hover { color: var(--honey); }
 .foot-links { display: flex; gap: 20px; flex-wrap: wrap; font-weight: 600; }
 .legal { max-width: 560px; margin: 14px 0 0; }
@@ -454,7 +457,7 @@ footer a:hover { color: var(--honey); }
 
 <header class="nav on-honey" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="RobinMacro"><img src="assets/logo.png" alt="" />RobinMacro</a>
+    <a class="brand" href="#top" aria-label="벌꿀이"><img src="assets/logo.png" alt="" /><span data-i18n="brand">벌꿀이</span></a>
     <nav class="nav-links" aria-label="Sections">
       <a href="#hour" data-i18n="nav.hour">하는 일</a>
       <a href="#features" data-i18n="nav.features">기능</a>
@@ -467,7 +470,7 @@ footer a:hover { color: var(--honey); }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
         <span id="langLabel">English</span>
       </button>
-      <a class="chip" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
+      <a class="chip" href="https://github.com/Yoon-robin/Beolkkuri" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
         <span class="gh-label">GitHub</span><span class="star-count" id="stars">★</span>
       </a>
@@ -485,11 +488,11 @@ footer a:hover { color: var(--honey); }
             <span class="ln" data-i18n="hero.t1">꿀 파밍은</span>
             <span class="ln alt" data-i18n="hero.t2">맥한테 맡겨요</span>
           </h1>
-          <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">RobinMacro는 비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
+          <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">벌꿀이는 비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
 
           <div class="cmd rise" style="animation-delay:.42s">
             <span class="prompt">$</span>
-            <code id="cmd1">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
+            <code id="cmd1">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash</code>
             <button class="copy" type="button" data-copy="cmd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
           </div>
 
@@ -498,7 +501,7 @@ footer a:hover { color: var(--honey); }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
               <span data-i18n="hero.cta">설치하기</span>
             </a>
-            <a class="btn btn-white" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
+            <a class="btn btn-white" href="https://github.com/Yoon-robin/Beolkkuri" target="_blank" rel="noopener">
               <span data-i18n="hero.gh">GitHub에서 보기</span>
             </a>
           </div>
@@ -516,7 +519,7 @@ footer a:hover { color: var(--honey); }
             <circle cx="64" cy="64" r="62" fill="#fff" stroke="#1c1409" stroke-width="3"/>
             <text><textPath href="#badgeCircle" textLength="296" lengthAdjust="spacing">FREE ✦ OPEN SOURCE ✦ FOR MAC ✦ </textPath></text>
           </svg>
-          <span class="core">🐝</span>
+          <span class="core"><img src="assets/bee.png" alt="" /></span>
         </div>
           <svg viewBox="-70 -70 540 450">
             <g id="cells"></g>
@@ -536,8 +539,8 @@ footer a:hover { color: var(--honey); }
         <div class="float s3"><span class="sticker"><kbd>⌘K</kbd><span data-i18n="float.3">설정 246개 검색</span></span></div>
         <div class="tilt" id="tilt">
           <div class="frame">
-            <div class="frame-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
-            <img src="assets/home.webp" width="2160" height="1350" alt="RobinMacro 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" data-i18n-alt="alt.home" />
+            <div class="frame-bar"><i></i><i></i><i></i><span>벌꿀이</span></div>
+            <img src="assets/home.webp" width="2160" height="1350" alt="벌꿀이 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" data-i18n-alt="alt.home" />
           </div>
         </div>
       </div>
@@ -607,9 +610,9 @@ footer a:hover { color: var(--honey); }
           <h3 data-i18n="f.discord.t">밖에서도 폰으로 확인</h3>
           <p data-i18n="f.discord.d">디스코드 알림, 시간별 리포트, 원격 명령 봇, 화면 스트리밍을 지원해요.</p>
           <div class="stack" aria-hidden="true">
-            <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.1">시간별 리포트가 도착했어요 📊</span></div></div>
-            <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.2">비셔스 비를 잡았어요 🐝</span></div></div>
-            <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.3">플랜터를 수확했어요 🌱</span></div></div>
+            <div class="note"><span class="av"></span><div><b>벌꿀이</b><span data-i18n="n.1">시간별 리포트가 도착했어요 📊</span></div></div>
+            <div class="note"><span class="av"></span><div><b>벌꿀이</b><span data-i18n="n.2">비셔스 비를 잡았어요 🐝</span></div></div>
+            <div class="note"><span class="av"></span><div><b>벌꿀이</b><span data-i18n="n.3">플랜터를 수확했어요 🌱</span></div></div>
           </div>
         </article>
 
@@ -664,7 +667,7 @@ footer a:hover { color: var(--honey); }
       </div>
       <div class="gallery reveal" style="--d:.14s">
         <div class="frame">
-          <div class="frame-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
+          <div class="frame-bar"><i></i><i></i><i></i><span>벌꿀이</span></div>
           <div class="shots" id="shots">
             <img class="top" src="assets/home.webp" alt="" loading="lazy" width="2160" height="1350" />
             <img src="assets/gather.webp" alt="" loading="lazy" width="2160" height="1350" />
@@ -687,17 +690,17 @@ footer a:hover { color: var(--honey); }
           <li><span data-i18n-html="ins.1"><b>⌘ + 스페이스</b>를 누르고 <b>터미널</b>을 열어요.</span></li>
           <li><span data-i18n-html="ins.2">아래 명령어를 <b>붙여 넣고 엔터</b>. 설치 창이 뜨면 <b>계속</b>, <b>설치</b>를 눌러요.</span></li>
           <li><span data-i18n-html="ins.3"><b>손쉬운 사용</b>과 <b>화면 기록</b>에서 터미널을 켜요. 켜졌는지는 앱이 초록 체크로 알려 줘요.</span></li>
-          <li><span data-i18n-html="ins.4">바탕화면의 <b>RobinMacro</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
+          <li><span data-i18n-html="ins.4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
         </ol>
         <div class="cmd">
           <span class="prompt">$</span>
-          <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
+          <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash</code>
           <button class="copy" type="button" data-copy="cmd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
         </div>
-        <a class="alt-link" href="https://github.com/Yoon-robin/RobinMacro#-설치하기" target="_blank" rel="noopener" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
+        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri#-설치하기" target="_blank" rel="noopener" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
       </div>
       <div class="terminal reveal" style="--d:.12s">
-        <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · RobinMacro 설치</span></div>
+        <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · 벌꿀이 설치</span></div>
         <div class="term-body" id="term" aria-hidden="true"></div>
       </div>
     </div>
@@ -714,8 +717,8 @@ footer a:hover { color: var(--honey); }
         <details class="reveal"><summary><span data-i18n="q2">윈도우에서도 되나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">아직은 맥 전용이에요. 애플 실리콘(M1 이상)은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상이 필요해요. 윈도우 버전은 준비하고 있어요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록에 초록 체크가 있는지 보고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">앱 왼쪽 아래의 <b>업데이트 확인</b>을 누르거나, 설치 명령을 한 번 더 붙여 넣으면 돼요. 설정은 그대로 남아요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">터미널에서 <code>rm -rf ~/robin-macro-env</code> 를 실행한 다음 설치 명령을 다시 붙여 넣으세요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q6">매크로 써도 괜찮나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a6">매크로 사용에 대한 책임은 사용자에게 있어요. 게임 규칙을 확인하고 본인 판단으로 사용해 주세요. RobinMacro는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">터미널에서 <code>rm -rf ~/beolkkuri-env</code> 를 실행한 다음 설치 명령을 다시 붙여 넣으세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q6">매크로 써도 괜찮나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a6">매크로 사용에 대한 책임은 사용자에게 있어요. 게임 규칙을 확인하고 본인 판단으로 사용해 주세요. 벌꿀이는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요.</div></div></details>
       </div>
     </div>
   </section>
@@ -729,7 +732,7 @@ footer a:hover { color: var(--honey); }
       <p class="sub" data-i18n="end.sub">설치는 한 줄이면 되고, 나머지는 시작 가이드가 알려 줘요.</p>
       <div class="hero-cta">
         <a class="btn btn-ink" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg><span data-i18n="hero.cta">설치하기</span></a>
-        <a class="btn btn-white" href="https://github.com/Yoon-robin/RobinMacro/issues" target="_blank" rel="noopener"><span data-i18n="end.help">도움이 필요해요</span></a>
+        <a class="btn btn-white" href="https://github.com/Yoon-robin/Beolkkuri/issues" target="_blank" rel="noopener"><span data-i18n="end.help">도움이 필요해요</span></a>
       </div>
     </div>
   </section>
@@ -738,14 +741,14 @@ footer a:hover { color: var(--honey); }
 <footer>
   <div class="wrap">
     <div>
-      <a class="brand" href="#top"><img src="assets/logo.png" alt="" />RobinMacro</a>
-      <p class="legal" data-i18n="foot.legal">RobinMacro는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요. 포함된 코드의 라이선스는 LICENSE 파일을 확인해 주세요. This product includes software developed by exihs (Existance Macro).</p>
+      <a class="brand" href="#top"><img src="assets/logo.png" alt="" /><span data-i18n="brand">벌꿀이</span></a>
+      <p class="legal" data-i18n="foot.legal">벌꿀이는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요. 포함된 코드의 라이선스는 LICENSE 파일을 확인해 주세요. This product includes software developed by exihs (Existance Macro).</p>
     </div>
     <div class="foot-links">
-      <a href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/Yoon-robin/RobinMacro/blob/main/docs/permissions.md" target="_blank" rel="noopener" data-i18n="foot.perm">권한 설정 도움말</a>
-      <a href="https://github.com/Yoon-robin/RobinMacro/issues" target="_blank" rel="noopener" data-i18n="foot.issues">문제 알리기</a>
-      <a href="https://github.com/Yoon-robin/RobinMacro/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/permissions.md" target="_blank" rel="noopener" data-i18n="foot.perm">권한 설정 도움말</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri/issues" target="_blank" rel="noopener" data-i18n="foot.issues">문제 알리기</a>
+      <a href="https://github.com/Yoon-robin/Beolkkuri/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>
     </div>
   </div>
 </footer>
@@ -762,9 +765,10 @@ footer a:hover { color: var(--honey); }
 
   /* ---------------- i18n ---------------- */
   const EN = {
+    brand: "Beolkkuri",
     "nav.hour": "What it does", "nav.features": "Features", "nav.screens": "Screens", "nav.install": "Install", "nav.faq": "FAQ",
     "hero.t1": "Let your Mac", "hero.t2": "farm the honey",
-    "hero.lead": "RobinMacro plays Bee Swarm Simulator for you on macOS. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
+    "hero.lead": "Beolkkuri plays Bee Swarm Simulator for you on macOS. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
     "hero.cta": "Install", "hero.gh": "View on GitHub", copy: "Copy",
     "meta.1": "Apple Silicon & Intel", "meta.2": "10–20 min install", "meta.3": "No coding needed",
     "float.1": "Press F1 to start", "float.2": "Running <span class=\"clock\">1:02:13</span>", "float.3": "Search 246 settings",
@@ -791,19 +795,19 @@ footer a:hover { color: var(--honey); }
     "ins.1": "Press <b>⌘ + Space</b> and open <b>Terminal</b>.",
     "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>.",
     "ins.3": "Turn on Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. The app shows a green check when they're on.",
-    "ins.4": "Open <b>RobinMacro</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
-    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.term": "Terminal · Installing RobinMacro",
+    "ins.4": "Open <b>Beolkkuri</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
+    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.term": "Terminal · Installing Beolkkuri",
     "faq.title": "Questions",
     q1: "Does it cost anything?", a1: "No, it's free, and all the code is on GitHub.",
     q2: "Does it work on Windows?", a2: "Not yet. It's Mac only for now: Apple Silicon Macs need macOS 13 Ventura or later, Intel Macs need macOS 10.12 or later. A Windows version is in the works.",
     q3: "I pressed Start but nothing moves", a3: "It's almost always permissions. Check that Accessibility and Screen Recording show a green check in the app's <b>Getting Started</b> page, then quit Terminal (⌘Q) and open it again.",
     q4: "How do I update?", a4: "Press <b>Check for updates</b> at the bottom left of the app, or paste the install command again. Your settings are kept.",
-    q5: "I want a clean reinstall", a5: "Run <code>rm -rf ~/robin-macro-env</code> in Terminal, then paste the install command again.",
-    q6: "Is using a macro OK?", a6: "You use macros at your own risk, so check the game's rules first. RobinMacro is not affiliated with Onett, Bee Swarm Simulator or Roblox.",
+    q5: "I want a clean reinstall", a5: "Run <code>rm -rf ~/beolkkuri-env</code> in Terminal, then paste the install command again.",
+    q6: "Is using a macro OK?", a6: "You use macros at your own risk, so check the game's rules first. Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox.",
     "end.title": "Leave your Mac on<br />tonight", "end.sub": "Install takes one line. Getting Started walks you through the rest.", "end.help": "Get help",
-    "foot.legal": "RobinMacro is not affiliated with Onett, Bee Swarm Simulator or Roblox. See LICENSE for the licenses of included code. This product includes software developed by exihs (Existance Macro).",
+    "foot.legal": "Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox. See LICENSE for the licenses of included code. This product includes software developed by exihs (Existance Macro).",
     "foot.perm": "Permission help", "foot.issues": "Report a problem", copied: "Copied. Paste it into Terminal",
-    "alt.home": "RobinMacro Home screen with the start button, task list and live log",
+    "alt.home": "Beolkkuri Home screen with the start button, task list and live log",
   }
   const CAPTIONS = {
     ko: ["시작 버튼, 할 일 목록, 실시간 기록이 한 화면에 있어요.", "필드는 5곳까지 고르고, 패턴과 시간을 정해요.", "처음이라면 시작 가이드가 권한부터 확인해 줘요.", "⌘K로 설정 246개 중 원하는 걸 바로 찾아요.", "밤에는 다크, 낮에는 라이트."],
@@ -817,7 +821,7 @@ footer a:hover { color: var(--honey); }
   $$("[data-i18n]").forEach((el) => (KO[el.dataset.i18n] = el.textContent))
   $$("[data-i18n-html]").forEach((el) => (KO[el.dataset.i18nHtml] = el.innerHTML))
   let lang = "ko"
-  try { lang = localStorage.getItem("rm_site_lang") || (navigator.language.startsWith("ko") ? "ko" : "en") } catch {}
+  try { lang = localStorage.getItem("beolkkuri_site_lang") || localStorage.getItem("rm_site_lang") || (navigator.language.startsWith("ko") ? "ko" : "en") } catch {}
 
   function applyLang(next) {
     lang = next
@@ -825,13 +829,13 @@ footer a:hover { color: var(--honey); }
     document.documentElement.lang = next
     $$("[data-i18n]").forEach((el) => { const v = dict[el.dataset.i18n]; if (v != null) el.textContent = v })
     $$("[data-i18n-html]").forEach((el) => { const v = dict[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v })
-    $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "RobinMacro 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
+    $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "벌꿀이 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
     $("#langLabel").textContent = next === "ko" ? "English" : "한국어"
-    document.title = next === "ko" ? "RobinMacro · 맥용 비 스웜 시뮬레이터 매크로" : "RobinMacro · Bee Swarm Simulator macro for macOS"
+    document.title = next === "ko" ? "벌꿀이 · 맥용 비 스웜 시뮬레이터 매크로" : "Beolkkuri · Bee Swarm Simulator macro for macOS"
     // the headline pops in again in the new language
     $$(".title .ln").forEach((s) => { s.style.animation = "none"; void s.offsetWidth; s.style.animation = "" })
     buildTapes(); setCaption(current); moveKnob(); layout()
-    try { localStorage.setItem("rm_site_lang", next) } catch {}
+    try { localStorage.setItem("beolkkuri_site_lang", next) } catch {}
   }
   $("#langBtn").addEventListener("click", () => applyLang(lang === "ko" ? "en" : "ko"))
 
@@ -841,7 +845,7 @@ footer a:hover { color: var(--honey); }
   const HEX = "M0 -56 L48.5 -28 L48.5 28 L0 56 L-48.5 28 L-48.5 -28 Z"
   $("#cells").innerHTML = CELLS.map(([x, y, lvl], i) => {
     const inner = lvl === "logo"
-      ? `<image href="assets/logo.png" x="-40" y="-40" width="80" height="80" clip-path="url(#hexClip)" />`
+      ? `<image class="cell-bee" href="assets/bee.png" x="-46" y="-50" width="92" height="92" />`
       : `<g clip-path="url(#hexClip)"><rect class="honey-fill" x="-50" y="-58" width="100" height="116" fill="url(#honeyGrad)" style="--lvl:${lvl};--d:${(0.35 + i * 0.12).toFixed(2)}s" /></g>`
     return `<g transform="translate(${x} ${y})"><path class="cell-bg" d="${HEX}" />${inner}<path class="cell-line" d="${HEX}" /></g>`
   }).join("")
@@ -1049,11 +1053,11 @@ footer a:hover { color: var(--honey); }
   /* ---------------- installer terminal ---------------- */
   const term = $("#term")
   const SCRIPT = () => [
-    ["", "$ ", "t-amber"], ["type", "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash"],
-    ["ln", lang === "ko" ? "🐝 RobinMacro 내려받는 중..." : "🐝 Downloading RobinMacro...", "t-amber"],
-    ["ln", lang === "ko" ? "~/RobinMacro 에 내려받았어요." : "Downloaded to ~/RobinMacro", "t-green"],
+    ["", "$ ", "t-amber"], ["type", "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash"],
+    ["ln", lang === "ko" ? "🐝 벌꿀이 내려받는 중..." : "🐝 Downloading Beolkkuri...", "t-amber"],
+    ["ln", lang === "ko" ? "~/Beolkkuri 에 내려받았어요." : "Downloaded to ~/Beolkkuri", "t-green"],
     ["ln", "==============================================", "t-amber"],
-    ["ln", "   RobinMacro 설치 / RobinMacro installer", "t-amber"],
+    ["ln", "   벌꿀이 설치 / Beolkkuri installer", "t-amber"],
     ["ln", "==============================================", "t-amber"],
     ["ln", lang === "ko" ? "[1/5] 맥 버전 확인" : "[1/5] Checking your Mac", "t-cyan"],
     ["ln", lang === "ko" ? "쓸 수 있는 맥이에요 / Your mac is compatible" : "Your mac is compatible", "t-green"],
@@ -1061,8 +1065,8 @@ footer a:hover { color: var(--honey); }
     ["ln", lang === "ko" ? "[3/5] 개발 도구 확인" : "[3/5] Checking Command Line Tools", "t-cyan"],
     ["ln", lang === "ko" ? "[4/5] 라이브러리 설치 (가장 오래 걸려요)" : "[4/5] Installing libraries (this takes the longest)", "t-cyan"],
     ["pkg", "numpy<2"], ["pkg", "opencv-python-headless"], ["pkg", "torch==2.7.0 torchvision"], ["pkg", "pyautogui"], ["pkg", "mss"], ["pkg", "discord.py"], ["pkg", "eel"],
-    ["ln", lang === "ko" ? "[5/5] RobinMacro 앱 만들기" : "[5/5] Creating the RobinMacro app", "t-cyan"],
-    ["ln", lang === "ko" ? "바탕화면에 RobinMacro 앱을 만들었어요." : "Created the RobinMacro app on your Desktop.", "t-green"],
+    ["ln", lang === "ko" ? "[5/5] 벌꿀이 앱 만들기" : "[5/5] Creating the Beolkkuri app", "t-cyan"],
+    ["ln", lang === "ko" ? "바탕화면에 벌꿀이 앱을 만들었어요." : "Created the Beolkkuri app on your Desktop.", "t-green"],
     ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
   ]
   async function runTerminal() {
@@ -1106,7 +1110,7 @@ footer a:hover { color: var(--honey); }
   })
 
   /* ---------------- github stars ---------------- */
-  fetch("https://api.github.com/repos/Yoon-robin/RobinMacro").then((r) => r.ok ? r.json() : null).then((d) => {
+  fetch("https://api.github.com/repos/Yoon-robin/Beolkkuri").then((r) => r.ok ? r.json() : null).then((d) => {
     if (d && typeof d.stargazers_count === "number") $("#stars").textContent = "★ " + d.stargazers_count.toLocaleString()
   }).catch(() => {})
 

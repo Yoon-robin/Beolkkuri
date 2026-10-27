@@ -11,9 +11,7 @@ except ModuleNotFoundError:
         if os.path.exists(script):
             subprocess.Popen(["open", "-a", "Terminal", script])
         else:
-            messageBox.msgBox(title="Dependencies not installed", text="필요한 프로그램이 설치되지 않았어요. install_dependencies.command 를 먼저 실행해 주세요.
-
-Dependencies are not installed. Run install_dependencies.command first.")
+            messageBox.msgBox(title="Dependencies not installed", text="필요한 프로그램이 설치되지 않았어요. install_dependencies.command 를 먼저 실행해 주세요.\n\nDependencies are not installed. Run install_dependencies.command first.")
     except Exception:
         pass
     sys.exit(0)
@@ -90,8 +88,9 @@ class RichPresenceManager:
     """Manages Discord Rich Presence updates based on macro status"""
     
     # Discord application used for Rich Presence. Left empty by default so the
-    # feature stays off until RobinMacro has its own registered Discord app.
-    DISCORD_APP_ID = os.environ.get("ROBINMACRO_DISCORD_APP_ID", "")
+    # feature stays off until Beolkkuri has its own registered Discord app.
+    # ROBINMACRO_DISCORD_APP_ID is the pre-rename name, still read for compatibility.
+    DISCORD_APP_ID = os.environ.get("BEOLKKURI_DISCORD_APP_ID") or os.environ.get("ROBINMACRO_DISCORD_APP_ID", "")
     
     def __init__(self, status_value, enabled: bool = False, presence_value=None):
         """
@@ -299,8 +298,8 @@ class RichPresenceManager:
         activity = {
             "state": str(status_str).replace("_", " ").title(),
             "details": "Macro active",
-            "large_image": "robin_macro",
-            "large_text": "RobinMacro",
+            "large_image": "beolkkuri",
+            "large_text": "Beolkkuri",
             "small_image": None,
             "small_text": None,
         }
@@ -3480,7 +3479,7 @@ if __name__ == "__main__":
             Thread(target=waitForStreamURL, daemon=True).start()
             return True
 
-        messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Visit https://github.com/Yoon-robin/RobinMacro/blob/main/docs/stream-setup.md for installation instructions', title='Cloudflared not installed')
+        messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Visit https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/stream-setup.md for installation instructions', title='Cloudflared not installed')
         return False
 
     def processStreamControlCommands(settings):
@@ -3693,7 +3692,7 @@ if __name__ == "__main__":
                     appManager.openApp("Roblox")
                 except Exception:
                     pass
-                logger.webhook("Macro Resumed", "RobinMacro", "bright green", route_category="macro_status")
+                logger.webhook("Macro Resumed", "Beolkkuri", "bright green", route_category="macro_status")
             # Check for pause (transition from running to paused)
             elif prevRunState == 2 and run.value == 6:
                 keyboardModule.releaseMovement()
@@ -3765,7 +3764,7 @@ if __name__ == "__main__":
                 "bug": "Bug Run Mode",
             }
             start_details = [
-                f"RobinMacro v{macro_version}",
+                f"Beolkkuri v{macro_version}",
                 f"Mode: {mode_names.get(macro_mode, macro_mode.title())}",
             ]
             if macro_mode == "alt":
@@ -3803,7 +3802,7 @@ if __name__ == "__main__":
                 pass
 
             if had_macro_proc:
-                logger.webhook("Macro Stopped", "RobinMacro", "red", route_category="macro_status")
+                logger.webhook("Macro Stopped", "Beolkkuri", "red", route_category="macro_status")
                 if setdat.get("macro_mode", "normal") != "alt":
                     TadAltSync(setdat, logger).initialize_alts()
             try:

@@ -1,4 +1,4 @@
-"""Shared helpers for BloomsAI and Robin AI Gather patterns."""
+"""Shared helpers for the BloomsAI and AI Gather patterns."""
 
 from __future__ import annotations
 

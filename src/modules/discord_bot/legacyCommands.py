@@ -3,7 +3,7 @@
 macOS 10.12-10.14 installs use Python 3.7, which can only install discord.py 1.7.3. That
 version has no slash commands (app_commands) and no buttons, dropdowns, or forms
 (discord.ui). install() adds stand-ins so discordBot.py runs unchanged: attach() registers
-every slash command as a prefix command ("robin!status", or "@Bot status"), and anything
+every slash command as a prefix command ("bee!status", or "@Bot status"), and anything
 that needs buttons or forms replies with a note instead.
 """
 import inspect
@@ -14,7 +14,8 @@ import discord
 from discord.ext import commands
 
 IS_LEGACY = int(discord.__version__.split(".")[0]) < 2
-PREFIX = "robin!"
+PREFIX = "bee!"
+OLD_PREFIX = "robin!"  # prefix from before the rename to Beolkkuri, still accepted for compatibility
 INTERACTIVE_UNAVAILABLE = (
     "ℹ️ Buttons, menus, and forms aren't available on this macOS version. "
     "Use the macro's GUI or the text commands in `" + PREFIX + "help` instead."
@@ -252,7 +253,7 @@ def attach(bot):
     """Give a discord.py 1.x bot a tree that registers prefix commands."""
     bot.tree = LegacyCommandTree(bot)
     # a mention always carries the message text, even without the message content intent
-    bot.command_prefix = commands.when_mentioned_or(PREFIX)
+    bot.command_prefix = commands.when_mentioned_or(PREFIX, OLD_PREFIX)
     bot.remove_command("help")  # the bot's own help command replaces the built-in one
 
     @bot.listen()

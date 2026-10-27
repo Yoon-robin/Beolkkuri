@@ -1,14 +1,18 @@
 #!/bin/bash
 #
-# RobinMacro installer. install.sh runs it after downloading, or open this file
+# Beolkkuri (벌꿀이) installer. install.sh runs it after downloading, or open this file
 # from Finder (right-click > Open). It installs Python, the libraries the macro
-# needs, and a RobinMacro app you can open later.
+# needs, and a 벌꿀이 app you can open later.
 
-VENV_NAME="robin-macro-env"
+VENV_NAME="beolkkuri-env"
 VENV_PATH="$HOME/$VENV_NAME"
+# Compatibility: installs from before the rename keep their old virtualenv, so libraries aren't reinstalled.
+if [ ! -d "$VENV_PATH" ] && [ -d "$HOME/robin-macro-env" ]; then
+	VENV_PATH="$HOME/robin-macro-env"
+fi
 MACRO_DIR="$(cd "$(dirname "$0")" && pwd)"
 # pip prints thousands of lines; keep them in a log and show one line per library.
-LOG="$HOME/RobinMacro-install.log"
+LOG="$HOME/Beolkkuri-install.log"
 : > "$LOG"
 failures=0
 
@@ -18,7 +22,7 @@ say_step() {
 }
 
 printf "\033[1;33m==============================================\n"
-printf "   RobinMacro 설치 / RobinMacro installer\n"
+printf "   벌꿀이 설치 / Beolkkuri installer\n"
 printf "==============================================\033[0m\n"
 printf "창을 닫지 말고 끝날 때까지 기다려 주세요. (10~20분 걸려요)\n"
 printf "Keep this window open until it finishes (10-20 minutes).\n"
@@ -274,7 +278,7 @@ install_pip_package "pillow"
 install_pip_package "discord-webhook"
 if [ "$python_ver" = '3.7' ]; then
 	# discord.py 2.x needs Python 3.8. 1.7.3 has no slash commands, so the bot runs them as
-	# robin! prefix commands (modules/discord_bot/legacyCommands.py). It needs aiohttp below 3.8;
+	# bee! prefix commands (modules/discord_bot/legacyCommands.py). It needs aiohttp below 3.8;
 	# 3.7.4.post0 is the newest, and pip builds it from source below macOS 10.14.
 	install_pip_package "discord.py==1.7.3 aiohttp==3.7.4.post0"
 else
@@ -373,23 +377,27 @@ if spec and spec.origin:
 else:
     print("html2image package not found")
 EOF
-say_step "5/5" "RobinMacro 앱 만들기" "Creating the RobinMacro app"
+say_step "5/5" "벌꿀이 앱 만들기" "Creating the Beolkkuri app"
 
 # A small AppleScript app that opens run_macro.command in Terminal, so the macro
 # can be started from the Desktop / Launchpad like any other app.
 create_launcher() {
 	local apps_dir="$HOME/Applications"
-	local app="$apps_dir/RobinMacro.app"
+	local name="벌꿀이"
+	local app="$apps_dir/$name.app"
 	local script="do shell script \"open -a Terminal \" & quoted form of \"$MACRO_DIR/run_macro.command\""
 	mkdir -p "$apps_dir"
 	rm -rf "$app"
 	osacompile -o "$app" -e "$script" 2>/dev/null || return 1
+	# Compatibility: remove the launcher and Desktop alias made before the rename (rm -f never deletes a folder).
+	rm -rf "$apps_dir/RobinMacro.app"
+	rm -f "$HOME/Desktop/RobinMacro" "$HOME/Desktop/RobinMacro.app" 2>/dev/null
 
 	local logo="$MACRO_DIR/.github/logo.png"
 	if [ -f "$logo" ] && command -v iconutil >/dev/null 2>&1; then
 		local work
 		work=$(mktemp -d)
-		local iconset="$work/RobinMacro.iconset"
+		local iconset="$work/beolkkuri.iconset"
 		mkdir -p "$iconset"
 		for size in 16 32 128 256 512; do
 			sips -z "$size" "$size" "$logo" --out "$iconset/icon_${size}x${size}.png" >/dev/null 2>&1
@@ -401,13 +409,13 @@ create_launcher() {
 	fi
 
 	# Desktop shortcut
-	rm -f "$HOME/Desktop/RobinMacro"
+	rm -f "$HOME/Desktop/$name"
 	osascript -e "tell application \"Finder\" to make alias file to (POSIX file \"$app\") at (path to desktop folder)" >/dev/null 2>&1 \
-		|| ln -sf "$app" "$HOME/Desktop/RobinMacro"
+		|| ln -sf "$app" "$HOME/Desktop/$name"
 }
 
 if create_launcher; then
-	printf "\033[1;32m바탕화면과 '응용 프로그램' 폴더에 RobinMacro 앱을 만들었어요.\nCreated the RobinMacro app on your Desktop and in ~/Applications.\033[0m\n"
+	printf "\033[1;32m바탕화면과 '응용 프로그램' 폴더에 벌꿀이 앱을 만들었어요.\nCreated the 벌꿀이 (Beolkkuri) app on your Desktop and in ~/Applications.\033[0m\n"
 else
 	printf "\033[1;33m앱 바로가기는 만들지 못했어요. 대신 run_macro.command 를 더블클릭해서 실행하세요.\nCould not create the app shortcut; double-click run_macro.command instead.\033[0m\n"
 fi
@@ -431,9 +439,9 @@ open "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapt
 printf "\n\033[1;36m이제 이렇게 하면 돼요 / Next:\033[0m\n"
 printf "  1) 열린 설정 창에서 '터미널'을 켜요 (목록에 없으면 + 버튼으로 추가)\n"
 printf "  2) 터미널을 완전히 종료해요 (⌘Q)\n"
-printf "  3) 바탕화면의 RobinMacro 를 더블클릭해요\n\n"
+printf "  3) 바탕화면의 벌꿀이를 더블클릭해요\n\n"
 printf "  1) Turn on Terminal in the settings windows that opened (add it with + if missing)\n"
 printf "  2) Quit Terminal completely (⌘Q)\n"
-printf "  3) Double-click RobinMacro on your Desktop\n\n"
+printf "  3) Double-click 벌꿀이 (Beolkkuri) on your Desktop\n\n"
 printf "앱의 '시작 가이드'에서 권한이 제대로 켜졌는지 바로 확인할 수 있어요.\n"
 printf "The Getting Started page in the app shows whether the permissions are on.\n"

@@ -6,7 +6,7 @@ import { defineConfig, type Plugin } from "vite"
 // In `pnpm dev` there is no eel server: answer /eel.js with an empty script so
 // the app falls back to the HTTP dev backend (ui/dev/dev_server.py).
 const devEelStub = (): Plugin => ({
-  name: "robinmacro-dev-eel-stub",
+  name: "beolkkuri-dev-eel-stub",
   apply: "serve",
   configureServer(server) {
     server.middlewares.use("/eel.js", (_req, res) => {

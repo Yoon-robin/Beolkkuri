@@ -439,7 +439,7 @@ class ItemReportDrawer:
 
         # Footer branding
         footer_font = self.getFont("semibold", 32)
-        version_text = f"RobinMacro v{getMacroVersion()}"
+        version_text = f"Beolkkuri v{getMacroVersion()}"
         bbox = self.draw.textbbox((0, 0), version_text, font=footer_font)
         self.draw.text(
             (ix + (iw - (bbox[2] - bbox[0])) / 2, iy + ih - 60),

@@ -85,7 +85,7 @@ function CycleCard({ cycle }: { cycle: number }) {
 export function ManualPlanters() {
   const t = useStrings(strings)
   const { settings } = useSettings()
-  const [tab, setTab] = usePersistedTab("robin.planters.manualTab", "basic")
+  const [tab, setTab] = usePersistedTab("beolkkuri.planters.manualTab", "basic")
   const selected = useMemo(() => manualPlanters(settings ?? {}), [settings])
 
   const reset = async () => {

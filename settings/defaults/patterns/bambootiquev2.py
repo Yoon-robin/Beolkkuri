@@ -1,4 +1,4 @@
-# Ahk code converted by RobinMacro
+# Ahk code converted by Beolkkuri
 
 # Scale movement for the configured field size and use the macro's keyboard API.
 if sizeword.lower() == "xs":

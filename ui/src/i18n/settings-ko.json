@@ -482,7 +482,7 @@
     },
     "manage-fallback-private-servers-button": {
       "title": "예비 비공개 서버",
-      "desc": "예비 서버를 최대 3개까지 설정해요. 기본 서버 접속에 실패하면, 공개 서버로 가기 전에 RobinMacro가 예비 서버를 하나씩 시도해요."
+      "desc": "예비 서버를 최대 3개까지 설정해요. 기본 서버 접속에 실패하면, 공개 서버로 가기 전에 벌꿀이가 예비 서버를 하나씩 시도해요."
     },
     "rejoin_schedule_type": {
       "title": "예약 재접속 방식",
@@ -582,7 +582,7 @@
     },
     "beta_update_row": {
       "title": "베타 테스트",
-      "desc": "RobinMacro 디스코드 서버에서 받은 7자리 코드를 입력하세요."
+      "desc": "벌꿀이 디스코드 서버에서 받은 7자리 코드를 입력하세요."
     },
     "discord_delivery_mode": {
       "title": "전송 방식",

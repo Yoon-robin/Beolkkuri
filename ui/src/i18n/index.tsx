@@ -7,7 +7,7 @@ import settingsKo from "./settings-ko.json"
 import { en, ko, type UiKey } from "./ui"
 
 export type Lang = "ko" | "en"
-const STORAGE_KEY = "robinmacro_lang"
+const STORAGE_KEY = "beolkkuri_lang"
 
 type SchemaDict = {
   settings: Record<string, { title?: string; desc?: string }>

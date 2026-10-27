@@ -4263,7 +4263,7 @@ class macro:
         skipTravel = bool(fieldSetting.get("skip_travel", False)) and self.location == normalized_field and not isHiveHubField
         pattern = fieldSetting['shape']
         aiPatternLabels = {
-            "robin_ai_gather": "Robin AI Gather",
+            "robin_ai_gather": "AI Gather",
             "blooms_ai": "BloomsAI",
         }
         aiPatternStateKeys = {
@@ -9392,7 +9392,7 @@ class macro:
         time.sleep(0.15)
         newX = mouse.getPos()[0]
         if originalX == newX:
-            messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit https://github.com/Yoon-robin/RobinMacro/blob/main/docs/permissions.md for detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
+            messageBox.msgBox(text='It seems like terminal does not have the accessibility permission. The macro will not work properly.\n\nTo fix it, go to System Settings -> Privacy and Security -> Accessibility -> add and enable Terminal.\n\nVisit https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/permissions.md for detailed instructions\n\n NOTE: This popup might be incorrect. If the macro is able to input keypresses and interact with the game, you can dismiss this popup', title='Accessibility Permission')
         time.sleep(1)
         # img1 = pillowToHash(mssScreenshot())
         # self.keyboard.press("esc")

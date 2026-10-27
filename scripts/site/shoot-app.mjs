@@ -37,8 +37,8 @@ async function shot(name, { hash, theme = "dark", runState = 3, width = 1440, he
     req.continue()
   })
   await page.evaluateOnNewDocument((t) => {
-    localStorage.setItem("robinmacro_theme", t)
-    localStorage.setItem("robinmacro_lang", "ko")
+    localStorage.setItem("beolkkuri_theme", t)
+    localStorage.setItem("beolkkuri_lang", "ko")
   }, theme)
   // the app polls its backend, so networkidle never settles: wait for load plus a fixed delay
   await page.goto(`http://localhost:5173/${hash}`, { waitUntil: "load" })

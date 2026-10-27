@@ -233,7 +233,7 @@ def _remove_empty_directories(start, destination, protected_folders):
 
 
 def _validate_installation_root(destination):
-    """Reject update targets that are not a RobinMacro installation."""
+    """Reject update targets that are not a Beolkkuri installation."""
     root = os.path.realpath(destination)
     required = (
         "src/main.py",
@@ -246,7 +246,7 @@ def _validate_installation_root(destination):
             if os.path.islink(current):
                 raise OSError(f"Refusing to update through symlink {current}")
         if not os.path.isfile(current):
-            raise OSError(f"Not a RobinMacro installation: missing {relative_path}")
+            raise OSError(f"Not a Beolkkuri installation: missing {relative_path}")
     return root
 
 
@@ -265,7 +265,7 @@ def _read_ignore_rules(extracted):
     with open(ignore_path, "r", encoding="utf-8") as fh:
         release_lines = fh.readlines()
     response = requests.get(
-        "https://raw.githubusercontent.com/Yoon-robin/RobinMacro/refs/heads/main/.gitignore",
+        "https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/refs/heads/main/.gitignore",
         timeout=20,
         headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
     )
@@ -464,7 +464,7 @@ def _check_ai_models():
 
 
 def _refresh_updater(destination, progress_callback=None):
-    update_py_url = "https://raw.githubusercontent.com/Yoon-robin/RobinMacro/refs/heads/main/src/modules/misc/update.py"
+    update_py_url = "https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/refs/heads/main/src/modules/misc/update.py"
     headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
         "Pragma": "no-cache",
@@ -751,8 +751,8 @@ def _discover_remote_version(remote_version_url, timeout=15):
     the tags endpoint and finally to `remote_version_url` if all else fails.
     Returns the version string (without a leading 'v') or None on failure.
     """
-    github_releases_api = "https://api.github.com/repos/Yoon-robin/RobinMacro/releases?per_page=100"
-    github_tags_api = "https://api.github.com/repos/Yoon-robin/RobinMacro/tags?per_page=100"
+    github_releases_api = "https://api.github.com/repos/Yoon-robin/Beolkkuri/releases?per_page=100"
+    github_tags_api = "https://api.github.com/repos/Yoon-robin/Beolkkuri/tags?per_page=100"
     try:
         headers = {
             "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -826,7 +826,7 @@ def update(t="main", update_channel="stable", progress_callback=None):
     # remote version URL and zip link
     import time
     # Use GitHub releases API with channel filtering
-    github_releases_api = "https://api.github.com/repos/Yoon-robin/RobinMacro/releases?per_page=100"
+    github_releases_api = "https://api.github.com/repos/Yoon-robin/Beolkkuri/releases?per_page=100"
     backup_path = os.path.join(destination, "backup_macro.zip")
 
     # read local version
@@ -878,7 +878,7 @@ def update(t="main", update_channel="stable", progress_callback=None):
         return False
 
     # Construct zip link using the fetched remote_version
-    zip_link = f"https://github.com/Yoon-robin/RobinMacro/archive/refs/tags/{remote_version}.zip"
+    zip_link = f"https://github.com/Yoon-robin/Beolkkuri/archive/refs/tags/{remote_version}.zip"
 
     if not _is_remote_newer(local_version, remote_version):
         _report_update_progress(progress_callback, 100, "No update available")
@@ -910,11 +910,11 @@ def update(t="main", update_channel="stable", progress_callback=None):
         msgBox("Update failed", "Could not download or extract update zip.")
         return False
 
-    # find extracted folder (likely starts with 'RobinMacro')
+    # find extracted folder (likely starts with 'Beolkkuri')
     _report_update_progress(progress_callback, 72, "Locating extracted files")
     extracted = None
     for f in os.listdir(destination):
-        if f.startswith("RobinMacro") and os.path.isdir(os.path.join(destination, f)):
+        if f.startswith("Beolkkuri") and os.path.isdir(os.path.join(destination, f)):
             extracted = os.path.join(destination, f)
             break
     if not extracted:
@@ -1067,7 +1067,7 @@ def update_from_commit(commit_hash, progress_callback=None):
 
     msgBox("Update in progress", f"Updating to commit {commit_hash}... Do not close terminal")
 
-    remote_zip = f"https://github.com/Yoon-robin/RobinMacro/archive/{commit_hash}.zip"
+    remote_zip = f"https://github.com/Yoon-robin/Beolkkuri/archive/{commit_hash}.zip"
     backup_path = os.path.join(destination, "backup_macro.zip")
 
     try:
@@ -1092,7 +1092,7 @@ def update_from_commit(commit_hash, progress_callback=None):
     _report_update_progress(progress_callback, 72, "Locating extracted files")
     extracted = None
     for f in os.listdir(destination):
-        if f.startswith("RobinMacro") and os.path.isdir(os.path.join(destination, f)):
+        if f.startswith("Beolkkuri") and os.path.isdir(os.path.join(destination, f)):
             extracted = os.path.join(destination, f)
             break
     if not extracted:
@@ -1238,7 +1238,7 @@ def check_for_updates_silent(update_channel="stable"):
             local_version = "0.0.0"
         
         # Query GitHub releases API
-        github_releases_api = "https://api.github.com/repos/Yoon-robin/RobinMacro/releases?per_page=100"
+        github_releases_api = "https://api.github.com/repos/Yoon-robin/Beolkkuri/releases?per_page=100"
         headers = {
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Pragma": "no-cache",

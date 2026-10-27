@@ -144,7 +144,7 @@ def getPatternsDir():
     return os.path.join(getProjectRoot(), "settings", "patterns")
 
 def getRobinAIModelPath(model_filename):
-    """Get the fixed Robin AI model path under src/data/models."""
+    """Get the fixed AI Gather model path under src/data/models."""
     return os.path.join(getProjectRoot(), "src", "data", "models", model_filename)
 
 def resolveProjectPath(path_value):

@@ -329,7 +329,7 @@
       {
         "id": "tad_alt_1_webhook",
         "title": "Alt 1 Remote-Control Webhook",
-        "desc": "A webhook in a channel visible to the first alt's RobinMacro Discord bot.",
+        "desc": "A webhook in a channel visible to the first alt's Beolkkuri Discord bot.",
         "type": {
           "name": "textbox",
           "inputType": "string",
@@ -349,7 +349,7 @@
       {
         "id": "tad_alt_2_webhook",
         "title": "Alt 2 Remote-Control Webhook",
-        "desc": "A webhook in a channel visible to the second alt's RobinMacro Discord bot.",
+        "desc": "A webhook in a channel visible to the second alt's Beolkkuri Discord bot.",
         "type": {
           "name": "textbox",
           "inputType": "string",
@@ -2143,7 +2143,7 @@
       {
         "id": "manage-fallback-private-servers-button",
         "title": "Fallback Private Servers",
-        "desc": "Configure up to three backup servers. RobinMacro tries each one after the primary server fails, before trying public servers.",
+        "desc": "Configure up to three backup servers. Beolkkuri tries each one after the primary server fails, before trying public servers.",
         "type": {
           "name": "button",
           "text": "Manage Servers",
@@ -2696,7 +2696,7 @@
       {
         "id": "beta_update_row",
         "title": "Beta Testing",
-        "desc": "Enter a 7-character code from the RobinMacro Discord server.",
+        "desc": "Enter a 7-character code from the Beolkkuri Discord server.",
         "type": {
           "name": "textbox_with_button",
           "inputId": "beta_commit_hash",

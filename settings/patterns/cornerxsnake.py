@@ -1,4 +1,4 @@
-#Ahk code converted by RobinMacro
+#Ahk code converted by Beolkkuri
 
 
 self.keyboard.keyDown(tclrkey, False)

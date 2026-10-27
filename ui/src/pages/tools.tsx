@@ -39,7 +39,7 @@ import { TicketCalculator } from "./tools/ticket-calculator"
 // this on startup). It stops tools left running by a previous UI session.
 void syncToolSession()
 
-const SUBTAB_KEY = "robinmacro_tools_subtab"
+const SUBTAB_KEY = "beolkkuri_tools_subtab"
 const TABS = ["autoclicker", "hotbar-buff", "bond-calculator", "ticket-calculator", "auto-gifted-basic-bee"] as const
 type TabId = (typeof TABS)[number]
 

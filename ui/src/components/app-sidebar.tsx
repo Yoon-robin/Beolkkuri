@@ -99,7 +99,7 @@ function NavGlider({ container: el, page }: { container: HTMLDivElement | null; 
   return (
     <span
       aria-hidden
-      className="rm-glider pointer-events-none absolute top-0 left-0 rounded-md bg-sidebar-accent"
+      className="bk-glider pointer-events-none absolute top-0 left-0 rounded-md bg-sidebar-accent"
       style={{ transform: `translate(${box.x}px, ${box.y}px)`, width: box.w, height: box.h }}
     >
       <span className="absolute top-1/2 left-0 h-4 w-[3px] -translate-y-1/2 rounded-full bg-primary group-data-[collapsible=icon]:hidden" />
@@ -186,7 +186,7 @@ export function AppSidebar({ page, onNavigate }: { page: PageId; onNavigate: (id
                 aria-label={themeLabel}
                 onClick={(e) => setTheme(resolvedTheme === "dark" ? "light" : "dark", { x: e.clientX, y: e.clientY })}
               >
-                <span key={resolvedTheme} className="rm-pop inline-flex">
+                <span key={resolvedTheme} className="bk-pop inline-flex">
                   {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
                 </span>
               </Button>

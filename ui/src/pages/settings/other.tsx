@@ -322,7 +322,7 @@ export function BetaUpdateControl() {
     const code = hash.trim()
     setRunning(true)
     // show progress in the sidebar update panel, like the old window.updateProgress call
-    window.__robinBridge?.handlers.updateProgress?.(...([0, t("beta.starting", { hash: code })] as never[]))
+    window.__beolkkuriBridge?.handlers.updateProgress?.(...([0, t("beta.starting", { hash: code })] as never[]))
     try {
       const res = await callPy("updateFromHash", code)
       if (!res) toast.error(t("beta.failed"))
@@ -378,7 +378,7 @@ export function useDebugExport() {
         toast.error(t("debug.failed", { message: String(Array.isArray(res) ? res[1] : res) }), { id })
         return
       }
-      const filename = res[2] || "robinmacro_debug.zip"
+      const filename = res[2] || "beolkkuri_debug.zip"
       downloadBlob(base64ToBlob(res[1], "application/zip"), filename)
       toast.success(t("debug.done", { file: filename }), { id })
     } catch (err) {

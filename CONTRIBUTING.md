@@ -19,7 +19,7 @@
 
 ## :bulb: Asking Questions
 
-Questions are welcome in [GitHub Discussions](https://github.com/Yoon-robin/RobinMacro/discussions) or as an issue. Please include your macOS version and what you expected to happen.
+Questions are welcome in [GitHub Discussions](https://github.com/Yoon-robin/Beolkkuri/discussions) or as an issue. Please include your macOS version and what you expected to happen.
 
 ## :inbox_tray: Opening an Issue
 
@@ -27,7 +27,7 @@ Before [creating an issue](https://help.github.com/en/github/managing-your-work-
 
 ### :lock: Reporting Security Issues
 
-Review our [Security Policy](https://github.com/Yoon-robin/RobinMacro/blob/main/SECURITY.md). **Do not** file a public issue for security vulnerabilities.
+Review our [Security Policy](https://github.com/Yoon-robin/Beolkkuri/blob/main/SECURITY.md). **Do not** file a public issue for security vulnerabilities.
 
 ### :beetle: Bug Reports and Other Issues
 

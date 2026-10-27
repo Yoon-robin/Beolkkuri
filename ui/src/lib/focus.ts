@@ -91,12 +91,12 @@ export function useFocusTarget(settingIds: string | readonly string[] | undefine
       }
       pending = null
       el.scrollIntoView({ behavior: "smooth", block: "center" })
-      el.classList.remove("rm-flash")
+      el.classList.remove("bk-flash")
       void el.offsetWidth
-      el.classList.add("rm-flash")
+      el.classList.add("bk-flash")
       const done = (e: AnimationEvent) => {
-        if (e.target !== el || e.animationName !== "rm-flash") return
-        el.classList.remove("rm-flash")
+        if (e.target !== el || e.animationName !== "bk-flash") return
+        el.classList.remove("bk-flash")
         el.removeEventListener("animationend", done)
       }
       el.addEventListener("animationend", done)

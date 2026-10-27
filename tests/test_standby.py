@@ -144,13 +144,13 @@ class CommandTests(unittest.TestCase):
 
                 namespace = load_functions({"help_command"}, {
                     "discord": SimpleNamespace(Interaction=object, Embed=Embed),
-                    "legacyCommands": SimpleNamespace(IS_LEGACY=legacy, PREFIX="robin!"),
+                    "legacyCommands": SimpleNamespace(IS_LEGACY=legacy, PREFIX="bee!"),
                     "TAD_ALT_SYNC_HELP_TEXT": "Alt sync help",
                     "DISCORD_COMMAND_PERMISSION_CATEGORIES": {},
                 })
                 asyncio.run(namespace["help_command"](self.interaction))
                 embed = self.send.call_args[1]["embed"]
-                prefix = "robin!" if legacy else "/"
+                prefix = "bee!" if legacy else "/"
                 self.assertIn("`" + prefix + "standby [duration]`", embed.fields[0].value)
                 self.assertTrue(all(len(field.value) <= 1024 for field in embed.fields))
 

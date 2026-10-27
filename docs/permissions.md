@@ -1,6 +1,6 @@
 # 권한 설정 (Accessibility & Screen Recording)
 
-RobinMacro는 **터미널** 안에서 실행돼요. 그래서 키보드·마우스를 움직이고 화면을 읽을 수 있게 **터미널에 두 가지 권한**을 줘야 해요.
+벌꿀이는 **터미널** 안에서 실행돼요. 그래서 키보드·마우스를 움직이고 화면을 읽을 수 있게 **터미널에 두 가지 권한**을 줘야 해요.
 
 ## 1. 손쉬운 사용 (키보드·마우스 조작)
 
@@ -17,11 +17,11 @@ RobinMacro는 **터미널** 안에서 실행돼요. 그래서 키보드·마우�
 
 ## 3. 터미널 다시 시작
 
-권한은 터미널을 **완전히 끄고(⌘Q) 다시 켜야** 적용돼요. 그다음 RobinMacro를 다시 실행하세요.
+권한은 터미널을 **완전히 끄고(⌘Q) 다시 켜야** 적용돼요. 그다음 벌꿀이를 다시 실행하세요.
 
 ## 제대로 켜졌는지 확인하기
 
-RobinMacro를 열고 왼쪽의 **시작 가이드** 를 보면, 두 권한이 켜져 있는지 초록 체크로 바로 보여 줘요. 꺼져 있으면 **켜기** 버튼을 눌러 그 설정 화면을 열 수 있어요.
+벌꿀이를 열고 왼쪽의 **시작 가이드** 를 보면, 두 권한이 켜져 있는지 초록 체크로 바로 보여 줘요. 꺼져 있으면 **켜기** 버튼을 눌러 그 설정 화면을 열 수 있어요.
 
 ## 그래도 안 될 때
 
@@ -30,4 +30,4 @@ RobinMacro를 열고 왼쪽의 **시작 가이드** 를 보면, 두 권한이 �
 
 ---
 
-**English:** Open *System Settings → Privacy & Security*. Under **Accessibility** and **Screen Recording** (called *Screen & System Audio Recording* on macOS 15+), turn on **Terminal**, or add it with **+** from *Applications → Utilities*. Quit Terminal (⌘Q) and start RobinMacro again. The Getting Started page shows a green check for each permission once it is on. If it still fails, remove Terminal from the list and add it back.
+**English:** Open *System Settings → Privacy & Security*. Under **Accessibility** and **Screen Recording** (called *Screen & System Audio Recording* on macOS 15+), turn on **Terminal**, or add it with **+** from *Applications → Utilities*. Quit Terminal (⌘Q) and start Beolkkuri again. The Getting Started page shows a green check for each permission once it is on. If it still fails, remove Terminal from the list and add it back.

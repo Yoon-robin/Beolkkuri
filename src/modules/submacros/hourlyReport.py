@@ -1700,7 +1700,7 @@ class HourlyReportDrawer:
             profileText = "unknown"
         lines = [
             (reportTitle, (255, 218, 61), 56),
-            (f"RobinMacro - {versionText}", (255, 255, 255), 56),
+            (f"Beolkkuri - {versionText}", (255, 255, 255), 56),
             (f"Runtime: {self._durationHMS(sessionTime)}", (79, 223, 38), 56),
             (f"Profile: {profileText}", self.accentColor, 56),
             ("Made by Logan :)", (4, 180, 228), 56),
@@ -2409,7 +2409,7 @@ class HourlyReportDrawer:
         except Exception:
             version_text = None
 
-        lines = [("RobinMacro", self.getFont("semibold", 68), self.bodyColor)]
+        lines = [("Beolkkuri", self.getFont("semibold", 68), self.bodyColor)]
         if profile_name:
             lines.append((f"Profile: {profile_name}", self.getFont("medium", 50), self.subtleColor))
         if version_text:

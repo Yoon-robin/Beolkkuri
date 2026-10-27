@@ -17,7 +17,7 @@ async function check(tag, width, height, lang) {
   page.on("pageerror", (e) => errors.push(e.message))
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()))
   await page.setViewport({ width, height })
-  await page.evaluateOnNewDocument((l) => localStorage.setItem("rm_site_lang", l), lang)
+  await page.evaluateOnNewDocument((l) => localStorage.setItem("beolkkuri_site_lang", l), lang)
   await page.goto(URL, { waitUntil: "load" })
   await sleep(1500)
   for (const sel of SECTIONS) {

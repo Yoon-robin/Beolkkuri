@@ -2,19 +2,19 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "robinmacro-backend",
+      "name": "beolkkuri-backend",
       "runtimeExecutable": "python",
       "runtimeArgs": ["ui/dev/dev_server.py"],
       "port": 8765
     },
     {
-      "name": "robinmacro-ui",
+      "name": "beolkkuri-ui",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--dir", "ui", "dev"],
       "port": 5173
     },
     {
-      "name": "robinmacro-site",
+      "name": "beolkkuri-site",
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8790", "--directory", "site"],
       "port": 8790

@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- 1200x630 share card, rendered to site/assets/og.png by scripts/site/render-brand.mjs -->
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=block" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; width: 1200px; height: 630px; overflow: hidden; position: relative;
+    background-color: #ffc83d; color: #1c1409; font-family: "Pretendard Variable", Pretendard, sans-serif;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97' fill='none' stroke='%231c1409' stroke-opacity='0.09' stroke-width='2'/%3E%3C/svg%3E");
+    background-size: 56px 97px;
+  }
+  .copy { position: absolute; left: 72px; top: 92px; width: 600px; }
+  .brand { display: flex; align-items: center; gap: 26px; }
+  .brand img { width: 150px; height: 150px; }
+  .name { font-family: "Black Han Sans", sans-serif; font-size: 148px; line-height: 0.9; letter-spacing: -0.02em; }
+  .en { margin-top: 10px; font-family: "Black Han Sans", sans-serif; font-size: 34px; letter-spacing: 0.04em; opacity: 0.75; }
+  .tag {
+    display: inline-block; margin-top: 40px; padding: 6px 22px 12px; border-radius: 20px; background: #1c1409; color: #ffc83d;
+    font-family: "Black Han Sans", sans-serif; font-size: 50px; line-height: 1.05; white-space: nowrap; rotate: -2deg; box-shadow: 8px 8px 0 #ff5b4a;
+  }
+  .meta { margin-top: 34px; font-size: 25px; font-weight: 700; color: #3a2c17; }
+  .shot {
+    position: absolute; left: 700px; top: 120px; width: 640px; border-radius: 22px; overflow: hidden; background: #1c1409;
+    border: 5px solid #1c1409; box-shadow: 14px 14px 0 #1c1409; rotate: -4deg;
+  }
+  .shot .bar { height: 34px; display: flex; gap: 9px; align-items: center; padding: 0 16px; }
+  .shot .bar i { width: 13px; height: 13px; border-radius: 50%; display: block; }
+  .shot img { display: block; width: 100%; }
+  .drip { position: absolute; left: 0; top: 0; width: 1200px; height: 80px; }
+</style>
+</head>
+<body>
+  <svg class="drip" viewBox="0 0 1440 96" preserveAspectRatio="none">
+    <path fill="#f59e0b" d="M0 0 H1440 V28 H1150 C1136 28 1132 34 1132 44 V60 A12 12 0 0 1 1108 60 V44 C1108 34 1104 28 1090 28 H640 C626 28 622 34 622 44 V78 A12 12 0 0 1 598 78 V44 C598 34 594 28 580 28 H190 C176 28 172 34 172 44 V64 A12 12 0 0 1 148 64 V44 C148 34 144 28 130 28 H0 Z"/>
+    <path fill="none" stroke="#1c1409" stroke-width="3" vector-effect="non-scaling-stroke" d="M1440 28 H1150 C1136 28 1132 34 1132 44 V60 A12 12 0 0 1 1108 60 V44 C1108 34 1104 28 1090 28 H640 C626 28 622 34 622 44 V78 A12 12 0 0 1 598 78 V44 C598 34 594 28 580 28 H190 C176 28 172 34 172 44 V64 A12 12 0 0 1 148 64 V44 C148 34 144 28 130 28 H0"/>
+  </svg>
+  <div class="copy">
+    <div class="brand">
+      <img src="logo.svg" alt="" />
+      <div><div class="name">벌꿀이</div><div class="en">BEOLKKURI</div></div>
+    </div>
+    <div class="tag">꿀 파밍은 맥한테 맡겨요</div>
+    <div class="meta">비 스웜 시뮬레이터 맥 매크로 · 무료 · 오픈소스</div>
+  </div>
+  <div class="shot">
+    <div class="bar"><i style="background:#ff5b4a"></i><i style="background:#ffc83d"></i><i style="background:#4ade80"></i></div>
+    <img src="../../site/assets/home.webp" alt="" />
+  </div>
+</body>
+</html>

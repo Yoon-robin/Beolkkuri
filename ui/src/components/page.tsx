@@ -20,7 +20,7 @@ export function Page({
   className?: string
 }) {
   return (
-    <div className={cn("rm-page mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6", className)}>
+    <div className={cn("bk-page mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6", className)}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
@@ -39,11 +39,11 @@ export function PageLoading() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-4 p-4 md:p-6" role="status" aria-label={t("common.loading")}>
       <div className="space-y-2">
-        <div className="rm-shimmer h-8 w-48 rounded-md" />
-        <div className="rm-shimmer h-4 w-72 max-w-full rounded-md" />
+        <div className="bk-shimmer h-8 w-48 rounded-md" />
+        <div className="bk-shimmer h-4 w-72 max-w-full rounded-md" />
       </div>
-      <div className="rm-shimmer h-40 rounded-xl" />
-      <div className="rm-shimmer h-64 rounded-xl" />
+      <div className="bk-shimmer h-40 rounded-xl" />
+      <div className="bk-shimmer h-64 rounded-xl" />
     </div>
   )
 }

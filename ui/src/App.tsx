@@ -75,7 +75,7 @@ function Shell() {
   const label = NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label
 
   useEffect(() => {
-    document.title = label ? `${t(label)} · RobinMacro` : "RobinMacro"
+    document.title = label ? `${t(label)} · ${t("app.name")}` : t("app.name")
   }, [label, t])
 
   // each page starts at the top instead of keeping the previous page's scroll position

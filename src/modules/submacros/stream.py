@@ -149,7 +149,7 @@ class cloudflaredStream:
             </script>
         </head>
         <body>
-            <h1>RobinMacro Stream</h1>
+            <h1>Beolkkuri Stream</h1>
             <div class="video-container">
                 {% if streaming %}
                     <img src="/video_feed" alt="Live Stream">

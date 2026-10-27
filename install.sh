@@ -1,17 +1,18 @@
 #!/bin/bash
 #
-# One-line RobinMacro installer. Paste this into Terminal:
+# One-line Beolkkuri (벌꿀이) installer. Paste this into Terminal:
 #
-#   curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash
 #
-# It downloads the latest release into ~/RobinMacro (keeping your settings if
+# It downloads the latest release into ~/Beolkkuri (keeping your settings if
 # it is already there) and then runs install_dependencies.command. Files that
 # curl downloads are not quarantined, so macOS will not block the scripts.
 
 set -e
 
-REPO="Yoon-robin/RobinMacro"
-DEST="$HOME/RobinMacro"
+REPO="Yoon-robin/Beolkkuri"
+DEST="$HOME/Beolkkuri"
+OLD_DEST="$HOME/RobinMacro"  # install folder from before the rename, moved below (compatibility)
 
 bold() { printf "\033[1;33m%s\033[0m\n" "$1"; }
 fail() {
@@ -21,10 +22,10 @@ fail() {
 }
 
 if [ "$(uname)" != "Darwin" ]; then
-	fail "RobinMacro는 맥에서만 쓸 수 있어요. / RobinMacro only runs on macOS."
+	fail "벌꿀이는 맥에서만 쓸 수 있어요. / Beolkkuri only runs on macOS."
 fi
 
-bold "🐝 RobinMacro 내려받는 중... / Downloading RobinMacro..."
+bold "🐝 벌꿀이 내려받는 중... / Downloading Beolkkuri..."
 
 # Prefer the newest release; fall back to the main branch before the first release.
 zip_url=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
@@ -33,14 +34,20 @@ zip_url=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-curl -fL --progress-bar "$zip_url" -o "$work/robinmacro.zip" || fail "내려받지 못했어요. 인터넷 연결을 확인해 주세요. / Download failed. Check your internet connection."
-unzip -q "$work/robinmacro.zip" -d "$work/src" || fail "압축을 풀지 못했어요. / Could not unpack the download."
+curl -fL --progress-bar "$zip_url" -o "$work/beolkkuri.zip" || fail "내려받지 못했어요. 인터넷 연결을 확인해 주세요. / Download failed. Check your internet connection."
+unzip -q "$work/beolkkuri.zip" -d "$work/src" || fail "압축을 풀지 못했어요. / Could not unpack the download."
 src_dir=$(find "$work/src" -mindepth 1 -maxdepth 1 -type d | head -n1)
 [ -f "$src_dir/install_dependencies.command" ] || fail "내려받은 파일이 올바르지 않아요. / The download looks incomplete."
 
+# Compatibility: move an install from before the rename so its settings carry over.
+if [ -d "$OLD_DEST" ] && [ ! -e "$DEST" ]; then
+	bold "예전 폴더 ~/RobinMacro 를 ~/Beolkkuri 로 옮겨요. / Moving the old ~/RobinMacro folder to ~/Beolkkuri."
+	mv "$OLD_DEST" "$DEST" || fail "예전 폴더를 옮기지 못했어요. / Could not move the old folder."
+fi
+
 if [ -d "$DEST" ]; then
-	bold "기존 RobinMacro를 새 버전으로 바꿔요. 내 설정은 그대로 남아요."
-	bold "Updating the existing RobinMacro; your settings are kept."
+	bold "기존 벌꿀이를 새 버전으로 바꿔요. 내 설정은 그대로 남아요."
+	bold "Updating your existing Beolkkuri; your settings are kept."
 fi
 mkdir -p "$DEST"
 # rsync over the old copy: new files replace old ones, and user files that are

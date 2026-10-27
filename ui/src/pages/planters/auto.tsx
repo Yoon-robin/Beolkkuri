@@ -296,7 +296,7 @@ export function AutoPlanters() {
   const t = useStrings(strings)
   const { settings, revision } = useSettings()
   const saveMany = useSaveMany()
-  const [tab, setTab] = usePersistedTab("robin.planters.autoTab", "basic")
+  const [tab, setTab] = usePersistedTab("beolkkuri.planters.autoTab", "basic")
   const enabled = useMemo(() => PLANTERS.filter((p) => !!settings?.[`auto_planter_${p}`]), [settings])
 
   // per-planter field restrictions default to "allowed" when missing (old loadPlanters behaviour)

@@ -5,7 +5,7 @@
 // at startup, so these calls must survive as literal text. Each function only
 // forwards to the handler the React app registered under the same name.
 (function () {
-  var bridge = (window.__robinBridge = window.__robinBridge || {
+  var bridge = (window.__beolkkuriBridge = window.__beolkkuriBridge || {
     handlers: {},
     // keybind fields currently capturing input; the macro ignores hotkeys meanwhile
     recording: {},

@@ -9,7 +9,7 @@ type EelFn = (...args: unknown[]) => (callback?: (value: unknown) => void) => Pr
 declare global {
   interface Window {
     eel?: Record<string, EelFn> & { expose?: unknown }
-    __robinBridge?: {
+    __beolkkuriBridge?: {
       handlers: Record<string, (...args: never[]) => unknown>
       recording: Record<string, boolean>
     }

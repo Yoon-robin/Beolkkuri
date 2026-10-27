@@ -10,8 +10,12 @@ import requests
 
 
 # The detection models are published separately from the macro and are downloaded
-# on demand. Set ROBINMACRO_MODELS_REPO ("owner/name") to use a different source.
-MODELS_REPO = os.environ.get("ROBINMACRO_MODELS_REPO", "Fuzzy-Team/fuzzymacroaimodels")
+# on demand. Set BEOLKKURI_MODELS_REPO ("owner/name") to use a different source.
+MODELS_REPO = (
+    os.environ.get("BEOLKKURI_MODELS_REPO")
+    or os.environ.get("ROBINMACRO_MODELS_REPO")  # pre-rename name, still read for compatibility
+    or "Fuzzy-Team/fuzzymacroaimodels"
+)
 MODELS_API_URL = f"https://api.github.com/repos/{MODELS_REPO}/contents"
 MODELS_ZIP_URL = f"https://github.com/{MODELS_REPO}/archive/refs/heads/main.zip"
 MODEL_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "models"))
@@ -189,7 +193,7 @@ def _download_file(url, destination):
 
 
 def _download_remote_tree(remote_files, remote_root_path, destination_root):
-    tmp_root = tempfile.mkdtemp(prefix="robin-model-", dir=os.path.dirname(destination_root))
+    tmp_root = tempfile.mkdtemp(prefix="beolkkuri-model-", dir=os.path.dirname(destination_root))
     try:
         if len(remote_files) == 1 and remote_files[0].get("path") == remote_root_path:
             tmp_file = os.path.join(tmp_root, remote_root_path)
@@ -234,7 +238,7 @@ def _copy_from_repo_zip(model_name, destination_root):
         raise FileNotFoundError(f"{model_name} was not found in the model repository zip.")
 
     model_prefix = prefix + model_name
-    tmp_root = tempfile.mkdtemp(prefix="robin-model-", dir=os.path.dirname(destination_root))
+    tmp_root = tempfile.mkdtemp(prefix="beolkkuri-model-", dir=os.path.dirname(destination_root))
     try:
         if model_name.endswith(".onnx"):
             archive.extract(model_prefix, tmp_root)

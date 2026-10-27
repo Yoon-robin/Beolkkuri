@@ -148,23 +148,23 @@
 /* ---------------------------------------------------------------- motion */
 
 /* arriving content comes into focus as it settles */
-@keyframes rm-rise {
+@keyframes bk-rise {
   from { opacity: 0; transform: translateY(6px); filter: blur(2px); }
   to { opacity: 1; transform: none; filter: none; }
 }
 
 /* an icon or label replacing another in place (start -> stop) */
-@keyframes rm-swap {
+@keyframes bk-swap {
   from { opacity: 0; transform: scale(0.85); filter: blur(3px); }
   to { opacity: 1; transform: none; filter: none; }
 }
 
-@keyframes rm-shimmer {
+@keyframes bk-shimmer {
   from { background-position: -200% 0; }
   to { background-position: 200% 0; }
 }
 
-@keyframes rm-pop {
+@keyframes bk-pop {
   0% { transform: scale(0.8); opacity: 0; filter: blur(2px); }
   60% { transform: scale(1.06); opacity: 1; filter: none; }
   100% { transform: scale(1); }
@@ -173,40 +173,40 @@
 @layer utilities {
   /* Page content: each direct child rises in shortly after the previous one. Pages are
      opened often, so the whole sequence stays under ~0.4s. */
-  .rm-page > * {
-    animation: rm-rise 0.3s var(--ease-out-soft) both;
+  .bk-page > * {
+    animation: bk-rise 0.3s var(--ease-out-soft) both;
   }
-  .rm-page > *:nth-child(2) { animation-delay: 30ms; }
-  .rm-page > *:nth-child(3) { animation-delay: 60ms; }
-  .rm-page > *:nth-child(n + 4) { animation-delay: 90ms; }
+  .bk-page > *:nth-child(2) { animation-delay: 30ms; }
+  .bk-page > *:nth-child(3) { animation-delay: 60ms; }
+  .bk-page > *:nth-child(n + 4) { animation-delay: 90ms; }
 
   /* Same, for the cards inside a grid or list. */
-  .rm-stagger > * {
-    animation: rm-rise 0.3s var(--ease-out-soft) both;
+  .bk-stagger > * {
+    animation: bk-rise 0.3s var(--ease-out-soft) both;
   }
-  .rm-stagger > *:nth-child(2) { animation-delay: 35ms; }
-  .rm-stagger > *:nth-child(3) { animation-delay: 70ms; }
-  .rm-stagger > *:nth-child(4) { animation-delay: 105ms; }
-  .rm-stagger > *:nth-child(5) { animation-delay: 140ms; }
-  .rm-stagger > *:nth-child(n + 6) { animation-delay: 170ms; }
+  .bk-stagger > *:nth-child(2) { animation-delay: 35ms; }
+  .bk-stagger > *:nth-child(3) { animation-delay: 70ms; }
+  .bk-stagger > *:nth-child(4) { animation-delay: 105ms; }
+  .bk-stagger > *:nth-child(5) { animation-delay: 140ms; }
+  .bk-stagger > *:nth-child(n + 6) { animation-delay: 170ms; }
 
   /* A sub-tab's panel: shorter and closer than a page, since tabs flip back and forth. */
-  .rm-tab-in {
-    animation: rm-rise 0.22s var(--ease-out-soft) both;
+  .bk-tab-in {
+    animation: bk-rise 0.22s var(--ease-out-soft) both;
   }
 
-  .rm-swap { animation: rm-swap 0.24s var(--ease-out-soft) both; }
+  .bk-swap { animation: bk-swap 0.24s var(--ease-out-soft) both; }
 
-  .rm-shimmer {
+  .bk-shimmer {
     background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted), var(--foreground) 6%) 50%, var(--muted) 100%);
     background-size: 200% 100%;
-    animation: rm-shimmer 1.6s linear infinite;
+    animation: bk-shimmer 1.6s linear infinite;
   }
 
-  .rm-pop { animation: rm-pop 0.35s var(--ease-out-soft) both; }
+  .bk-pop { animation: bk-pop 0.35s var(--ease-out-soft) both; }
 
   /* Sliding highlight behind the selected tab or menu item (see tabs.tsx, app-sidebar.tsx). */
-  .rm-glider {
+  .bk-glider {
     transition:
       transform 0.28s var(--ease-glide),
       width 0.28s var(--ease-glide),
@@ -231,14 +231,14 @@
 }
 
 /* A setting reached from search glows once so the eye finds it. */
-@keyframes rm-flash {
+@keyframes bk-flash {
   0%, 35% { background-color: color-mix(in oklch, var(--primary) 18%, transparent); box-shadow: 0 0 0 6px color-mix(in oklch, var(--primary) 18%, transparent); }
   100% { background-color: transparent; box-shadow: 0 0 0 6px transparent; }
 }
 
 @layer utilities {
-  .rm-flash {
+  .bk-flash {
     border-radius: var(--radius-md);
-    animation: rm-flash 1.8s ease-out both;
+    animation: bk-flash 1.8s ease-out both;
   }
 }

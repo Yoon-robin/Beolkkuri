@@ -1,4 +1,4 @@
-"""Development backend for the RobinMacro UI.
+"""Development backend for the Beolkkuri UI.
 
 Runs the real settings manager over HTTP so the React app can be developed in a
 normal browser (``pnpm dev``) on any OS, without starting the macro itself.
@@ -108,5 +108,5 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("RobinMacro dev backend on http://127.0.0.1:8765")
+    print("Beolkkuri dev backend on http://127.0.0.1:8765")
     ThreadingHTTPServer(("127.0.0.1", 8765), Handler).serve_forever()

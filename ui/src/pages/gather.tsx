@@ -37,7 +37,7 @@ import { ModelStatus } from "./gather/model-status"
 import { strings } from "./gather/strings"
 import { TokenDialog } from "./gather/token-dialog"
 
-const SLOT_STORAGE_KEY = "robinmacro_gather_slot"
+const SLOT_STORAGE_KEY = "beolkkuri_gather_slot"
 
 function readSlot() {
   try {
@@ -82,10 +82,10 @@ function useAIDefaults() {
     Promise.all([
       callPy<FieldSettings>("getDefaultRobinAIGatherPatternPreset").catch(() => null),
       callPy<FieldSettings>("getDefaultBloomsAIPatternPreset").catch(() => null),
-    ]).then(([robin, blooms]) => {
+    ]).then(([aiGather, blooms]) => {
       if (cancelled) return
       setDefaults({
-        [ROBIN_AI_PATTERN]: robin && typeof robin === "object" ? robin : FALLBACK_AI_PRESETS[ROBIN_AI_PATTERN],
+        [ROBIN_AI_PATTERN]: aiGather && typeof aiGather === "object" ? aiGather : FALLBACK_AI_PRESETS[ROBIN_AI_PATTERN],
         [BLOOMS_AI_PATTERN]: blooms && typeof blooms === "object" ? blooms : FALLBACK_AI_PRESETS[BLOOMS_AI_PATTERN],
       })
     })

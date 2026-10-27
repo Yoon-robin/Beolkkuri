@@ -2,7 +2,7 @@
 // read with useStrings() so pages can be worked on independently.
 
 export const ko = {
-  "app.name": "RobinMacro",
+  "app.name": "벌꿀이",
   "app.tagline": "비 스웜 시뮬레이터 자동 매크로",
   "nav.home": "홈",
   "nav.gather": "채집",
@@ -103,7 +103,7 @@ export const ko = {
 export type UiKey = keyof typeof ko
 
 export const en: Record<UiKey, string> = {
-  "app.name": "RobinMacro",
+  "app.name": "Beolkkuri",
   "app.tagline": "Bee Swarm Simulator macro",
   "nav.home": "Home",
   "nav.gather": "Gather",

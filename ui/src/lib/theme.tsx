@@ -10,7 +10,7 @@ type ThemeStore = {
 }
 
 const ThemeContext = createContext<ThemeStore | null>(null)
-const STORAGE_KEY = "robinmacro_theme"
+const STORAGE_KEY = "beolkkuri_theme"
 const media = () => window.matchMedia("(prefers-color-scheme: dark)")
 
 const resolve = (theme: Theme): "light" | "dark" => (theme === "system" ? (media().matches ? "dark" : "light") : theme)

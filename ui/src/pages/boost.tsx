@@ -154,7 +154,7 @@ export default function BoostPage() {
   const t = useStrings(strings)
   const { t: tc } = useI18n()
   const { settings } = useSettings()
-  const [tab, setTab] = usePersistedTab("robin.boost.tab", "hotbar")
+  const [tab, setTab] = usePersistedTab("beolkkuri.boost.tab", "hotbar")
   useTabRequest("boost", setTab)
   const overrides = useBoostOverrides()
   if (!settings) return <PageLoading />

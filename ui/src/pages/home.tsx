@@ -235,12 +235,12 @@ function LogsCard() {
 
   const exportLogs = async () => {
     const recent = (await py.getRecentLogs().catch(() => [])) ?? []
-    let text = "RobinMacro Logs\n================\n\n"
+    let text = "Beolkkuri Logs\n===============\n\n"
     for (const l of recent) text += `[${l.time ?? ""}] ${l.title ?? ""}\n${(l.desc ?? "").replace(/<br>/g, "\n")}\n\n`
     const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }))
     const a = document.createElement("a")
     a.href = url
-    a.download = `robinmacro_logs_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.log`
+    a.download = `beolkkuri_logs_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.log`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -436,7 +436,7 @@ function PlanterTimers({ settings }: { settings: Settings }) {
         {timers.length === 0 ? (
           <EmptyState icon={SproutIcon} description={t("noPlanters")} className="py-6" />
         ) : (
-          <div className="rm-stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="bk-stagger grid grid-cols-2 gap-3 sm:grid-cols-3">
             {timers.map((p) => {
               const remaining = formatRemaining(p.harvestTime - now)
               return (
@@ -536,7 +536,7 @@ export default function HomePage() {
                   </Select>
                 </div>
                 {/* keyed so a new mode's description fades in rather than swapping silently */}
-                <p key={mode} className="rm-tab-in text-xs text-muted-foreground">
+                <p key={mode} className="bk-tab-in text-xs text-muted-foreground">
                   {t(`mode.${mode}.desc` as "mode.normal.desc")}
                 </p>
               </div>
@@ -560,7 +560,7 @@ export default function HomePage() {
                   }
                 />
               ) : (
-                <ol className="rm-stagger space-y-1.5">
+                <ol className="bk-stagger space-y-1.5">
                   {taskKeys(tasks).map(([key, task]) => (
                     <TaskRow key={key} task={task} />
                   ))}

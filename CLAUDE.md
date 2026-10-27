@@ -1,4 +1,4 @@
-# RobinMacro
+# 벌꿀이 (Beolkkuri)
 
 Bee Swarm Simulator macro for macOS with a React + shadcn/ui interface. It started as a fork of Fuzzy Macro (itself built on Existance Macro), was fully rebranded, and was given a new UI for Korean users who don't code. Korean is the default UI language, with an English toggle. Talk to the owner (Yoon-robin) in Korean.
 
@@ -12,7 +12,7 @@ ui/               React 19 + Vite 6 + TypeScript + Tailwind v4 + shadcn/ui (radi
   dev/            dev_server.py (HTTP backend for the browser), eel_harness.py (serves the build through real eel)
   scripts/        extract-schema.mjs (one-off migration, see "Settings schema")
 paths/, settings/ movement paths and gather patterns used by the macro
-install.sh        one-line installer: downloads latest release (or main) into ~/RobinMacro, runs install_dependencies.command
+install.sh        one-line installer: downloads latest release (or main) into ~/Beolkkuri, runs install_dependencies.command
 install_dependencies.command / run_macro.command   macOS installer and launcher (bash, LF, must stay executable)
 docs/             Korean help pages linked from the app and README
 site/             landing page (GitHub Pages): one static index.html + assets/. Deployed by .github/workflows/pages.yml
@@ -29,7 +29,7 @@ python ui/dev/dev_server.py     # 127.0.0.1:8765, real settingsManager + stubs f
 pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the dev server)
 ```
 
-`.claude/launch.json` has both as `robinmacro-backend` / `robinmacro-ui` for the preview tools.
+`.claude/launch.json` has both as `beolkkuri-backend` / `beolkkuri-ui` for the preview tools.
 
 - **The dev server reads and writes the real `settings/profiles/default` files** (created from defaults on first run; gitignored). Restore anything you toggle while testing.
 - Macro-only calls (start/stop/tools/updates/permissions) are stubbed in `STUBS` in `ui/dev/dev_server.py`. Add a stub when the UI calls a new `gui.py` function, matching the real return shape. `DEV_PERMISSIONS` fakes Screen Recording as off until its "켜기" button is pressed.
@@ -55,9 +55,9 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 - **Strings:** app-wide strings go in `ui/src/i18n/ui.ts`; page strings go in a local `PageStrings` table read with `useStrings`. Always keep ko and en in sync. Korean copy uses natural, friendly 해요체 and stays short.
 - **Motion utilities** in `ui/src/index.css`:
   - Easing tokens `--ease-out-soft` (things arriving) and `--ease-glide` (things moving between two places), also usable as `ease-out-soft` / `ease-glide`.
-  - `.rm-page` staggers a page's children automatically (rise + slight blur, under ~0.4s in total). Tab panels use the shorter `.rm-tab-in`.
-  - `.rm-stagger`, `.rm-shimmer`, `.rm-pop`, `.rm-swap` (an icon/label replacing another in place) and `.rm-flash` are opt-in.
-  - The selected tab (`components/ui/tabs.tsx`) and sidebar item (`NavGlider` in `app-sidebar.tsx`) have one sliding highlight (`.rm-glider`) instead of per-item backgrounds.
+  - `.bk-page` staggers a page's children automatically (rise + slight blur, under ~0.4s in total). Tab panels use the shorter `.bk-tab-in`.
+  - `.bk-stagger`, `.bk-shimmer`, `.bk-pop`, `.bk-swap` (an icon/label replacing another in place) and `.bk-flash` are opt-in.
+  - The selected tab (`components/ui/tabs.tsx`) and sidebar item (`NavGlider` in `app-sidebar.tsx`) have one sliding highlight (`.bk-glider`) instead of per-item backgrounds.
   - No looping attention effects (glows, pulsing buttons): the macro can run for hours. The small status dot is the one exception.
   - There is a global `prefers-reduced-motion` override.
   - Theme switching uses a view-transition circle (`ui/src/lib/theme.tsx`).
@@ -68,8 +68,8 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 
 ## Landing page (`site/`)
 
-- Live at https://yoon-robin.github.io/RobinMacro/. Every push to `main` that touches `site/**` redeploys it (Pages source: GitHub Actions).
-- A single hand-written `site/index.html` (no build step, no framework): inline CSS/JS. Korean by default, with an EN toggle remembered in localStorage (`rm_site_lang`). Korean text lives in the HTML (`data-i18n` / `data-i18n-html`); the English strings are in the `EN` object in the script, so keep the keys in sync.
+- Live at https://yoon-robin.github.io/Beolkkuri/. Every push to `main` that touches `site/**` redeploys it (Pages source: GitHub Actions).
+- A single hand-written `site/index.html` (no build step, no framework): inline CSS/JS. Korean by default, with an EN toggle remembered in localStorage (`beolkkuri_site_lang`; the old `rm_site_lang` is still read). Korean text lives in the HTML (`data-i18n` / `data-i18n-html`); the English strings are in the `EN` object in the script, so keep the keys in sync.
 - Look: a bright honey "game poster" style, chosen so it doesn't read like a generic AI landing page.
   - Black Han Sans (Google Fonts) for headlines, Pretendard (jsDelivr) for text.
   - Ink outlines and hard offset shadows instead of glows, gradients and glass.
@@ -82,30 +82,50 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
   - Gallery screenshots change with a circle wipe.
   - The final headline fills with ink as you scroll.
   - The copy buttons give off honey sparks.
-- Preview: `python -m http.server 8790 --directory site` (`robinmacro-site` in `.claude/launch.json`).
+- Preview: `python -m http.server 8790 --directory site` (`beolkkuri-site` in `.claude/launch.json`).
 - Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
 - Refresh the app screenshots:
   1. Run the dev UI plus backend.
   2. `node scripts/site/shoot-app.mjs <dir>` (fake running state and logs, 2x).
   3. `python scripts/site/to-webp.py <dir> site/assets`.
-- `site/assets/og.png` (1200×630 share card) was composed once by hand; redo it only if the branding changes.
+- `site/assets/og.png` (1200×630 share card) and the mascot `site/assets/bee.png` come from the brand pipeline (see Brand rules). Re-render the share card after refreshing `site/assets/home.webp`, since it shows that screenshot.
 - Set `CHROME=/path/to/chrome` if the scripts can't find a browser. On Windows with the sandbox on, Chrome may fail to launch; headless-shell with `pipe: true` worked.
 - Copy rules: no made-up stats or user counts. "Not affiliated with Onett/Roblox" stays in the FAQ and footer.
 
 ## Brand rules
 
-The owner asked for no trace of the old name. "Fuzzy"/"fuzz" may appear only in:
+The brand is **벌꿀이** in Korean and **Beolkkuri** in English; the slug for files, paths and identifiers is `beolkkuri`. It was called RobinMacro before, and before that it was a fork of Fuzzy Macro. The owner asked for no trace of the old names.
+
+- Korean text uses 벌꿀이. It ends in a vowel, so it takes 는/가/를/와/로. English text uses Beolkkuri, and bilingual strings use both. The Desktop app is literally `벌꿀이.app`, so English text that points at it says "벌꿀이 (Beolkkuri)".
+- Images drawn with the Inter font (hourly report, item monitor) say Beolkkuri, because Inter has no Hangul.
+- **Logo:** a honeybee mascot on a honey tile. The one source is `scripts/brand/logo.svg`; don't edit the PNGs.
+  1. `node scripts/site/render-brand.mjs` renders `.github/logo.png` (README and the macOS app icon), `ui/public/icon.png`, `src/hourly_report/assets/macro_icon.png`, `site/assets/logo.png`, `site/favicon.png`, the bare mascot `site/assets/bee.png` (the same drawing with `#tile-art` hidden) and the share card from `scripts/brand/og.html`.
+  2. `python scripts/make_logo.py` turns `.github/logo.png` into `ui/public/favicon.ico`.
+  3. Rebuild the UI so `src/webapp` gets the new icon and favicon.
+
+"RobinMacro" and other `robin` names may appear only in:
+- Compatibility fallbacks, each with a one-line comment:
+  - `install.sh` moves an old `~/RobinMacro` to `~/Beolkkuri` before the rsync, when `~/Beolkkuri` doesn't exist yet.
+  - `install_dependencies.command` and `run_macro.command` use `~/robin-macro-env` when `~/beolkkuri-env` doesn't exist. In-app updates replace files inside an old `~/RobinMacro` install, which must keep working without reinstalling libraries.
+  - `create_launcher` in `install_dependencies.command` removes the old `~/Applications/RobinMacro.app` and its Desktop alias.
+  - `main.py` and `modelManager.py` read `ROBINMACRO_DISCORD_APP_ID` / `ROBINMACRO_MODELS_REPO` when the `BEOLKKURI_…` names are unset.
+  - The Discord bot still accepts `robin!` next to `bee!` (`legacyCommands.OLD_PREFIX`).
+  - The README "reinstall from scratch" line also deletes `~/robin-macro-env`.
+- `Yoon-robin`, the owner's GitHub account: in URLs and the LICENSE copyright line.
+- The AI Gather pattern id `robin_ai_gather`, which Python reads and must not change: the pattern file name, the `shape` value, the `robin_ai_*` setting keys, `robin_ai_token_rankings.json`, `src/data/user/robin_ai_recordings/`, the schema id `configure-robin-ai-tokens-button`, and the code names built on it (`ROBIN_AI_*`, `*RobinAI*` functions, including the eel-exposed ones). Text that users see calls it "AI Gather" / "AI 채집".
+
+"Fuzzy"/"fuzz" may appear only in:
 - `LICENSE`: the Fuzzy Team BSD-3 and Existance BSD-4 notices are legally required. Also the README credit line required by the Existance license.
-- `modelManager.MODELS_REPO`: the default is `Fuzzy-Team/fuzzymacroaimodels`. That repo has no license, so it can't be re-hosted; it can be overridden with `ROBINMACRO_MODELS_REPO`.
+- `modelManager.MODELS_REPO`: the default is `Fuzzy-Team/fuzzymacroaimodels`. That repo has no license, so it can't be re-hosted; it can be overridden with `BEOLKKURI_MODELS_REPO`.
 - Game terms and libraries: the bee "fuzzy"/"gifted_fuzzy", "Fuzz Bombs" tokens, `fuzzywuzzy`, and the word "fuzzy match".
 
-The Discord bot prefix is `robin!`. Discord Rich Presence is off until `ROBINMACRO_DISCORD_APP_ID` is set.
+The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence is off until `BEOLKKURI_DISCORD_APP_ID` is set; its image key is `beolkkuri`.
 
 ## Repo housekeeping
 
 - `.gitattributes` forces LF. Windows has `core.autocrlf=true`, so expect CRLF warnings; they are harmless.
 - `*.command` files must keep mode 100755. When adding one from Windows: `git update-index --chmod=+x <file>`.
-- Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/RobinMacro`. `install.sh` installs the latest release zipball, or `main` if there are no releases.
+- Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/Beolkkuri`. `install.sh` installs the latest release zipball, or `main` if there are no releases.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Status and next steps (as of 2026-10-27)
@@ -115,7 +135,7 @@ Done:
 - The React UI, with every page ported from the old jQuery UI.
 - The Korean translation.
 - The one-line installer.
-- Quieter installer output, logged to `~/RobinMacro-install.log`.
+- Quieter installer output, logged to `~/Beolkkuri-install.log`.
 - The Desktop app launcher.
 - Live permission checks.
 - The Ctrl+K search.
@@ -124,12 +144,14 @@ Done:
 - The landing page on GitHub Pages (`site/`).
 
 Not yet verified on a real Mac, so test these first:
-1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/RobinMacro.app` with its Desktop alias.
+1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/벌꿀이.app` with its Desktop alias.
+   Also the upgrade from an old install: `install.sh` moving `~/RobinMacro`, the `~/robin-macro-env` fallback, and the old launcher and alias being removed.
 2. `getPermissionStatus` / `openPrivacySettings` in `gui.py` (ctypes `AXIsProcessTrusted`, `CGPreflightScreenCaptureAccess`).
 3. Keybind recording versus the hotkeys. `main.py`'s pynput `on_press` asks `eel.getElementProperty(...)()` synchronously whether a keybind field is recording. On Windows, `ui/dev/eel_harness.py` asks the same way from a plain thread and gets `'true'` while a field records, in a few ms, so the eel round trip works. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
 4. The real macro run, start/stop hotkeys and the hourly report with the new UI.
 
 Open items:
 - **Releases:** none exist yet. Create v1.0.0 once the Mac test passes; the updater and `install.sh` use releases.
+- **Repo rename:** the code already points at `Yoon-robin/Beolkkuri`. Rename the GitHub repo when the rename is pushed, so the updater's API calls don't 404 (GitHub redirects the old URLs).
 - **Small UI leftover:** some buff names stay English in Korean mode, because they are game names.
 - **Old UI for reference:** the original UI code is in the upstream repo (https://github.com/Fuzzy-Team/Fuzzy-Macro, `src/webapp`), if a legacy behaviour needs checking. Don't copy branding from it.

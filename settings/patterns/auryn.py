@@ -1,4 +1,4 @@
-#Ahk code converted by RobinMacro
+#Ahk code converted by Beolkkuri
 
 
 #auryn gathering path

@@ -1,6 +1,6 @@
 # Cup
 # Original Lua pattern by Souka/Seto, based on Kettle by Dully.
-# Converted for RobinMacro's Python pattern runner.
+# Converted for Beolkkuri's Python pattern runner.
 
 alignment = 0
 

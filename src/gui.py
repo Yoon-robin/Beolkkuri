@@ -991,7 +991,7 @@ def exportDebugZip(profile_name=None):
 
         mem.seek(0)
         b64 = base64.b64encode(mem.read()).decode("ascii")
-        filename = f"robinmacro_debug_{int(time.time())}.zip"
+        filename = f"beolkkuri_debug_{int(time.time())}.zip"
         return True, b64, filename
     except Exception as e:
         return False, str(e)
@@ -1104,7 +1104,7 @@ def getMacroVersion():
 
 @eel.expose
 def usesLegacyDiscordBot():
-    """True on macOS 10.12-10.14, where Python 3.7 can only install discord.py 1.x, so bot commands use the robin! prefix"""
+    """True on macOS 10.12-10.14, where Python 3.7 can only install discord.py 1.x, so bot commands use the bee! prefix"""
     return sys.version_info < (3, 8)
 
 @eel.expose

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- 벌꿀이 / Beolkkuri app icon. Render with: node scripts/site/render-brand.mjs -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd659"/>
+      <stop offset="1" stop-color="#ffb21a"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe489"/>
+      <stop offset="1" stop-color="#ffc21f"/>
+    </linearGradient>
+    <pattern id="comb" width="104" height="180" patternUnits="userSpaceOnUse">
+      <path d="M52 0 L104 30 L104 90 L52 120 L0 90 L0 30 Z M52 120 L52 180" fill="none" stroke="#1c1409" stroke-opacity="0.09" stroke-width="5"/>
+    </pattern>
+    <clipPath id="tile"><rect x="24" y="24" width="976" height="976" rx="228"/></clipPath>
+    <clipPath id="belly"><ellipse cx="512" cy="600" rx="262" ry="242"/></clipPath>
+  </defs>
+
+  <!-- the tile; render-brand.mjs hides #tile-art to make the bare mascot (site/assets/bee.png) -->
+  <g id="tile-art">
+  <g clip-path="url(#tile)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <rect width="1024" height="1024" fill="url(#comb)"/>
+    <!-- honey dripping from the top edge -->
+    <path d="M0 0 H1024 V118 H884 C864 118 856 130 856 148 V206 A28 28 0 0 1 800 206 V148 C800 130 792 118 772 118 H262 C242 118 234 130 234 148 V250 A28 28 0 0 1 178 250 V148 C178 130 170 118 150 118 H0 Z"
+      fill="#f59e0b" stroke="#1c1409" stroke-width="22" stroke-linejoin="round"/>
+  </g>
+  <rect x="24" y="24" width="976" height="976" rx="228" fill="none" stroke="#1c1409" stroke-width="40"/>
+  </g>
+
+  <!-- wings -->
+  <g fill="#fff" stroke="#1c1409" stroke-width="26">
+    <ellipse cx="292" cy="388" rx="132" ry="94" transform="rotate(-28 292 388)"/>
+    <ellipse cx="732" cy="388" rx="132" ry="94" transform="rotate(28 732 388)"/>
+  </g>
+  <g fill="none" stroke="#1c1409" stroke-width="14" stroke-linecap="round" opacity="0.35">
+    <path d="M232 404 Q 292 372 352 360"/>
+    <path d="M792 404 Q 732 372 672 360"/>
+  </g>
+
+  <!-- antennae -->
+  <g fill="none" stroke="#1c1409" stroke-width="26" stroke-linecap="round">
+    <path d="M454 380 C 436 312, 410 274, 380 250"/>
+    <path d="M570 380 C 588 312, 614 274, 644 250"/>
+  </g>
+  <circle cx="372" cy="244" r="38" fill="#1c1409"/>
+  <circle cx="652" cy="244" r="38" fill="#1c1409"/>
+  <circle cx="384" cy="232" r="11" fill="#fff" opacity="0.8"/>
+  <circle cx="664" cy="232" r="11" fill="#fff" opacity="0.8"/>
+
+  <!-- body with stripes -->
+  <ellipse cx="512" cy="600" rx="262" ry="242" fill="url(#body)"/>
+  <g clip-path="url(#belly)" fill="none" stroke="#1c1409" stroke-width="56">
+    <path d="M220 716 Q 512 784 804 716"/>
+    <path d="M240 806 Q 512 874 784 806"/>
+  </g>
+  <ellipse cx="512" cy="600" rx="262" ry="242" fill="none" stroke="#1c1409" stroke-width="30"/>
+  <path d="M330 468 Q 360 410 430 392" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- face -->
+  <g stroke="#1c1409" stroke-width="24">
+    <circle cx="420" cy="556" r="60" fill="#fff"/>
+    <circle cx="604" cy="556" r="60" fill="#fff"/>
+  </g>
+  <circle cx="432" cy="568" r="34" fill="#1c1409"/>
+  <circle cx="616" cy="568" r="34" fill="#1c1409"/>
+  <circle cx="446" cy="552" r="13" fill="#fff"/>
+  <circle cx="630" cy="552" r="13" fill="#fff"/>
+  <ellipse cx="352" cy="648" rx="44" ry="27" fill="#ff8fb7"/>
+  <ellipse cx="672" cy="648" rx="44" ry="27" fill="#ff8fb7"/>
+  <path d="M474 646 Q 512 688 550 646" fill="none" stroke="#1c1409" stroke-width="24" stroke-linecap="round"/>
+</svg>

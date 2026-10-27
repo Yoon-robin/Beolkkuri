@@ -46,7 +46,7 @@ export function RunButton({ size = "default", className }: { size?: "default" | 
   const mountedAs = useRef(status)
   const changed = useRef(false)
   if (status !== mountedAs.current) changed.current = true
-  const swap = changed.current ? "rm-swap" : undefined
+  const swap = changed.current ? "bk-swap" : undefined
 
   if (status === "running" || status === "stopping") {
     return (

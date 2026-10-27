@@ -137,72 +137,72 @@
     "idle_main_menu": {
       "state": "Idle",
       "details": "Waiting on next action...",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": null
     },
     "paused": {
       "state": "Paused",
       "details": "Macro paused",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": null
     },
     "standby": {
       "state": "Standby",
       "details": "Keeping this Mac awake",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": null
     },
     "converting": {
       "state": "Converting honey",
       "details": "At the hive",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Converting"
     },
     "rejoining": {
       "state": "Rejoining server",
       "details": "Reconnecting",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": null
     },
     "bugrun": {
       "state": "Hunting mobs",
       "details": "Defeating enemies",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Combat"
     },
     "collect": {
       "state": "Collecting items",
       "details": "Gathering resources",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Collecting"
     },
     "tool_auto_clicker": {
       "state": "Using Auto Clicker",
       "details": "Running a macro tool",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Auto Clicker"
     },
     "tool_auto_gifted_basic_bee": {
       "state": "Using Auto Gifted Basic Bee",
       "details": "Running a macro tool",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Gifted Basic Bee"
     }
@@ -211,48 +211,48 @@
     "gather_": {
       "state": "Gathering in {field} Field",
       "details": "Collecting pollen",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     },
     "quest_": {
       "state": "Doing {field} Quest",
       "details": "Completing objectives",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     },
     "travelling_": {
       "state": "Travelling to {field}",
       "details": "Moving to location",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     },
     "collecting_": {
       "state": "Collecting {field}",
       "details": "Gathering resources",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     },
     "attacking_": {
       "state": "Attacking {field}",
       "details": "Fighting enemies",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     },
     "planter_": {
       "state": "Managing {field} Planter",
       "details": "Placing or harvesting",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "{field}"
     }
@@ -261,320 +261,320 @@
     "coconut_crab": {
       "state": "Fighting Coconut Crab",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Coconut Crab"
     },
     "coconut crab": {
       "state": "Fighting Coconut Crab",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Coconut Crab"
     },
     "vicious": {
       "state": "Fighting Vicious Bee",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Vicious Bee"
     },
     "mondo": {
       "state": "Collecting Mondo Buff",
       "details": "Waiting for buff",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Mondo Chick"
     },
     "stump_snail": {
       "state": "Fighting Stump Snail",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Stump Snail"
     },
     "stump snail": {
       "state": "Fighting Stump Snail",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Stump Snail"
     },
     "king_beetle": {
       "state": "Fighting King Beetle",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "King Beetle"
     },
     "king beetle": {
       "state": "Fighting King Beetle",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "King Beetle"
     },
     "tunnel_bear": {
       "state": "Fighting Tunnel Bear",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Tunnel Bear"
     },
     "tunnel bear": {
       "state": "Fighting Tunnel Bear",
       "details": "Boss battle",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Tunnel Bear"
     },
     "planter": {
       "state": "Managing planters",
       "details": "Placing or harvesting",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Planters"
     },
     "blender": {
       "state": "Using blender",
       "details": "Crafting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Blender"
     },
     "ant": {
       "state": "Ant Challenge",
       "details": "Completing challenge",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Ant Challenge"
     },
     "memory": {
       "state": "Playing Memory Match",
       "details": "Matching tiles",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Memory Match"
     },
     "sticker_printer": {
       "state": "Using Sticker Printer",
       "details": "Printing stickers",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Sticker Printer"
     },
     "sticker_stack": {
       "state": "Claiming Sticker Stack",
       "details": "Collecting stickers",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Sticker Stack"
     },
     "honeystorm": {
       "state": "Honeystorm active",
       "details": "Collecting tokens",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Honeystorm"
     },
     "wealth_clock": {
       "state": "Using Wealth Clock",
       "details": "Collecting honey",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Wealth Clock"
     },
     "honey_dispenser": {
       "state": "Using Honey Dispenser",
       "details": "Collecting honey",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Honey Dispenser"
     },
     "honey dispenser": {
       "state": "Using Honey Dispenser",
       "details": "Collecting honey",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Honey Dispenser"
     },
     "robo_pass_dispenser": {
       "state": "Using Robo Pass Dispenser",
       "details": "Collecting Robo Pass",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Robo Pass"
     },
     "robo pass": {
       "state": "Using Robo Pass Dispenser",
       "details": "Collecting Robo Pass",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Robo Pass"
     },
     "dispenser": {
       "state": "Using dispenser",
       "details": "Collecting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Dispenser"
     },
     "booster": {
       "state": "Field boosted",
       "details": "Auto Field Boost active",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Boosted"
     },
     "cannon": {
       "state": "Using cannon",
       "details": "Fast travel",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Cannon"
     },
     "sprinkler": {
       "state": "Placing sprinkler",
       "details": "Setting up equipment",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Sprinkler"
     },
     "feast": {
       "state": "Using Beesmas Feast",
       "details": "Collecting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Feast"
     },
     "samovar": {
       "state": "Using Samovar",
       "details": "Collecting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Samovar"
     },
     "stockings": {
       "state": "Checking Stockings",
       "details": "Collecting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Stockings"
     },
     "wreath": {
       "state": "Admiring Wreath",
       "details": "Collecting honey",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Wreath"
     },
     "gingerbread": {
       "state": "Collecting Gingerbread House",
       "details": "Collecting Beesmas rewards",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Gingerbread"
     },
     "gummy_beacon": {
       "state": "Using Gummy Beacon",
       "details": "Collecting Beesmas rewards",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Gummy Beacon"
     },
     "gummy beacon": {
       "state": "Using Gummy Beacon",
       "details": "Collecting Beesmas rewards",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Gummy Beacon"
     },
     "wind_shrine": {
       "state": "Using Wind Shrine",
       "details": "Making an offering",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Wind Shrine"
     },
     "wind shrine": {
       "state": "Using Wind Shrine",
       "details": "Making an offering",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Wind Shrine"
     },
     "guiding_star": {
       "state": "Guiding Star detected",
       "details": "Watching boosted field",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Guiding Star"
     },
     "guiding star": {
       "state": "Guiding Star detected",
       "details": "Watching boosted field",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Guiding Star"
     },
     "candles": {
       "state": "Admiring Candles",
       "details": "Collecting honey",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Candles"
     },
     "snow_machine": {
       "state": "Using Snow Machine",
       "details": "Collecting snowflakes",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Snow Machine"
     },
     "lid_art": {
       "state": "Viewing Onett's Lid Art",
       "details": "Collecting items",
-      "large_image": "robin_macro",
-      "large_text": "RobinMacro",
+      "large_image": "beolkkuri",
+      "large_text": "Beolkkuri",
       "small_image": null,
       "small_text": "Lid Art"
     }
@@ -582,8 +582,8 @@
   "default": {
     "state": "Macro running",
     "details": "Bee Swarm Simulator",
-    "large_image": "robin_macro",
-    "large_text": "RobinMacro",
+    "large_image": "beolkkuri",
+    "large_text": "Beolkkuri",
     "small_image": null,
     "small_text": null
   }

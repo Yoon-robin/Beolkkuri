@@ -1,5 +1,5 @@
 """
-Pattern: Robin AI Gather
+Pattern: AI Gather
 Description: Uses CoreML models for token targeting and sprinkler returns.
 Best for: Blue-focused gathering where you want token chasing instead of a fixed path.
 Width: Expands the leash radius and target clustering range.

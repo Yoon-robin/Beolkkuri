@@ -1,17 +1,17 @@
 <div align="center">
 
-<img width="160" height="160" alt="RobinMacro logo" src=".github/logo.png">
+<img width="160" height="160" alt="Beolkkuri logo" src=".github/logo.png">
 
-# RobinMacro
+# 벌꿀이 (Beolkkuri)
 
 **맥(macOS)용 비 스웜 시뮬레이터(Bee Swarm Simulator) 자동 매크로**<br>
 코딩을 몰라도 더블클릭 몇 번이면 설치하고, 한국어 화면에서 바로 설정할 수 있어요.
 
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey?logo=apple)
-![Stars](https://img.shields.io/github/stars/Yoon-robin/RobinMacro?style=flat&color=f5b301&logo=github)
-![Version](https://img.shields.io/github/v/release/Yoon-robin/RobinMacro?include_prereleases)
+![Stars](https://img.shields.io/github/stars/Yoon-robin/Beolkkuri?style=flat&color=f5b301&logo=github)
+![Version](https://img.shields.io/github/v/release/Yoon-robin/Beolkkuri?include_prereleases)
 
-**[🌐 홈페이지](https://yoon-robin.github.io/RobinMacro/)** · [설치하기](#-설치하기) · [처음 실행하기](#-처음-실행하기) · [자주 묻는 질문](#-자주-묻는-질문) · [English](#english)
+**[🌐 홈페이지](https://yoon-robin.github.io/Beolkkuri/)** · [설치하기](#-설치하기) · [처음 실행하기](#-처음-실행하기) · [자주 묻는 질문](#-자주-묻는-질문) · [English](#english)
 
 </div>
 
@@ -44,13 +44,13 @@
 2. 아래 한 줄을 **복사해서 터미널에 붙여넣고(⌘V) 엔터**를 눌러요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash
 ```
 
 3. 이제 기다리기만 하면 돼요. **10~20분** 정도 걸리고, 진행 상황이 한국어로 나와요.
    - 파이썬이나 개발 도구 설치 창이 뜨면 **계속 / 설치** 를 눌러 주세요.
    - 맥 로그인 암호를 물으면 입력해요. (입력해도 화면에 안 보이는 게 정상이에요)
-4. 끝나면 **바탕화면에 RobinMacro 앱**이 생겨요. 설치 위치는 `내 홈 폴더/RobinMacro` 예요.
+4. 끝나면 **바탕화면에 벌꿀이 앱**이 생겨요. 설치 위치는 `내 홈 폴더/Beolkkuri` 예요.
 
 > 업데이트하거나 다시 설치할 때도 같은 줄을 붙여넣으면 돼요. 내 설정은 그대로 남아요.
 
@@ -58,7 +58,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 <summary><b>터미널이 어렵다면: ZIP으로 설치하기</b></summary>
 
 1. 이 페이지 위쪽의 초록색 **`<> Code`** 버튼 → **Download ZIP** 을 눌러요.
-2. 다운로드 폴더의 **RobinMacro-main.zip** 을 더블클릭해서 풀고, 폴더를 원하는 곳(예: `문서`)으로 옮겨요.
+2. 다운로드 폴더의 **Beolkkuri-main.zip** 을 더블클릭해서 풀고, 폴더를 원하는 곳(예: `문서`)으로 옮겨요.
 3. 폴더 안의 **`install_dependencies.command`** 를 **마우스 오른쪽 버튼(또는 control+클릭) → 열기** 로 실행해요.
    - "확인되지 않은 개발자" 경고가 뜨면 **열기** 를 한 번 더 눌러요.
    - 그래도 막히면 **시스템 설정 → 개인정보 보호 및 보안** 맨 아래의 **"그래도 열기"** 를 눌러요.
@@ -70,7 +70,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 
 1. **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용** 에서 **터미널** 을 켜요.
 2. **시스템 설정 → 개인정보 보호 및 보안 → 화면 기록** 에서도 **터미널** 을 켜요.
-3. 터미널을 완전히 껐다가(⌘Q) 바탕화면의 RobinMacro 를 열어요.
+3. 터미널을 완전히 껐다가(⌘Q) 바탕화면의 벌꿀이를 열어요.
 
 앱의 **시작 가이드** 에서 권한이 제대로 켜졌는지 초록 체크로 바로 확인할 수 있어요. 자세한 설명: [docs/permissions.md](docs/permissions.md)
 
@@ -79,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 ## ▶️ 처음 실행하기
 
 1. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요.
-2. 바탕화면의 **RobinMacro** 를 더블클릭해요. (또는 폴더 안의 `run_macro.command`)
+2. 바탕화면의 **벌꿀이**를 더블클릭해요. (또는 폴더 안의 `run_macro.command`)
 3. 매크로 화면이 열리면 왼쪽의 **시작 가이드** 를 따라 해요.
    - **설정 → 게임 설정** 에서 내 **벌집 번호**를 맞추고,
    - **채집** 에서 갈 필드를 켜고,
@@ -123,7 +123,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 <details>
 <summary><b>처음부터 다시 설치하고 싶어요</b></summary>
 
-터미널에서 `rm -rf ~/robin-macro-env` 를 실행한 뒤, [한 줄 설치](#1-한-줄로-설치하기-추천) 명령을 다시 붙여넣으세요.
+터미널에서 `rm -rf ~/beolkkuri-env ~/robin-macro-env` 를 실행한 뒤, [한 줄 설치](#1-한-줄로-설치하기-추천) 명령을 다시 붙여넣으세요.
 </details>
 
 ---
@@ -131,7 +131,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 ## 🛠 개발자용
 
 ```
-RobinMacro/
+Beolkkuri/
 ├── src/            파이썬 매크로 (main.py, gui.py, modules/)
 │   └── webapp/     빌드된 화면 (ui/ 에서 자동 생성, 직접 고치지 마세요)
 ├── ui/             React + TypeScript + Tailwind + shadcn/ui 화면 소스
@@ -150,16 +150,16 @@ pnpm dev                   # http://localhost:5173
 pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 사용자에게 반영돼요)
 ```
 
-**다른 컴퓨터에서 이어서 작업하기:** `git clone https://github.com/Yoon-robin/RobinMacro` 한 뒤 위 명령을 그대로 실행하면 돼요. 구조, 규칙, 남은 할 일은 [CLAUDE.md](CLAUDE.md) 에 정리돼 있어요 (Claude Code가 자동으로 읽어요). 개발 서버 실행 설정은 `.claude/launch.json` 에 있어요. 홈페이지는 `site/` 폴더이고, `main` 에 푸시하면 자동으로 배포돼요.
+**다른 컴퓨터에서 이어서 작업하기:** `git clone https://github.com/Yoon-robin/Beolkkuri` 한 뒤 위 명령을 그대로 실행하면 돼요. 구조, 규칙, 남은 할 일은 [CLAUDE.md](CLAUDE.md) 에 정리돼 있어요 (Claude Code가 자동으로 읽어요). 개발 서버 실행 설정은 `.claude/launch.json` 에 있어요. 홈페이지는 `site/` 폴더이고, `main` 에 푸시하면 자동으로 배포돼요.
 
 ---
 
 ## English
 
-**RobinMacro** is a Bee Swarm Simulator macro for macOS with a React + shadcn/ui interface in Korean and English.
+**Beolkkuri** (벌꿀이) is a Bee Swarm Simulator macro for macOS with a React + shadcn/ui interface in Korean and English.
 
-**Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
-**Run:** Open Bee Swarm Simulator in Roblox, then open the **RobinMacro** app the installer put on your Desktop (or run `run_macro.command`). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
+**Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
+**Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app the installer put on your Desktop (or run `run_macro.command`). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
 
 Features: field gathering with patterns and AI token gathering, dispensers/collectibles, mob and boss runs, quests, manual and auto planters, hotbar and field boosts, rejoining, death recovery, profiles, Discord webhooks, a bot and streaming, and hourly reports.
 
@@ -171,4 +171,4 @@ Features: field gathering with patterns and AI token gathering, dispensers/colle
 - Inspired by [Natro Macro](https://github.com/NatroTeam/NatroMacro), [Stumpy Macro](https://github.com/alaninnovates/bss-macro) and [Existance Macro](https://github.com/existancepy/bss-macro-py).
 - This product includes software developed by exihs (Existance Macro).
 
-RobinMacro is not affiliated with Onett, Bee Swarm Simulator or Roblox. Using macros is at your own risk. See [LICENSE](LICENSE) for the licenses of included code.
+Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox. Using macros is at your own risk. See [LICENSE](LICENSE) for the licenses of included code.

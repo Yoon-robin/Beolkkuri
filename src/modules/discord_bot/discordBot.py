@@ -87,7 +87,7 @@ def format_standby_duration(seconds):
 
 
 def response_footer():
-    return f"RobinMacro - Version {settingsManager.getMacroVersion()}"
+    return f"Beolkkuri - Version {settingsManager.getMacroVersion()}"
 
 
 def _content_with_footer(content):
@@ -96,7 +96,7 @@ def _content_with_footer(content):
         return footer
 
     content = str(content)
-    if "RobinMacro - Version" in content:
+    if "Beolkkuri - Version" in content:
         return content
     return f"{content}\n\n{footer}"
 
@@ -108,7 +108,7 @@ def _apply_embed_footer(embed):
     footer = response_footer()
     existing_footer = getattr(getattr(embed, "footer", None), "text", None)
     if existing_footer:
-        if "RobinMacro - Version" not in existing_footer:
+        if "Beolkkuri - Version" not in existing_footer:
             embed.set_footer(text=f"{existing_footer} | {footer}")
     else:
         embed.set_footer(text=footer)
@@ -120,7 +120,7 @@ def _build_response_embed(content=None):
     if content is not None:
         embed.description = str(content)
     else:
-        embed.title = "RobinMacro"
+        embed.title = "Beolkkuri"
     return _apply_embed_footer(embed)
 
 
@@ -177,7 +177,7 @@ def _format_bot_response(args, kwargs, add_default_content=True):
 
 
 def _patch_discord_response_footers():
-    if not getattr(discord.InteractionResponse, "_robin_footer_patched", False):
+    if not getattr(discord.InteractionResponse, "_beolkkuri_footer_patched", False):
         original_send_message = discord.InteractionResponse.send_message
         original_edit_message = discord.InteractionResponse.edit_message
 
@@ -191,9 +191,9 @@ def _patch_discord_response_footers():
 
         discord.InteractionResponse.send_message = send_message_with_footer
         discord.InteractionResponse.edit_message = edit_message_with_footer
-        discord.InteractionResponse._robin_footer_patched = True
+        discord.InteractionResponse._beolkkuri_footer_patched = True
 
-    if not getattr(discord.Webhook, "_robin_footer_patched", False):
+    if not getattr(discord.Webhook, "_beolkkuri_footer_patched", False):
         original_webhook_send = discord.Webhook.send
 
         async def webhook_send_with_footer(self, *args, **kwargs):
@@ -201,9 +201,9 @@ def _patch_discord_response_footers():
             return await original_webhook_send(self, *args, **kwargs)
 
         discord.Webhook.send = webhook_send_with_footer
-        discord.Webhook._robin_footer_patched = True
+        discord.Webhook._beolkkuri_footer_patched = True
 
-    if not getattr(discord.Message, "_robin_footer_patched", False):
+    if not getattr(discord.Message, "_beolkkuri_footer_patched", False):
         original_message_edit = discord.Message.edit
 
         async def message_edit_with_footer(self, *args, **kwargs):
@@ -211,7 +211,7 @@ def _patch_discord_response_footers():
             return await original_message_edit(self, *args, **kwargs)
 
         discord.Message.edit = message_edit_with_footer
-        discord.Message._robin_footer_patched = True
+        discord.Message._beolkkuri_footer_patched = True
 
 def get_cached_settings():
     """Get settings with caching to improve performance"""
@@ -238,7 +238,7 @@ TAD_ALT_SYNC_HELP_TEXT = (
     "`?start` - Start the alt macro after its field is updated.\n"
     "`?help` - Show this TAD compatibility help.\n\n"
     "These compatibility commands are accepted only from Discord webhook messages. "
-    "TAD Alt Sync sends them in the order `?stop`, `?set`, then `?start`; RobinMacro must receive the field authorization before starting. "
+    "TAD Alt Sync sends them in the order `?stop`, `?set`, then `?start`; Beolkkuri must receive the field authorization before starting. "
     "The host sends that sequence with its default field at startup and whenever the boost field changes. "
     "It also sends the default field when no boost is detected and when the host stops. "
     "When Glitter Extending is enabled, the host uses Glitter five seconds before the boost expires and keeps the alt in the boost field for a second boost duration. "
@@ -861,7 +861,8 @@ def _build_logger_embed(data):
 def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None, updateGUI=None, discord_message_queue=None, planter_command_queue=None, stream_control_queue=None, skipServer=None, standby_command_queue=None, standby_state=None):
     import modules.macro
     _patch_discord_response_footers()
-    bot = commands.Bot(command_prefix="robin!", intents=discord.Intents.all())
+    # bee! plus the pre-rename prefix (legacyCommands.OLD_PREFIX), kept for compatibility
+    bot = commands.Bot(command_prefix=[legacyCommands.PREFIX, legacyCommands.OLD_PREFIX], intents=discord.Intents.all())
     if legacyCommands.IS_LEGACY:
         legacyCommands.attach(bot)
     
@@ -961,7 +962,7 @@ def discordBot(token, run, status, skipTask, recentLogs=None, pin_requests=None,
             except Exception:
                 # Fallback to default if reading version fails
                 pass
-            status_name = f"RobinMacro v{version}!"
+            status_name = f"Beolkkuri v{version}!"
             await bot.change_presence(activity=discord.Game(name=status_name))
         except Exception as e:
             print(f"Failed to set Discord status: {e}")

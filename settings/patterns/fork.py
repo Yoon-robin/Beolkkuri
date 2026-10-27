@@ -1,4 +1,4 @@
-#Ahk code converted by RobinMacro
+#Ahk code converted by Beolkkuri
 
 
 cforkgap=0.75 #flowers between lines

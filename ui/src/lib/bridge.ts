@@ -6,8 +6,8 @@ import { useEffect, useRef } from "react"
 type Listener = (...args: never[]) => unknown
 
 function bridge() {
-  window.__robinBridge ??= { handlers: {}, recording: {} }
-  return window.__robinBridge
+  window.__beolkkuriBridge ??= { handlers: {}, recording: {} }
+  return window.__beolkkuriBridge
 }
 
 export type PythonEvent =

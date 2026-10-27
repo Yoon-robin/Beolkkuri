@@ -329,7 +329,7 @@ export function ProfilesSection() {
                 <RefreshCwIcon />
               </Button>
             </div>
-            <ul className="rm-stagger max-h-96 space-y-1.5 overflow-y-auto">
+            <ul className="bk-stagger max-h-96 space-y-1.5 overflow-y-auto">
               {(profiles ?? []).map((name) => {
                 const active = name === current
                 return (

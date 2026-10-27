@@ -156,7 +156,7 @@ function TabsList({
         <span
           aria-hidden
           data-slot="tabs-glider"
-          className="rm-glider pointer-events-none absolute top-0 left-0 rounded-md border border-transparent bg-background shadow-sm dark:border-input dark:bg-input/30"
+          className="bk-glider pointer-events-none absolute top-0 left-0 rounded-md border border-transparent bg-background shadow-sm dark:border-input dark:bg-input/30"
           style={{ transform: `translate(${box.x}px, ${box.y}px)`, width: box.w, height: box.h }}
         />
       )}
@@ -193,7 +193,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("rm-tab-in flex-1 text-sm outline-none", className)}
+      className={cn("bk-tab-in flex-1 text-sm outline-none", className)}
       {...props}
     />
   )
