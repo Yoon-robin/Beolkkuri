@@ -6,7 +6,7 @@ import { CHROME } from "./chrome.mjs"
 
 const OUT = process.argv[2] ?? "out"
 const URL = process.env.SITE_URL ?? "http://localhost:8790/"
-const SECTIONS = ["top", ".stage", "#features", ".c-planter", "#screens", "#how", "#install", "#faq"]
+const SECTIONS = ["top", ".stage", "#hour", "#features", ".c-planter", "#screens", "#install", "#faq", "#final"]
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: "shell", pipe: true, protocolTimeout: 90000, args: ["--no-sandbox", "--disable-gpu", "--force-color-profile=srgb", "--lang=ko-KR"] })

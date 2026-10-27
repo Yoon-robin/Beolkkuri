@@ -69,7 +69,19 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 ## Landing page (`site/`)
 
 - Live at https://yoon-robin.github.io/RobinMacro/. Every push to `main` that touches `site/**` redeploys it (Pages source: GitHub Actions).
-- A single hand-written `site/index.html` (no build step, no framework): inline CSS/JS, Pretendard from jsDelivr, dark honey theme. Korean by default, with an EN toggle remembered in localStorage (`rm_site_lang`). Korean text lives in the HTML (`data-i18n` / `data-i18n-html`); the English strings are in the `EN` object in the script, so keep the keys in sync.
+- A single hand-written `site/index.html` (no build step, no framework): inline CSS/JS. Korean by default, with an EN toggle remembered in localStorage (`rm_site_lang`). Korean text lives in the HTML (`data-i18n` / `data-i18n-html`); the English strings are in the `EN` object in the script, so keep the keys in sync.
+- Look: a bright honey "game poster" style, chosen so it doesn't read like a generic AI landing page.
+  - Black Han Sans (Google Fonts) for headlines, Pretendard (jsDelivr) for text.
+  - Ink outlines and hard offset shadows instead of glows, gradients and glass.
+  - Sections alternate honey / paper / ink backgrounds.
+- Motion is all in the script and CSS of that file, and everything has a `prefers-reduced-motion` fallback:
+  - The hero honeycomb fills cell by cell, and bees fly around it with SVG `animateMotion`.
+  - The screenshot straightens as you scroll, and honey drips at the hero's bottom edge.
+  - The two tapes speed up with scroll speed.
+  - `#hour` is pinned and scrolls sideways on screens at least 900×640; smaller screens get a plain grid.
+  - Gallery screenshots change with a circle wipe.
+  - The final headline fills with ink as you scroll.
+  - The copy buttons give off honey sparks.
 - Preview: `python -m http.server 8790 --directory site` (`robinmacro-site` in `.claude/launch.json`).
 - Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
 - Refresh the app screenshots:

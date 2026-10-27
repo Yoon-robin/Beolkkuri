@@ -3,504 +3,471 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RobinMacro — 맥용 비 스웜 시뮬레이터 매크로</title>
-<meta name="description" content="자는 동안에도 꿀은 쌓여요. 한 줄로 설치하고 한국어 화면에서 클릭 몇 번이면 끝나는 맥용 비 스웜 시뮬레이터 매크로. 무료 · 오픈소스." />
-<meta name="theme-color" content="#0c0a07" />
+<title>RobinMacro · 맥용 비 스웜 시뮬레이터 매크로</title>
+<meta name="description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 터미널에 한 줄 붙여 넣으면 설치되고, 메뉴는 전부 한국어예요. 무료, 오픈소스." />
+<meta name="theme-color" content="#ffc83d" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="RobinMacro — 자는 동안에도 꿀은 쌓여요" />
-<meta property="og:description" content="맥용 비 스웜 시뮬레이터 매크로. 한 줄 설치 · 한국어 화면 · 무료 오픈소스." />
+<meta property="og:title" content="RobinMacro · 꿀 파밍은 맥한테 맡겨요" />
+<meta property="og:description" content="비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로. 한 줄 설치, 한국어 화면, 무료 오픈소스." />
 <meta property="og:image" content="https://yoon-robin.github.io/RobinMacro/assets/og.png" />
 <meta property="og:url" content="https://yoon-robin.github.io/RobinMacro/" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" href="favicon.png" />
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" />
 <style>
 :root {
-  --bg: #0c0a07;
-  --bg-2: #13100b;
-  --card: rgba(255, 248, 235, 0.035);
-  --card-strong: rgba(255, 248, 235, 0.06);
-  --line: rgba(255, 240, 210, 0.09);
-  --line-strong: rgba(255, 220, 160, 0.18);
-  --text: #fbf7f0;
-  --muted: #b9b0a3;
-  --dim: #8a8174;
-  --amber: #fbbf24;
-  --amber-2: #f59e0b;
-  --orange: #f97316;
-  --honey: #ffd27a;
-  --green: #4ade80;
-  --radius: 22px;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --mx: 50%;
-  --my: 30%;
-  color-scheme: dark;
+  --honey: #ffc83d;
+  --honey-2: #ffb21a;
+  --honey-soft: #ffe7a3;
+  --amber: #f08a00;
+  --ink: #1c1409;
+  --ink-2: #3a2c17;
+  --ink-soft: #2a1f12;
+  --paper: #fffaee;
+  --cream: #fff1cc;
+  --muted: #6b5a3e;
+  --on-ink: #fff4d6;
+  --on-ink-muted: #cdbb97;
+  --red: #ff5b4a;
+  --blue: #3f8cff;
+  --green: #2fb357;
+  --purple: #8b5cf6;
+  --display: "Black Han Sans", "Pretendard Variable", Pretendard, sans-serif;
+  --out: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hard: 5px 5px 0 var(--ink);
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: clip; }
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--paper);
+  color: var(--ink);
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  font-feature-settings: "ss05";
   line-height: 1.6;
   word-break: keep-all;
-  overflow-x: hidden;
-  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; }
-::selection { background: rgba(251, 191, 36, 0.35); }
+::selection { background: var(--ink); color: var(--honey); }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
 .wrap { width: min(1180px, 100% - 40px); margin-inline: auto; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-
-/* ---------- background layers ---------- */
-.bg-hex {
-  position: fixed; inset: 0; z-index: -3; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97' fill='none' stroke='%23fbbf24' stroke-opacity='0.55' stroke-width='1'/%3E%3C/svg%3E");
+.display { font-family: var(--display); font-weight: 400; letter-spacing: -0.01em; }
+h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(40px, 6vw, 76px); line-height: 1.04; letter-spacing: -0.015em; }
+.sub { margin: 18px 0 0; max-width: 560px; font-size: 18px; color: var(--muted); }
+.honeycomb {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97' fill='none' stroke='%231c1409' stroke-opacity='0.09' stroke-width='2'/%3E%3C/svg%3E");
   background-size: 56px 97px;
-  opacity: 0.16;
-  -webkit-mask-image: radial-gradient(520px circle at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.25) 45%, transparent 75%);
-          mask-image: radial-gradient(520px circle at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.25) 45%, transparent 75%);
 }
-.bg-glow {
-  position: fixed; inset: -20%; z-index: -4; pointer-events: none;
-  background:
-    radial-gradient(40% 35% at 75% 10%, rgba(245, 158, 11, 0.22), transparent 70%),
-    radial-gradient(35% 30% at 10% 60%, rgba(249, 115, 22, 0.12), transparent 70%),
-    radial-gradient(30% 30% at 90% 90%, rgba(251, 191, 36, 0.08), transparent 70%);
-  animation: drift 22s ease-in-out infinite alternate;
+
+/* ---------- buttons, stickers ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 56px; padding: 0 26px; border-radius: 16px; border: 3px solid var(--ink); cursor: pointer;
+  font-size: 17px; font-weight: 800; white-space: nowrap;
+  box-shadow: var(--hard);
+  transition: translate 0.18s var(--out), box-shadow 0.18s var(--out), background 0.2s;
 }
-@keyframes drift { to { transform: translate3d(-3%, 4%, 0) scale(1.06); } }
-#pollen { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
-.noise {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+.btn svg { width: 20px; height: 20px; }
+.btn:hover { translate: -2px -2px; box-shadow: 7px 7px 0 var(--ink); }
+.btn:active { translate: 4px 4px; box-shadow: 1px 1px 0 var(--ink); }
+.btn-ink { background: var(--ink); color: var(--honey); }
+.btn-white { background: #fff; color: var(--ink); }
+.sticker {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 14px;
+  background: #fff; border: 2.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+  font-size: 14.5px; font-weight: 800; white-space: nowrap;
+}
+.tag {
+  display: inline-block; padding: 4px 12px; border-radius: 10px; border: 2.5px solid var(--ink);
+  background: var(--red); color: #fff; font-weight: 800; font-size: 14px; rotate: -3deg; box-shadow: 3px 3px 0 var(--ink);
 }
 
 /* ---------- nav ---------- */
-.nav {
-  position: sticky; top: 0; z-index: 50;
-  transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
-  border-bottom: 1px solid transparent;
-}
-.nav.scrolled { background: rgba(12, 10, 7, 0.72); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-color: var(--line); }
-.nav .wrap { display: flex; align-items: center; gap: 20px; height: 68px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
-.brand img { width: 34px; height: 34px; border-radius: 10px; box-shadow: 0 6px 20px -6px rgba(245, 158, 11, 0.7); transition: transform 0.4s var(--ease); }
-.brand:hover img { transform: rotate(-8deg) scale(1.08); }
-.nav-links { display: flex; gap: 4px; margin-left: 18px; }
-.nav-links a { padding: 8px 12px; border-radius: 10px; color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.2s, background 0.2s; }
-.nav-links a:hover { color: var(--text); background: var(--card-strong); }
+.nav { position: sticky; top: 0; z-index: 50; transition: background 0.3s, box-shadow 0.3s; }
+.nav.scrolled { background: rgba(255, 250, 238, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 3px 0 var(--ink); }
+.nav.on-honey:not(.scrolled) { background: transparent; }
+.nav .wrap { display: flex; align-items: center; gap: 18px; height: 70px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-size: 22px; }
+.brand img { width: 38px; height: 38px; border-radius: 11px; border: 2.5px solid var(--ink); transition: rotate 0.5s var(--spring); }
+.brand:hover img { rotate: -12deg; }
+.nav-links { display: flex; gap: 2px; margin-left: 14px; }
+.nav-links a { padding: 8px 12px; border-radius: 10px; font-size: 15px; font-weight: 700; transition: background 0.2s; }
+.nav-links a:hover { background: rgba(28, 20, 9, 0.08); }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.chip-btn {
-  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 12px;
-  border: 1px solid var(--line); background: var(--card); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 12px;
+  border: 2.5px solid var(--ink); background: #fff; box-shadow: 3px 3px 0 var(--ink);
+  font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap;
+  transition: translate 0.15s var(--out), box-shadow 0.15s var(--out);
 }
-.chip-btn:hover { border-color: var(--line-strong); background: var(--card-strong); }
-.chip-btn:active { transform: scale(0.97); }
-.chip-btn svg { width: 17px; height: 17px; }
-.star-count { padding-left: 8px; margin-left: 2px; border-left: 1px solid var(--line); color: var(--honey); font-variant-numeric: tabular-nums; }
-
-/* ---------- buttons ---------- */
-.btn {
-  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  height: 54px; padding: 0 26px; border-radius: 16px; border: 0; cursor: pointer;
-  font-size: 16.5px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap;
-  transition: transform 0.2s var(--ease), box-shadow 0.3s, background 0.3s;
-}
-.btn svg { width: 19px; height: 19px; }
-.btn:active { transform: scale(0.97); }
-.btn-primary {
-  color: #1c1204;
-  background: linear-gradient(135deg, #ffe08a 0%, #fbbf24 35%, #f59e0b 70%, #f97316 100%);
-  background-size: 200% 200%;
-  box-shadow: 0 10px 40px -10px rgba(245, 158, 11, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  animation: sheen 6s ease-in-out infinite;
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 50px -12px rgba(245, 158, 11, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
-@keyframes sheen { 50% { background-position: 100% 100%; } }
-.btn-ghost { color: var(--text); background: var(--card-strong); border: 1px solid var(--line-strong); backdrop-filter: blur(8px); }
-.btn-ghost:hover { transform: translateY(-2px); background: rgba(255, 248, 235, 0.09); }
+.chip:hover { translate: -1px -1px; box-shadow: 4px 4px 0 var(--ink); }
+.chip:active { translate: 3px 3px; box-shadow: 0 0 0 var(--ink); }
+.chip svg { width: 17px; height: 17px; }
+.star-count { padding-left: 8px; border-left: 2px solid var(--ink); font-variant-numeric: tabular-nums; }
 
 /* ---------- hero ---------- */
-.hero { position: relative; padding: 76px 0 40px; text-align: center; overflow-x: clip; }
-.eyebrow {
-  display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 999px;
-  border: 1px solid var(--line-strong); background: rgba(251, 191, 36, 0.06); font-size: 14px; color: var(--honey); font-weight: 600;
-}
-.eyebrow .pill { padding: 2px 9px; border-radius: 999px; background: var(--amber); color: #1c1204; font-size: 12px; font-weight: 800; }
-h1.title {
-  margin: 26px auto 0; max-width: 15ch;
-  font-size: clamp(46px, 8.4vw, 104px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 900;
-}
-.title .line { display: block; overflow: hidden; padding-bottom: 0.06em; }
-html[lang="en"] h1.title { max-width: none; font-size: clamp(38px, 6.6vw, 88px); }
-.title .line > span { display: inline-block; transform: translateY(105%); animation: rise 1s var(--ease) forwards; }
-.title .line:nth-child(2) > span { animation-delay: 0.12s; }
-.title .line:nth-child(2) { background: radial-gradient(45% 55% at 50% 60%, rgba(245, 158, 11, 0.22), transparent 75%); }
-@keyframes rise { to { transform: none; } }
-.honey-text {
-  background: linear-gradient(100deg, #fff1c7 0%, #fbbf24 30%, #f97316 55%, #fbbf24 80%, #fff1c7 100%);
-  background-size: 220% 100%;
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: rise 1s var(--ease) 0.12s forwards, flow 7s linear infinite;
-}
-@keyframes flow { to { background-position: -220% 0; } }
-.lead { margin: 26px auto 0; max-width: 620px; font-size: clamp(17px, 2vw, 20px); color: var(--muted); }
-.lead b { color: var(--text); font-weight: 600; }
-.fade-up { opacity: 0; transform: translateY(18px); animation: fadeUp 0.9s var(--ease) forwards; }
-@keyframes fadeUp { to { opacity: 1; transform: none; } }
-.hero-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
-.hero-meta { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; color: var(--dim); font-size: 14px; }
-.hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
-.hero-meta svg { width: 16px; height: 16px; color: var(--amber); }
+.hero { position: relative; margin-top: -70px; padding: 130px 0 0; background-color: var(--honey); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 30px; align-items: center; }
+.hero-grid > * { min-width: 0; }
+h1.title { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(44px, 7vw, 100px); line-height: 0.98; letter-spacing: -0.02em; }
+html[lang="en"] h1.title { font-size: clamp(34px, 4.6vw, 66px); }
+.title .ln { display: block; width: fit-content; max-width: 100%; animation: popIn 0.9s var(--spring) backwards; }
+.title .ln.alt { margin-top: 10px; padding: 2px 18px 8px; border-radius: 20px; background: var(--ink); color: var(--honey); rotate: -2deg; box-shadow: 7px 7px 0 var(--red); animation-delay: 0.14s; }
+@keyframes popIn { from { opacity: 0; scale: 0.6; translate: 0 40px; rotate: -10deg; } 60% { opacity: 1; } }
+.lead { margin: 30px 0 0; max-width: 560px; font-size: clamp(17px, 1.9vw, 20px); color: var(--ink-2); font-weight: 500; }
+.rise { animation: rise 0.8s var(--out) backwards; }
+@keyframes rise { from { opacity: 0; translate: 0 22px; } }
+.badge { position: absolute; z-index: 2; left: -4%; top: -2%; width: 128px; height: 128px; rotate: -8deg; }
+.badge svg { width: 100%; height: 100%; animation: spin 18s linear infinite; }
+.badge text { font-family: var(--display); font-size: 15px; fill: var(--ink); }
+.badge .core { position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; }
+@keyframes spin { to { rotate: 360deg; } }
 
-/* install pill */
 .cmd {
-  margin: 30px auto 0; display: flex; align-items: center; gap: 12px; width: min(720px, 100%);
-  padding: 8px 8px 8px 18px; border-radius: 16px; border: 1px solid var(--line-strong);
-  background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(10px);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14.5px; text-align: left;
-  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.04);
+  margin: 30px 0 0; display: flex; align-items: center; gap: 12px; width: min(620px, 100%);
+  padding: 8px 8px 8px 18px; border-radius: 16px; background: var(--ink); color: var(--on-ink);
+  border: 3px solid var(--ink); box-shadow: 5px 5px 0 rgba(28, 20, 9, 0.35);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px;
 }
-.cmd .prompt { color: var(--amber); user-select: none; }
-.cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; color: #f5efe3; }
+.cmd .prompt { color: var(--honey); user-select: none; }
+.cmd code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
 .cmd code::-webkit-scrollbar { display: none; }
-.cmd .copy {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 11px; border: 0; cursor: pointer;
-  background: var(--amber); color: #1c1204; font-family: "Pretendard Variable", Pretendard, sans-serif; font-weight: 700; font-size: 14px;
-  transition: transform 0.15s, background 0.2s;
+.copy {
+  flex-shrink: 0; position: relative; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 15px; border-radius: 11px;
+  border: 0; cursor: pointer; background: var(--honey); color: var(--ink);
+  font-family: "Pretendard Variable", Pretendard, sans-serif; font-weight: 800; font-size: 14px;
+  transition: scale 0.15s var(--out), background 0.2s;
 }
-.cmd .copy:hover { background: var(--honey); }
-.cmd .copy:active { transform: scale(0.95); }
-.cmd .copy svg { width: 16px; height: 16px; }
-.cmd .copy.done { background: var(--green); }
+.copy:hover { background: var(--honey-soft); }
+.copy:active { scale: 0.94; }
+.copy svg { width: 16px; height: 16px; }
+.copy.done { background: #7ee29a; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; }
+.hero-meta { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14.5px; font-weight: 700; color: var(--ink-2); }
+.hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta svg { width: 17px; height: 17px; }
 
-/* hero showcase */
-.stage { position: relative; margin: 70px auto 0; width: min(1120px, 100%); perspective: 1800px; }
-.stage::before {
-  content: ""; position: absolute; inset: 8% 6% -6%; z-index: -1; border-radius: 40px;
-  background: radial-gradient(60% 60% at 50% 40%, rgba(245, 158, 11, 0.55), rgba(249, 115, 22, 0.15) 50%, transparent 75%);
-  filter: blur(60px); opacity: 0.8;
+/* the hive: cells fill with honey, bees circle it */
+.hive { position: relative; width: 100%; max-width: 540px; margin-inline: auto; }
+.hive > svg { width: 100%; height: auto; overflow: visible; }
+.cell-bg { fill: var(--cream); }
+.cell-line { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linejoin: round; }
+.honey-fill { transform-box: fill-box; transform: translateY(var(--lvl)); animation: fillUp 1.5s var(--out) var(--d) backwards; }
+@keyframes fillUp { from { transform: translateY(100%); } }
+.hive .drop { animation: drip 4.5s cubic-bezier(0.55, 0, 1, 0.45) 2.4s infinite; }
+@keyframes drip { 0%, 55% { transform: translateY(0) scale(0.2); opacity: 0; } 62% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(120px) scale(0.85); opacity: 0; } }
+.hive .drop { transform-box: fill-box; transform-origin: 50% 0; }
+.wing { transform-box: fill-box; transform-origin: 50% 100%; animation: flap 0.11s ease-in-out infinite alternate; }
+@keyframes flap { to { transform: scaleY(0.35); } }
+
+/* screenshot stage under the hero */
+.stage { position: relative; margin: 70px auto 0; width: min(1100px, 100%); padding-bottom: 30px; }
+.tilt {
+  transform: perspective(1600px) rotateX(calc((1 - var(--p, 1)) * 18deg)) rotate(calc((1 - var(--p, 1)) * -3deg)) scale(calc(0.9 + var(--p, 1) * 0.1));
+  transform-origin: 50% 0; will-change: transform;
 }
-.tilt { transform: rotateX(var(--tilt, 22deg)) scale(var(--tilt-scale, 0.94)); transform-origin: 50% 0; transition: transform 0.12s linear; will-change: transform; }
-.window {
-  border-radius: 16px; overflow: hidden; background: #1a1612; border: 1px solid rgba(255, 230, 190, 0.14);
-  box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+.frame { border-radius: 20px; overflow: hidden; background: var(--ink); border: 3.5px solid var(--ink); box-shadow: 12px 12px 0 var(--ink); }
+.frame-bar { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; background: var(--ink); color: var(--on-ink-muted); }
+.frame-bar i { width: 13px; height: 13px; border-radius: 50%; display: block; border: 2px solid #000; }
+.frame-bar i:nth-child(1) { background: var(--red); } .frame-bar i:nth-child(2) { background: var(--honey); } .frame-bar i:nth-child(3) { background: #4ade80; }
+.frame-bar span { flex: 1; text-align: center; margin-right: 60px; font-size: 13px; font-weight: 700; }
+.frame img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
+.float { position: absolute; z-index: 3; animation: bob 5s ease-in-out infinite; }
+.float .sticker { font-size: 15px; }
+.float small { font-weight: 600; opacity: 0.65; }
+.s1 { left: -2%; top: 18%; rotate: -5deg; }
+.s1 .sticker { background: #d9f99d; }
+.s2 { right: -2%; top: 6%; rotate: 4deg; animation-delay: -1.7s; }
+.s3 { right: 4%; bottom: 10%; rotate: -3deg; animation-delay: -3.3s; }
+.s3 .sticker { background: var(--honey-soft); }
+kbd { font-family: ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px; border-radius: 7px; border: 2px solid var(--ink); background: #fff; }
+.live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); border: 2px solid var(--ink); animation: blink 1.4s steps(1) infinite; }
+@keyframes bob { 50% { translate: 0 -12px; } }
+@keyframes blink { 50% { opacity: 0.3; } }
+.drip-edge { overflow: visible; position: relative; display: block; width: 100%; height: 96px; margin-bottom: -95px; z-index: 2; }
+.drip-edge .fall { animation: fall 5s cubic-bezier(0.55, 0, 1, 0.45) infinite; transform-box: fill-box; }
+.drip-edge .fall:nth-of-type(2) { animation-delay: -1.8s; } .drip-edge .fall:nth-of-type(3) { animation-delay: -3.4s; }
+@keyframes fall { 0%, 60% { transform: translateY(0); opacity: 0; } 66% { opacity: 1; } 100% { transform: translateY(70px); opacity: 0; } }
+
+/* ---------- tapes ---------- */
+.tapes { position: relative; height: 230px; margin-top: 60px; overflow: hidden; }
+.tape { position: absolute; left: -5%; width: 110%; padding: 16px 0; border-block: 3px solid var(--ink); white-space: nowrap; }
+.tape.t1 { top: 50px; background: var(--ink); color: var(--honey); rotate: -3.5deg; z-index: 2; }
+.tape.t2 { top: 92px; background: var(--honey); color: var(--ink); rotate: 2.5deg; }
+.tape-track { display: inline-flex; gap: 0; will-change: transform; }
+.tape-track span { display: inline-flex; align-items: center; gap: 22px; padding-right: 22px; font-family: var(--display); font-size: 30px; line-height: 1.2; }
+.tape-track span::after { content: ""; width: 18px; height: 20px; background: currentColor; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+
+/* ---------- an hour of the macro (pinned, scrolls sideways) ---------- */
+.hour { position: relative; background: var(--ink); color: var(--on-ink); padding: 110px 0; }
+.hour .sub { color: var(--on-ink-muted); }
+.hour-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.hour-head h2 { margin-top: 14px; }
+.hour-clock { display: flex; align-items: center; gap: 16px; }
+.hour-clock .time { font-family: var(--display); font-size: clamp(54px, 7vw, 92px); line-height: 1; color: var(--honey); font-variant-numeric: tabular-nums; min-width: 3.1ch; text-align: right; }
+.jar { position: relative; width: 58px; height: 78px; border: 3.5px solid var(--on-ink); border-top-width: 9px; border-radius: 10px 10px 16px 16px; overflow: hidden; }
+.jar i { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--hp, 1) * 100%); background: linear-gradient(var(--honey), var(--amber)); transition: height 0.15s linear; }
+.hour-track { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-top: 54px; padding-inline: max(20px, (100vw - 1180px) / 2); }
+.moment {
+  position: relative; padding: 26px 26px 28px; border-radius: 24px; background: var(--ink-soft); border: 3px solid var(--on-ink);
+  box-shadow: 7px 7px 0 var(--honey); transition: scale 0.5s var(--out), opacity 0.5s, box-shadow 0.5s var(--out);
 }
-.window-bar { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; background: linear-gradient(#2a241d, #221d17); border-bottom: 1px solid rgba(0, 0, 0, 0.5); }
-.window-bar i { width: 12px; height: 12px; border-radius: 50%; display: block; }
-.window-bar i:nth-child(1) { background: #ff5f57; } .window-bar i:nth-child(2) { background: #febc2e; } .window-bar i:nth-child(3) { background: #28c840; }
-.window-bar span { flex: 1; text-align: center; margin-right: 52px; font-size: 12.5px; color: #a8a29e; font-weight: 600; }
-.window img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
-.float {
-  position: absolute; z-index: 3; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 16px;
-  background: rgba(28, 24, 19, 0.82); border: 1px solid var(--line-strong); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8); font-size: 14px; font-weight: 600; white-space: nowrap;
-  animation: bob 6s ease-in-out infinite;
-}
-.float small { display: block; font-weight: 500; color: var(--muted); font-size: 12.5px; }
-.float .ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; }
-.float .ic svg { width: 18px; height: 18px; }
-.f1 { left: -3%; top: 22%; }
-.f1 .ic { background: rgba(74, 222, 128, 0.15); color: var(--green); }
-.f2 { right: -4%; top: 10%; animation-delay: -2s; }
-.f2 .ic { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
-.f3 { right: 2%; bottom: 14%; animation-delay: -4s; }
-.f3 .ic { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
-.f2 kbd { font-family: ui-monospace, monospace; font-size: 12px; padding: 2px 7px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--line); }
-.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); animation: ping 1.6s infinite; }
-@keyframes ping { 70% { box-shadow: 0 0 0 9px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
-@keyframes bob { 50% { transform: translateY(-12px); } }
+.moment .t { font-family: var(--display); font-size: 46px; line-height: 1; color: var(--honey); }
+.moment h3 { margin: 18px 0 6px; font-size: 23px; font-weight: 800; letter-spacing: -0.02em; }
+.moment p { margin: 0; color: var(--on-ink-muted); font-size: 16px; }
+.hexbadge { position: absolute; right: 22px; top: 20px; width: 56px; height: 62px; display: grid; place-items: center; color: var(--ink); }
+.hexbadge::before { content: ""; position: absolute; inset: 0; background: var(--honey); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.hexbadge svg { position: relative; width: 26px; height: 26px; }
+.hour-note { margin-top: 34px; color: var(--on-ink-muted); font-size: 14px; }
+.hour.pinned { padding: 0; height: var(--h, 300vh); }
+.hour.pinned .hour-pin { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+.hour.pinned .hour-track { display: flex; gap: 28px; width: max-content; will-change: transform; }
+.hour.pinned .moment { width: 360px; flex-shrink: 0; scale: 0.92; opacity: 0.55; }
+.hour.pinned .moment:nth-child(even) { rotate: 1.5deg; } .hour.pinned .moment:nth-child(odd) { rotate: -1.5deg; }
+.hour.pinned .moment.now { scale: 1; opacity: 1; box-shadow: 10px 10px 0 var(--red); }
+.hour.pinned .hour-note { margin-top: 30px; }
 
-/* bees: flight paths are drawn for a 1120px stage and the layer is scaled to fit */
-.bees { position: absolute; left: 0; top: 0; z-index: 4; width: 1120px; height: 760px; transform-origin: 0 0; transform: scale(var(--k, 1)); pointer-events: none; }
-.bee { position: absolute; z-index: 4; width: 46px; height: 46px; offset-rotate: auto; animation: fly 16s linear infinite; pointer-events: none; transform: scale(var(--bs, 1)); filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
-.bee svg { width: 100%; height: 100%; transform: rotate(90deg); }
-.bee .wing { transform-origin: 24px 22px; animation: flap 0.12s ease-in-out infinite alternate; }
-.bee .wing.r { animation-delay: 0.06s; }
-@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
-@keyframes fly { from { offset-distance: 0%; } to { offset-distance: 100%; } }
-.bee.b1 { offset-path: path("M -80 260 C 160 40, 420 420, 640 180 S 1040 80, 1220 300"); }
-.bee.b2 { offset-path: path("M 1240 520 C 980 640, 760 360, 520 560 S 140 700, -100 460"); animation-duration: 21s; animation-delay: -7s; width: 36px; height: 36px; }
-.bee.b3 { offset-path: path("M 300 -60 C 380 200, 900 120, 980 420 S 700 760, 1200 820"); animation-duration: 26s; animation-delay: -15s; width: 30px; height: 30px; }
-
-/* ---------- marquee ---------- */
-.marquee { position: relative; margin-top: 90px; padding: 22px 0; border-block: 1px solid var(--line); overflow: hidden; background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.03), transparent); }
-.marquee::before, .marquee::after { content: ""; position: absolute; top: 0; bottom: 0; width: 140px; z-index: 2; pointer-events: none; }
-.marquee::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
-.marquee::after { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
-.track { display: flex; gap: 14px; width: max-content; animation: scroll 46s linear infinite; }
-.marquee:hover .track { animation-play-state: paused; }
-.track span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-weight: 600; font-size: 15px; color: #e7dfd2; white-space: nowrap; }
-@keyframes scroll { to { transform: translateX(-50%); } }
-
-/* ---------- sections ---------- */
-section { position: relative; padding: 120px 0 0; }
-.kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--amber); letter-spacing: 0.02em; text-transform: uppercase; }
-.kicker::before { content: ""; width: 22px; height: 2px; border-radius: 2px; background: currentColor; }
-h2 { margin: 14px 0 0; font-size: clamp(34px, 5vw, 58px); line-height: 1.1; letter-spacing: -0.035em; font-weight: 850; }
-h2 em { font-style: normal; }
-.sub { margin: 18px 0 0; max-width: 600px; color: var(--muted); font-size: 18px; }
-.center { text-align: center; }
-.center .sub { margin-inline: auto; }
-
-.reveal { opacity: 0; transform: translateY(36px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
-.reveal.in { opacity: 1; transform: none; }
-
-/* bento */
-.bento { margin-top: 56px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+/* ---------- features ---------- */
+.features { padding: 130px 0 40px; }
+.features .head { max-width: 760px; }
+.grid { margin-top: 56px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; }
 .card {
-  position: relative; border-radius: var(--radius); padding: 28px; background: var(--card); border: 1px solid var(--line);
-  overflow: hidden; isolation: isolate; min-height: 250px;
-  transition: transform 0.4s var(--ease), border-color 0.3s;
+  position: relative; padding: 26px; border-radius: 24px; background: #fff; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink);
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s var(--out), box-shadow 0.3s var(--out);
 }
-.card::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; transition: opacity 0.4s;
-  background: radial-gradient(420px circle at var(--cx, 50%) var(--cy, 50%), rgba(251, 191, 36, 0.13), transparent 45%);
-}
-.card::after {
-  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; padding: 1px; opacity: 0; transition: opacity 0.4s;
-  background: radial-gradient(300px circle at var(--cx, 50%) var(--cy, 50%), rgba(251, 191, 36, 0.7), transparent 50%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-}
-.card:hover { transform: translateY(-4px); }
-.card:hover::before, .card:hover::after { opacity: 1; }
-.card h3 { margin: 18px 0 8px; font-size: 21px; letter-spacing: -0.02em; font-weight: 750; }
+.card:hover { box-shadow: 10px 10px 0 var(--ink); }
+.card h3 { margin: 0 0 8px; font-size: 22px; font-weight: 850; letter-spacing: -0.02em; line-height: 1.3; }
 .card p { margin: 0; color: var(--muted); font-size: 15.5px; }
-.icon-badge { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(249, 115, 22, 0.12)); border: 1px solid rgba(251, 191, 36, 0.25); color: var(--amber); }
-.icon-badge svg { width: 22px; height: 22px; }
-.c-gather { grid-column: span 4; grid-row: span 2; display: flex; flex-direction: column; }
-.c-search, .c-discord, .c-planter, .c-lang, .c-safe { grid-column: span 2; }
+.card .label { position: absolute; top: -16px; left: 22px; }
+.c-search { grid-column: span 3; background: var(--honey-soft); }
+.c-discord { grid-column: span 3; display: flex; flex-direction: column; }
+.c-planter, .c-safe, .c-lang { grid-column: span 2; }
+.c-safe { background: #d9f99d; }
+.c-lang { background: #dbeafe; }
 
+.mini-search { margin-top: 20px; border-radius: 16px; border: 2.5px solid var(--ink); background: #fff; overflow: hidden; font-size: 14px; }
+.mini-search .q { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 2.5px solid var(--ink); font-weight: 700; }
+.mini-search .q svg { width: 16px; height: 16px; }
+.caret { width: 2.5px; height: 18px; background: var(--ink); animation: blink 1s steps(1) infinite; }
+.mini-search .r { padding: 9px 14px; display: flex; justify-content: space-between; gap: 10px; opacity: 0; translate: 0 8px; transition: opacity 0.35s var(--out), translate 0.35s var(--out), background 0.2s; }
+.mini-search .r.show { opacity: 1; translate: none; }
+.mini-search .r.hl { background: var(--honey); font-weight: 700; }
+.mini-search .r small { color: var(--muted); }
 
-/* gather visual */
-.field {
-  position: relative; margin-top: 26px; flex: 1; min-height: 260px; border-radius: 18px; overflow: hidden;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(74, 222, 128, 0.18), transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(250, 204, 21, 0.14), transparent 40%),
-    linear-gradient(160deg, #1d2a17, #13200f);
-  border: 1px solid rgba(132, 204, 22, 0.15);
-}
-.field::before { content: ""; position: absolute; inset: 0; opacity: 0.35; background-image: radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1.4px); background-size: 18px 18px; }
-.field svg.pattern { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pattern path.trail { fill: none; stroke: url(#trailGrad); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1400; stroke-dashoffset: 1400; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.8)); }
-.card.in .pattern path.trail, .card:hover .pattern path.trail { animation: draw 6s var(--ease) infinite; }
-@keyframes draw { 0% { stroke-dashoffset: 1400; } 70%, 100% { stroke-dashoffset: 0; } }
-.flower { position: absolute; font-size: 22px; animation: sway 3s ease-in-out infinite; }
-@keyframes sway { 50% { transform: rotate(12deg) translateY(-2px); } }
-.bag {
-  position: absolute; left: 18px; bottom: 18px; right: 18px; display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; border-radius: 14px; background: rgba(12, 10, 7, 0.7); backdrop-filter: blur(8px); border: 1px solid var(--line);
-  font-size: 13.5px; font-weight: 600;
-}
-.bar { flex: 1; height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #fbbf24, #f97316); box-shadow: 0 0 12px rgba(251, 191, 36, 0.8); animation: fill 6s var(--ease) infinite; }
-@keyframes fill { 0% { width: 4%; } 70% { width: 100%; } 85% { width: 100%; } 100% { width: 4%; } }
-
-/* search visual */
-.mini-search { margin-top: 20px; border-radius: 14px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.35); overflow: hidden; font-size: 13.5px; }
-.mini-search .q { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border-bottom: 1px solid var(--line); color: var(--text); }
-.mini-search .q svg { width: 15px; height: 15px; color: var(--dim); }
-.mini-search .caret { width: 2px; height: 16px; background: var(--amber); animation: blink 1s steps(1) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-.mini-search .r { padding: 8px 12px; color: var(--muted); display: flex; justify-content: space-between; opacity: 0; transform: translateY(6px); transition: all 0.4s var(--ease); }
-.mini-search .r.show { opacity: 1; transform: none; }
-.mini-search .r.hl { background: rgba(251, 191, 36, 0.1); color: var(--text); }
-.mini-search .r small { color: var(--dim); }
-
-/* discord visual */
-.stack { position: relative; margin-top: 20px; height: 120px; }
+.stack { position: relative; margin-top: 20px; flex: 1; min-height: 136px; }
 .note {
-  position: absolute; left: 0; right: 0; display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 13px;
-  background: #23202b; border: 1px solid rgba(139, 92, 246, 0.25); font-size: 13px;
-  animation: notify 7.5s var(--ease) infinite; opacity: 0;
+  position: absolute; left: 0; right: 0; top: calc(50% - 32px); display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px;
+  background: #2b2d31; color: #f2f3f5; border: 2.5px solid var(--ink); font-size: 14px;
+  animation: notify 7.5s var(--out) infinite; opacity: 0;
 }
-.note b { display: block; font-size: 12.5px; color: #c4b5fd; }
-.note .av { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: url("assets/logo.png") center / cover; }
+.note b { display: block; font-size: 13px; color: #c4b5fd; }
+.note .av { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: url("assets/logo.png") center / cover; }
 .note:nth-child(2) { animation-delay: 2.5s; } .note:nth-child(3) { animation-delay: 5s; }
-@keyframes notify { 0% { opacity: 0; transform: translateY(26px) scale(0.96); } 8%, 30% { opacity: 1; transform: none; } 40%, 100% { opacity: 0; transform: translateY(-30px) scale(0.96); } }
+@keyframes notify { 0% { opacity: 0; transform: translateY(40px) scale(0.9) rotate(-2deg); } 8%, 30% { opacity: 1; transform: none; } 40%, 100% { opacity: 0; transform: translateY(-36px) scale(0.94); } }
 
-/* planter rings */
 .rings { margin-top: 22px; display: flex; gap: 14px; }
-.ring { position: relative; width: 72px; height: 72px; }
-.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring circle { fill: none; stroke-width: 7; }
-.ring .bgc { stroke: rgba(255, 255, 255, 0.08); }
-.ring .fg { stroke: url(#ringGrad); stroke-linecap: round; stroke-dasharray: 188; stroke-dashoffset: 188; transition: stroke-dashoffset 2s var(--ease); }
+.ring { position: relative; width: 76px; height: 76px; }
+.ring svg { width: 100%; height: 100%; rotate: -90deg; }
+.ring circle { fill: none; stroke-width: 8; }
+.ring .bgc { stroke: var(--cream); }
+.ring .fg { stroke: var(--amber); stroke-linecap: round; stroke-dasharray: 188; stroke-dashoffset: 188; transition: stroke-dashoffset 2s var(--out) 0.3s; }
 .card.in .ring .fg { stroke-dashoffset: var(--off); }
-.ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; }
+.ring::after { content: ""; position: absolute; inset: 2px; border-radius: 50%; border: 2.5px solid var(--ink); pointer-events: none; }
+.ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 24px; }
+.checks { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 600; }
+.checks li svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; padding: 2px; border-radius: 6px; background: var(--ink); color: #d9f99d; }
+.lang-flip { position: relative; margin-top: 18px; display: inline-flex; padding: 5px; border-radius: 14px; background: #fff; border: 2.5px solid var(--ink); }
+.lang-flip span { position: relative; z-index: 1; padding: 6px 14px; font-weight: 800; font-size: 14px; transition: color 0.35s; }
+.lang-flip span.on { color: var(--honey); }
+.lang-flip .knob { position: absolute; top: 5px; bottom: 5px; left: 5px; border-radius: 10px; background: var(--ink); transition: left 0.45s var(--spring), width 0.45s var(--spring); }
 
-/* language + safety */
-.lang-flip { margin-top: 18px; display: inline-flex; gap: 6px; padding: 5px; border-radius: 13px; background: rgba(0,0,0,0.35); border: 1px solid var(--line); }
-.lang-flip span { padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: 14px; color: var(--dim); transition: all 0.4s var(--ease); }
-.lang-flip span.on { background: var(--amber); color: #1c1204; }
-.checks { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.checks li { display: flex; gap: 10px; align-items: center; color: #e2d9cb; font-size: 15px; }
-.checks li svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; }
+/* ---------- screens ---------- */
+.screens { margin-top: 90px; padding: 96px 0 120px; background-color: var(--cream); border-block: 3px solid var(--ink); }
+.screens .head { text-align: center; }
+.screens .sub { margin-inline: auto; }
+.tabs { position: relative; margin: 40px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; padding: 6px; width: max-content; max-width: 100%; border-radius: 18px; border: 3px solid var(--ink); background: #fff; box-shadow: 4px 4px 0 var(--ink); }
+.tabs button { position: relative; z-index: 1; height: 42px; padding: 0 18px; border-radius: 12px; border: 0; background: transparent; cursor: pointer; font-weight: 800; font-size: 15px; transition: color 0.25s; }
+.tabs button[aria-selected="true"] { color: var(--honey); }
+.tabs .glider { position: absolute; z-index: 0; top: 6px; height: 42px; border-radius: 12px; background: var(--ink); transition: left 0.45s var(--spring), top 0.45s var(--spring), width 0.45s var(--spring); }
+.gallery { margin: 34px auto 0; width: min(1060px, 100%); }
+.shots { position: relative; aspect-ratio: 16 / 10; background: var(--ink); }
+.shots img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; }
+.shots img.under { opacity: 1; z-index: 1; }
+.shots img.top { opacity: 1; z-index: 2; }
+.caption { margin: 26px auto 0; max-width: 640px; text-align: center; font-size: 17px; font-weight: 700; min-height: 28px; transition: opacity 0.25s, translate 0.25s var(--out); }
+.caption.out { opacity: 0; translate: 0 6px; }
 
-/* ---------- gallery ---------- */
-.tabs { position: relative; margin: 44px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 6px; width: max-content; max-width: 100%; border-radius: 16px; border: 1px solid var(--line); background: var(--card); }
-.tabs button { position: relative; z-index: 1; height: 40px; padding: 0 18px; border-radius: 11px; border: 0; background: transparent; cursor: pointer; font-weight: 650; font-size: 15px; color: var(--muted); transition: color 0.25s; }
-.tabs button[aria-selected="true"] { color: #1c1204; }
-.tabs .pill-bg { position: absolute; z-index: 0; top: 6px; height: 40px; border-radius: 11px; background: var(--amber); box-shadow: 0 6px 20px -6px rgba(245, 158, 11, 0.8); transition: left 0.45s var(--ease), top 0.45s var(--ease), width 0.45s var(--ease); }
-.gallery { position: relative; margin: 30px auto 0; width: min(1080px, 100%); }
-.gallery .window { position: relative; }
-.shots { position: relative; aspect-ratio: 16 / 10; }
-.shots img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; transform: scale(1.02); transition: opacity 0.6s var(--ease), transform 0.8s var(--ease); }
-.shots img.on { opacity: 1; transform: none; }
-.caption { margin-top: 22px; text-align: center; color: var(--muted); font-size: 16px; min-height: 26px; transition: opacity 0.3s; }
-
-/* ---------- steps ---------- */
-.steps { position: relative; margin-top: 60px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.steps .rail { position: absolute; top: 34px; left: 16%; right: 16%; height: 2px; background: var(--line); overflow: hidden; }
-.steps .rail i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--amber), var(--orange)); box-shadow: 0 0 14px var(--amber); transition: width 1.6s var(--ease) 0.3s; }
-.steps.in .rail i { width: 100%; }
-.step { position: relative; text-align: center; padding: 0 10px; }
-.step .num {
-  position: relative; z-index: 1; margin: 0 auto; display: grid; place-items: center; width: 68px; height: 68px; border-radius: 22px;
-  font-size: 26px; font-weight: 900; color: #1c1204; background: linear-gradient(135deg, #ffe08a, #f59e0b); box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.8);
-  transform: scale(0.6) rotate(-12deg); opacity: 0; transition: all 0.7s var(--ease);
+/* ---------- install ---------- */
+.install { background: var(--ink); color: var(--on-ink); padding: 120px 0; }
+.install-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 50px; align-items: center; }
+.install-grid > * { min-width: 0; }
+.install h2 { color: var(--honey); }
+.steps { margin: 30px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 16px; }
+.steps li { counter-increment: s; display: flex; gap: 16px; align-items: flex-start; font-size: 16.5px; color: var(--on-ink-muted); }
+.steps li::before {
+  content: counter(s); flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--honey); color: var(--ink); font-family: var(--display); font-size: 19px; border: 2.5px solid var(--on-ink);
 }
-.steps.in .step .num { transform: none; opacity: 1; }
-.steps.in .step:nth-child(3) .num { transition-delay: 0.5s; }
-.steps.in .step:nth-child(4) .num { transition-delay: 1s; }
-.step h3 { margin: 22px 0 8px; font-size: 22px; letter-spacing: -0.02em; }
-.step p { margin: 0 auto; max-width: 300px; color: var(--muted); font-size: 15.5px; }
-
-/* ---------- terminal ---------- */
-.install { margin-top: 56px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 28px; align-items: center; }
-.install > * { min-width: 0; }
-.terminal { border-radius: 16px; overflow: hidden; background: #0d0b09; border: 1px solid rgba(255, 230, 190, 0.14); box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.9), 0 0 80px -30px rgba(245, 158, 11, 0.35); }
-.terminal .window-bar span { margin-right: 52px; }
-.term-body { height: 380px; padding: 18px 20px; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.75; color: #e7e1d6; }
+.steps li b { color: var(--on-ink); }
+.install .cmd { margin-top: 26px; border-color: var(--on-ink); box-shadow: 5px 5px 0 var(--honey); }
+.alt-link { display: inline-flex; margin-top: 20px; color: var(--on-ink-muted); font-size: 15px; font-weight: 600; border-bottom: 2px dashed currentColor; }
+.alt-link:hover { color: var(--honey); }
+.terminal { border-radius: 20px; overflow: hidden; background: #0b0805; border: 3px solid var(--on-ink); box-shadow: 10px 10px 0 var(--honey); }
+.terminal .frame-bar { background: #241b10; border-bottom: 3px solid var(--on-ink); }
+.term-body { height: 400px; padding: 18px 20px; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.75; color: #ece4d4; }
 .term-body .ln { white-space: pre-wrap; word-break: break-all; animation: termIn 0.25s ease-out both; }
-@keyframes termIn { from { opacity: 0; transform: translateY(4px); } }
+@keyframes termIn { from { opacity: 0; translate: 0 4px; } }
 .t-amber { color: #fbbf24; font-weight: 700; } .t-cyan { color: #67e8f9; font-weight: 700; } .t-dim { color: #8a8174; } .t-green { color: #4ade80; font-weight: 700; } .t-ok { color: #4ade80; }
-.cursor { display: inline-block; width: 8px; height: 16px; margin-left: 2px; vertical-align: -3px; background: var(--amber); animation: blink 1s steps(1) infinite; }
-.install-copy h3 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-.install-copy ol { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 14px; }
-.install-copy li { counter-increment: s; display: flex; gap: 14px; color: var(--muted); font-size: 16px; }
-.install-copy li::before { content: counter(s); flex-shrink: 0; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: rgba(251, 191, 36, 0.12); color: var(--amber); font-weight: 800; font-size: 14px; }
-.install-copy li b { color: var(--text); }
-.install-copy .cmd { margin: 22px 0 0; }
-.alt-link { display: inline-flex; margin-top: 16px; color: var(--dim); font-size: 14.5px; border-bottom: 1px dashed var(--dim); }
-.alt-link:hover { color: var(--text); }
+.cursor { display: inline-block; width: 8px; height: 16px; margin-left: 2px; vertical-align: -3px; background: var(--honey); animation: blink 1s steps(1) infinite; }
 
 /* ---------- faq ---------- */
-.faq { margin: 50px auto 0; max-width: 820px; display: grid; gap: 12px; }
-details { border-radius: 18px; border: 1px solid var(--line); background: var(--card); transition: background 0.3s, border-color 0.3s; }
-details[open] { background: var(--card-strong); border-color: var(--line-strong); }
-summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 20px 22px; font-weight: 700; font-size: 17px; }
+.faq-sec { padding: 120px 0 40px; }
+.faq { margin: 44px auto 0; max-width: 840px; display: grid; gap: 14px; }
+details { border-radius: 20px; border: 3px solid var(--ink); background: #fff; box-shadow: 4px 4px 0 var(--ink); transition: box-shadow 0.25s var(--out), translate 0.25s var(--out); }
+details:hover { translate: -1px -1px; box-shadow: 6px 6px 0 var(--ink); }
+summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 20px 22px; font-weight: 800; font-size: 17.5px; border-radius: 17px; transition: background 0.25s; }
+details[open] summary { background: var(--honey); border-radius: 17px 17px 0 0; }
 summary::-webkit-details-marker { display: none; }
-summary .plus { margin-left: auto; position: relative; width: 22px; height: 22px; flex-shrink: 0; }
-summary .plus::before, summary .plus::after { content: ""; position: absolute; left: 50%; top: 50%; width: 13px; height: 2px; border-radius: 2px; background: var(--amber); transform: translate(-50%, -50%); transition: transform 0.35s var(--ease); }
-summary .plus::after { transform: translate(-50%, -50%) rotate(90deg); }
-details[open] summary .plus::after { transform: translate(-50%, -50%) rotate(0); }
+summary .plus { margin-left: auto; position: relative; width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; background: var(--ink); }
+summary .plus::before, summary .plus::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 2.5px; border-radius: 2px; background: var(--honey); translate: -50% -50%; transition: rotate 0.35s var(--spring); }
+summary .plus::after { rotate: 90deg; }
+details[open] summary .plus::after { rotate: 0deg; }
 .faq-body { overflow: hidden; }
-.faq-body > div { padding: 0 22px 20px; color: var(--muted); font-size: 15.5px; }
-.faq-body code { font-family: ui-monospace, monospace; font-size: 0.9em; padding: 2px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.07); color: var(--honey); }
+.faq-body > div { padding: 16px 22px 20px; color: var(--muted); font-size: 16px; }
+.faq-body b { color: var(--ink); }
+.faq-body code { font-family: ui-monospace, monospace; font-size: 0.9em; padding: 2px 7px; border-radius: 7px; background: var(--cream); border: 1.5px solid var(--ink); color: var(--ink); }
 
-/* ---------- final cta ---------- */
-.final { margin-top: 130px; position: relative; border-radius: 36px; padding: 80px 30px; text-align: center; overflow: hidden; border: 1px solid var(--line-strong);
-  background: radial-gradient(70% 90% at 50% 0%, rgba(245, 158, 11, 0.32), transparent 70%), linear-gradient(180deg, rgba(255, 240, 210, 0.04), rgba(255, 240, 210, 0.01)); }
-.final::before { content: ""; position: absolute; inset: 0; opacity: 0.22; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0 L56 16.2 L56 48.5 L28 64.7 L0 48.5 L0 16.2 Z M28 64.7 L28 97' fill='none' stroke='%23fbbf24' stroke-opacity='0.6' stroke-width='1'/%3E%3C/svg%3E");
-  -webkit-mask-image: radial-gradient(70% 80% at 50% 0%, #000, transparent 75%); mask-image: radial-gradient(70% 80% at 50% 0%, #000, transparent 75%); }
-.final img.logo-big { position: relative; margin: 0 auto 26px; width: 104px; height: 104px; border-radius: 28px; box-shadow: 0 20px 60px -10px rgba(245, 158, 11, 0.9); animation: bob 5s ease-in-out infinite; }
-.final h2 { position: relative; }
-.final .sub { position: relative; }
-.final .hero-cta { position: relative; }
+/* ---------- final ---------- */
+.wave { display: block; width: 100%; height: 80px; margin-top: 80px; margin-bottom: -1px; }
+.final { position: relative; background-color: var(--honey); padding: 40px 0 120px; text-align: center; overflow: hidden; }
+.final .logo-big { margin: 0 auto 26px; width: 108px; height: 108px; border-radius: 30px; border: 3.5px solid var(--ink); box-shadow: 7px 7px 0 var(--ink); animation: bob 5s ease-in-out infinite; }
+.fill-text {
+  margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(52px, 9vw, 128px); line-height: 1.02; letter-spacing: -0.02em;
+  color: transparent;
+  background: linear-gradient(to top, var(--ink) var(--fill, 100%), rgba(28, 20, 9, 0.14) var(--fill, 100%));
+  -webkit-background-clip: text; background-clip: text;
+}
+html[lang="en"] .fill-text { font-size: clamp(46px, 7.6vw, 108px); }
+.final .sub { margin: 26px auto 0; color: var(--ink-2); font-weight: 600; }
+.final .hero-cta { justify-content: center; margin-top: 34px; }
 
 /* ---------- footer ---------- */
-footer { margin-top: 110px; padding: 44px 0 60px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 20px 40px; justify-content: space-between; }
-footer a { color: var(--muted); } footer a:hover { color: var(--text); }
-.foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
-.legal { max-width: 560px; }
+footer { background: var(--ink); color: var(--on-ink-muted); padding: 50px 0 64px; font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 24px 40px; justify-content: space-between; }
+footer .brand { color: var(--on-ink); }
+footer .brand img { border-color: var(--on-ink); }
+footer a:hover { color: var(--honey); }
+.foot-links { display: flex; gap: 20px; flex-wrap: wrap; font-weight: 600; }
+.legal { max-width: 560px; margin: 14px 0 0; }
 
-/* toast */
-.toast { position: fixed; left: 50%; bottom: 28px; z-index: 100; transform: translate(-50%, calc(100% + 60px)); visibility: hidden; padding: 12px 18px; border-radius: 14px; background: #1f1a14; border: 1px solid var(--line-strong); box-shadow: 0 20px 50px -10px rgba(0,0,0,0.8); font-weight: 600; font-size: 14.5px; display: flex; gap: 10px; align-items: center; transition: transform 0.5s var(--ease), visibility 0s 0.5s; }
-.toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform 0.5s var(--ease); }
-.toast svg { width: 18px; height: 18px; color: var(--green); }
+/* ---------- reveal ---------- */
+.reveal { opacity: 0; translate: 0 44px; transition: opacity 0.6s var(--out), translate 0.9s var(--spring), rotate 0.9s var(--spring), scale 0.9s var(--spring); transition-delay: var(--d, 0s); }
+.reveal.pop { scale: 0.86; rotate: -4deg; }
+.card.reveal { transition: opacity 0.6s var(--out), translate 0.9s var(--spring), rotate 0.9s var(--spring), scale 0.9s var(--spring), transform 0.5s var(--out), box-shadow 0.3s var(--out); transition-delay: var(--d, 0s); }
+.reveal.in { opacity: 1; translate: none; scale: none; rotate: none; }
+
+/* toast + copy sparks */
+.toast {
+  position: fixed; left: 50%; bottom: 28px; z-index: 100; translate: -50% calc(100% + 60px); visibility: hidden;
+  padding: 12px 18px; border-radius: 14px; background: var(--ink); color: var(--on-ink); border: 2.5px solid var(--ink); box-shadow: 5px 5px 0 var(--honey);
+  font-weight: 700; font-size: 15px; display: flex; gap: 10px; align-items: center; transition: translate 0.5s var(--spring), visibility 0s 0.5s;
+}
+.toast.show { translate: -50% 0; visibility: visible; transition: translate 0.5s var(--spring); }
+.toast svg { width: 18px; height: 18px; color: #4ade80; }
+.spark { position: fixed; z-index: 200; width: 12px; height: 13px; pointer-events: none; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
 
 /* ---------- responsive ---------- */
-@media (max-width: 980px) {
+@media (max-width: 1000px) {
   .nav-links { display: none; }
-  .bento { grid-template-columns: 1fr 1fr; }
-  .c-gather { grid-column: span 2; grid-row: auto; }
-  .c-search, .c-discord, .c-planter, .c-lang, .c-safe { grid-column: span 1; }
-  .install { grid-template-columns: 1fr; }
-  .f1 { left: 1%; } .f2 { right: 1%; } .f3 { display: none; }
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+  html[lang="en"] h1.title { font-size: clamp(34px, 9vw, 72px); }
+  .hive { max-width: 420px; margin-top: 10px; }
+  .badge { width: 104px; height: 104px; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .c-search, .c-discord { grid-column: span 2; }
+  .c-planter, .c-safe { grid-column: span 1; }
+  .c-lang { grid-column: span 2; }
+  .install-grid { grid-template-columns: 1fr; }
+  .s3 { display: none; }
 }
 @media (max-width: 680px) {
-  .hero { padding-top: 50px; }
-  .bento { grid-template-columns: 1fr; }
-  .c-gather, .c-search, .c-discord, .c-planter, .c-lang, .c-safe { grid-column: auto; }
-  .steps { grid-template-columns: 1fr; gap: 40px; }
-  .steps .rail { display: none; }
-  .float { display: none; }
+  .hero { padding-top: 110px; }
+  .badge { display: none; }
   .gh-label { display: none; }
+  .brand { font-size: 19px; }
+  .btn { height: 52px; padding: 0 20px; font-size: 16px; }
   .cmd { font-size: 12.5px; padding-left: 14px; }
-  .cmd .copy span { display: none; }
-  .term-body { height: 340px; font-size: 12px; }
-  .stage { margin-top: 48px; }
-  .bee.b3 { display: none; }
-  .final { padding: 60px 20px; border-radius: 26px; }
+  .copy span { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .c-search, .c-discord, .c-planter, .c-safe, .c-lang { grid-column: auto; }
+  .float { display: none; }
+  .frame { box-shadow: 7px 7px 0 var(--ink); border-radius: 14px; }
+  .tapes { height: 180px; margin-top: 40px; }
+  .tape-track span { font-size: 22px; }
+  .tape.t1 { top: 36px; } .tape.t2 { top: 72px; }
+  .hour, .install { padding: 90px 0; }
+  .moment .t { font-size: 40px; }
+  .term-body { height: 360px; font-size: 12px; }
+  .tabs button { padding: 0 13px; font-size: 14px; }
+}
+@media (max-width: 440px) {
+  #langLabel { display: none; }
+  .chip { padding: 0 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-  .bee { display: none; }
-  .reveal { opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; translate: none; scale: none; rotate: none; }
+  .bees, .hive .drop, .drip-edge .fall { display: none; }
+  .note:first-child { opacity: 1; }
+  .mini-search .r { opacity: 1; translate: none; }
 }
 </style>
 </head>
 <body>
-<div class="bg-glow"></div>
-<div class="bg-hex"></div>
-<canvas id="pollen" aria-hidden="true"></canvas>
-<div class="noise"></div>
 
-<!-- shared svg defs -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <linearGradient id="trailGrad" x1="0" x2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#f97316"/></linearGradient>
-    <linearGradient id="ringGrad" x1="0" x2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#f97316"/></linearGradient>
+    <linearGradient id="honeyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd95a"/><stop offset="1" stop-color="#f29a00"/></linearGradient>
+    <clipPath id="hexClip"><path d="M0 -56 L48.5 -28 L48.5 28 L0 56 L-48.5 28 L-48.5 -28 Z"/></clipPath>
     <symbol id="bee" viewBox="0 0 48 48">
-      <ellipse class="wing" cx="17" cy="16" rx="9" ry="6" fill="#e0f2fe" fill-opacity=".75" stroke="#bae6fd" stroke-width="1"/>
-      <ellipse class="wing r" cx="31" cy="16" rx="9" ry="6" fill="#e0f2fe" fill-opacity=".75" stroke="#bae6fd" stroke-width="1"/>
-      <ellipse cx="24" cy="28" rx="11" ry="13" fill="#fbbf24"/>
-      <path d="M13.5 24h21M13 30h22M15 36h18" stroke="#1c1204" stroke-width="3.2" stroke-linecap="round"/>
-      <circle cx="24" cy="13" r="6" fill="#1c1204"/>
-      <circle cx="21.8" cy="12" r="1.4" fill="#fff"/><circle cx="26.2" cy="12" r="1.4" fill="#fff"/>
-      <path d="M21 8 L18 3 M27 8 L30 3" stroke="#1c1204" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M24 41 L24 45" stroke="#1c1204" stroke-width="2" stroke-linecap="round"/>
+      <ellipse class="wing" cx="16" cy="17" rx="9" ry="6.5" fill="#fff" stroke="#1c1409" stroke-width="2.4"/>
+      <ellipse class="wing" cx="32" cy="17" rx="9" ry="6.5" fill="#fff" stroke="#1c1409" stroke-width="2.4"/>
+      <ellipse cx="24" cy="29" rx="11" ry="13" fill="#ffc83d" stroke="#1c1409" stroke-width="2.6"/>
+      <path d="M13.8 25h20.4M13.4 31h21.2M15.6 37h16.8" stroke="#1c1409" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="24" cy="13" r="6.2" fill="#1c1409"/>
+      <circle cx="21.8" cy="12" r="1.5" fill="#fff"/><circle cx="26.2" cy="12" r="1.5" fill="#fff"/>
+      <path d="M21 8 L18 3 M27 8 L30 3" stroke="#1c1409" stroke-width="1.8" stroke-linecap="round"/>
     </symbol>
   </defs>
 </svg>
 
-<header class="nav" id="nav">
+<header class="nav on-honey" id="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="RobinMacro"><img src="assets/logo.png" alt="" />RobinMacro</a>
     <nav class="nav-links" aria-label="Sections">
+      <a href="#hour" data-i18n="nav.hour">하는 일</a>
       <a href="#features" data-i18n="nav.features">기능</a>
       <a href="#screens" data-i18n="nav.screens">화면</a>
       <a href="#install" data-i18n="nav.install">설치</a>
-      <a href="#faq" data-i18n="nav.faq">자주 묻는 질문</a>
+      <a href="#faq" data-i18n="nav.faq">질문</a>
     </nav>
     <div class="nav-right">
-      <button class="chip-btn" id="langBtn" type="button" aria-label="Language">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+      <button class="chip" id="langBtn" type="button" aria-label="Language">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
         <span id="langLabel">English</span>
       </button>
-      <a class="chip-btn" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
+      <a class="chip" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
         <span class="gh-label">GitHub</span><span class="star-count" id="stars">★</span>
       </a>
@@ -510,112 +477,146 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
 
 <main id="top">
   <!-- HERO -->
-  <section class="hero" style="padding-top:76px">
+  <section class="hero honeycomb">
     <div class="wrap">
-      <span class="eyebrow fade-up"><span class="pill">macOS</span><span data-i18n="hero.eyebrow">무료 · 오픈소스 · 한국어 지원</span></span>
-      <h1 class="title">
-        <span class="line"><span data-i18n="hero.t1">자는 동안에도</span></span>
-        <span class="line"><span class="honey-text" data-i18n="hero.t2">꿀은 쌓여요</span></span>
-      </h1>
-      <p class="lead fade-up" style="animation-delay:.35s" data-i18n-html="hero.lead">맥용 <b>비 스웜 시뮬레이터</b> 자동 매크로. 터미널에 한 줄만 붙여넣으면 설치되고, 한국어 화면에서 클릭 몇 번이면 채집·수집·사냥·퀘스트까지 알아서 해요.</p>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1 class="title">
+            <span class="ln" data-i18n="hero.t1">꿀 파밍은</span>
+            <span class="ln alt" data-i18n="hero.t2">맥한테 맡겨요</span>
+          </h1>
+          <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">RobinMacro는 비 스웜 시뮬레이터를 대신 돌려 주는 맥용 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
 
-      <div class="cmd fade-up" style="animation-delay:.5s">
-        <span class="prompt">$</span>
-        <code id="cmd1">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
-        <button class="copy" type="button" data-copy="cmd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
-      </div>
+          <div class="cmd rise" style="animation-delay:.42s">
+            <span class="prompt">$</span>
+            <code id="cmd1">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
+            <button class="copy" type="button" data-copy="cmd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
+          </div>
 
-      <div class="hero-cta fade-up" style="animation-delay:.62s">
-        <a class="btn btn-primary" href="#install">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
-          <span data-i18n="hero.cta">지금 설치하기</span>
-        </a>
-        <a class="btn btn-ghost" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
-          <span data-i18n="hero.gh">GitHub에서 보기</span>
-        </a>
-      </div>
-      <div class="hero-meta fade-up" style="animation-delay:.75s">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.1">Apple Silicon · Intel</span></span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 10~20분</span></span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.3">코딩 몰라도 OK</span></span>
-      </div>
-
-      <div class="stage fade-up" style="animation-delay:.85s">
-        <div class="bees" id="bees" aria-hidden="true">
-          <div class="bee b1"><svg><use href="#bee"/></svg></div>
-          <div class="bee b2"><svg><use href="#bee"/></svg></div>
-          <div class="bee b3"><svg><use href="#bee"/></svg></div>
+          <div class="hero-cta rise" style="animation-delay:.52s">
+            <a class="btn btn-ink" href="#install">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+              <span data-i18n="hero.cta">설치하기</span>
+            </a>
+            <a class="btn btn-white" href="https://github.com/Yoon-robin/RobinMacro" target="_blank" rel="noopener">
+              <span data-i18n="hero.gh">GitHub에서 보기</span>
+            </a>
+          </div>
+          <div class="hero-meta rise" style="animation-delay:.62s">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.1">Apple Silicon · Intel</span></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 10~20분</span></span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.3">코딩 몰라도 돼요</span></span>
+          </div>
         </div>
-        <div class="float f1"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div><span data-i18n="float.1">매크로를 시작했어요</span><small data-i18n="float.1s">F1을 누르거나 버튼 한 번</small></div></div>
-        <div class="float f2"><span class="live-dot"></span><div><span data-i18n="float.2">실행 중 · <span id="clock">1:02:13</span></span></div></div>
-        <div class="float f3"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div><div><span data-i18n="float.3">설정 246개 바로 검색</span><small><kbd>⌘K</kbd></small></div></div>
+
+        <div class="hive" aria-hidden="true">
+        <div class="badge" aria-hidden="true">
+          <svg viewBox="0 0 128 128">
+            <defs><path id="badgeCircle" d="M64 64 m-48 0 a48 48 0 1 1 96 0 a48 48 0 1 1 -96 0"/></defs>
+            <circle cx="64" cy="64" r="62" fill="#fff" stroke="#1c1409" stroke-width="3"/>
+            <text><textPath href="#badgeCircle" textLength="296" lengthAdjust="spacing">FREE ✦ OPEN SOURCE ✦ FOR MAC ✦ </textPath></text>
+          </svg>
+          <span class="core">🐝</span>
+        </div>
+          <svg viewBox="-70 -70 540 450">
+            <g id="cells"></g>
+            <path class="drop" d="M200.5 300 c-7 9 -9 14 -9 18 a9 9 0 0 0 18 0 c0 -4 -2 -9 -9 -18z" fill="url(#honeyGrad)" stroke="#1c1409" stroke-width="2.5"/>
+            <g class="bees">
+              <g><animateMotion dur="11s" repeatCount="indefinite" rotate="auto" path="M -40 120 C 60 -40, 260 -60, 380 40 S 470 260, 300 330 S -20 300, -40 120"/><use href="#bee" x="-21" y="-21" width="42" height="42" transform="rotate(90)"/></g>
+              <g><animateMotion dur="14s" repeatCount="indefinite" rotate="auto" begin="-5s" path="M 440 200 C 360 360, 120 380, 40 260 S 120 -20, 260 -30 S 480 80, 440 200"/><use href="#bee" x="-17" y="-17" width="34" height="34" transform="rotate(90)"/></g>
+              <g><animateMotion dur="6.5s" repeatCount="indefinite" rotate="auto" path="M 300 -30 C 380 -50, 430 30, 370 80 S 250 40, 300 -30"/><use href="#bee" x="-14" y="-14" width="28" height="28" transform="rotate(90)"/></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="float s1"><span class="sticker">✅ <span data-i18n="float.1">F1 누르면 시작</span></span></div>
+        <div class="float s2"><span class="sticker"><span class="live-dot"></span><span data-i18n-html="float.2">실행 중 <span class="clock">1:02:13</span></span></span></div>
+        <div class="float s3"><span class="sticker"><kbd>⌘K</kbd><span data-i18n="float.3">설정 246개 검색</span></span></div>
         <div class="tilt" id="tilt">
-          <div class="window">
-            <div class="window-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
+          <div class="frame">
+            <div class="frame-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
             <img src="assets/home.webp" width="2160" height="1350" alt="RobinMacro 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" data-i18n-alt="alt.home" />
           </div>
         </div>
       </div>
     </div>
+  </section>
+  <svg class="drip-edge" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#ffc83d" d="M0 0 H1440 V40 H1358 C1344 40 1342 46 1342 58 V66 A12 12 0 0 1 1318 66 V58 C1318 46 1316 40 1302 40 H1158 C1144 40 1142 46 1142 58 V94 A12 12 0 0 1 1118 94 V58 C1118 46 1116 40 1102 40 H928 C914 40 912 46 912 58 V70 A12 12 0 0 1 888 70 V58 C888 46 886 40 872 40 H638 C624 40 622 46 622 58 V108 A12 12 0 0 1 598 108 V58 C598 46 596 40 582 40 H448 C434 40 432 46 432 58 V62 A12 12 0 0 1 408 62 V58 C408 46 406 40 392 40 H188 C174 40 172 46 172 58 V86 A12 12 0 0 1 148 86 V58 C148 46 146 40 132 40 H0 Z"/>
+    <path fill="none" stroke="#1c1409" stroke-width="3" vector-effect="non-scaling-stroke" d="M1440 40 H1358 C1344 40 1342 46 1342 58 V66 A12 12 0 0 1 1318 66 V58 C1318 46 1316 40 1302 40 H1158 C1144 40 1142 46 1142 58 V94 A12 12 0 0 1 1118 94 V58 C1118 46 1116 40 1102 40 H928 C914 40 912 46 912 58 V70 A12 12 0 0 1 888 70 V58 C888 46 886 40 872 40 H638 C624 40 622 46 622 58 V108 A12 12 0 0 1 598 108 V58 C598 46 596 40 582 40 H448 C434 40 432 46 432 58 V62 A12 12 0 0 1 408 62 V58 C408 46 406 40 392 40 H188 C174 40 172 46 172 58 V86 A12 12 0 0 1 148 86 V58 C148 46 146 40 132 40 H0"/>
+    <ellipse class="fall" cx="610" cy="116" rx="7" ry="8" fill="#ffc83d" stroke="#1c1409" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <ellipse class="fall" cx="1130" cy="104" rx="6" ry="7" fill="#ffc83d" stroke="#1c1409" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <ellipse class="fall" cx="160" cy="96" rx="6" ry="7" fill="#ffc83d" stroke="#1c1409" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  </svg>
 
-    <div class="marquee" aria-hidden="true">
-      <div class="track" id="track"></div>
+  <div class="tapes" aria-hidden="true">
+    <div class="tape t1"><div class="tape-track" id="tape1"></div></div>
+    <div class="tape t2"><div class="tape-track" id="tape2"></div></div>
+  </div>
+
+  <!-- AN HOUR -->
+  <section class="hour" id="hour">
+    <div class="hour-pin">
+      <div class="wrap hour-head">
+        <div>
+          <span class="tag" data-i18n="hour.tag">예시</span>
+          <h2 data-i18n-html="hour.title">켜 두면 한 시간 동안<br />이렇게 해요</h2>
+        </div>
+        <div class="hour-clock" aria-hidden="true">
+          <div class="jar"><i id="jarFill"></i></div>
+          <div class="time" id="hourTime">1:00</div>
+        </div>
+      </div>
+      <div class="hour-track" id="hourTrack">
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></div><div class="t">0:00</div><h3 data-i18n="m1.t">F1, 출발</h3><p data-i18n="m1.d">벌집에서 첫 번째 필드로 날아가요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m7.5 0a4.5 4.5 0 1 1-4.5 4.5m4.5-4.5H15m-3 4.5V15"/><circle cx="12" cy="12" r="3"/></svg></div><div class="t">0:03</div><h3 data-i18n="m2.t">패턴대로 채집</h3><p data-i18n="m2.d">정해 둔 패턴으로 필드를 훑어요. AI 토큰 채집을 켜면 토큰도 주워요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8M9 3v3M15 3v3M6 6h12v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M6 12h12"/></svg></div><div class="t">0:11</div><h3 data-i18n="m3.t">가방이 꽉 찼어요</h3><p data-i18n="m3.d">벌집으로 돌아가 꿀로 바꾸고, 다시 필드로 가요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="t">0:15</div><h3 data-i18n="m4.t">쿨타임 한 바퀴</h3><p data-i18n="m4.d">부의 시계, 디스펜서처럼 다시 쓸 수 있게 된 것부터 챙겨요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 0 1 6 0v1.1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6.5 13H3M21 13h-3.5M6 9 3 7M18 9l3-2M6 17l-3 2M18 17l3 2"/></svg></div><div class="t">0:32</div><h3 data-i18n="m5.t">몹 사냥</h3><p data-i18n="m5.d">무당벌레, 장수풍뎅이가 다시 나타나면 잡고 돌아와요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4M19 17V5a2 2 0 0 0-2-2H4"/></svg></div><div class="t">0:47</div><h3 data-i18n="m6.t">퀘스트</h3><p data-i18n="m6.d">곰 퀘스트에 필요한 필드로 옮겨서 목표를 채워요.</p></article>
+        <article class="moment"><div class="hexbadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div><div class="t">1:00</div><h3 data-i18n="m7.t">리포트 도착</h3><p data-i18n="m7.d">한 시간 동안 모은 꿀과 한 일을 디스코드로 보내 줘요.</p></article>
+      </div>
+      <p class="wrap hour-note" data-i18n="hour.note">실제 순서와 시간은 설정에 따라 달라요.</p>
     </div>
   </section>
 
   <!-- FEATURES -->
-  <section id="features">
+  <section class="features" id="features">
     <div class="wrap">
-      <div class="center reveal">
-        <span class="kicker" data-i18n="feat.kicker">기능</span>
-        <h2 data-i18n-html="feat.title">켜 두기만 하면<br /><em class="honey-text" style="animation:flow 7s linear infinite">알아서 다 해요</em></h2>
-        <p class="sub" data-i18n="feat.sub">필드를 고르고 시작을 누르면 끝. 채집부터 꿀 바꾸기, 수집, 몹 사냥, 퀘스트, 플랜터까지 RobinMacro가 순서대로 챙겨요.</p>
+      <div class="head reveal">
+        <h2 data-i18n-html="feat.title">매일 쓰게 될<br />기능들</h2>
+        <p class="sub" data-i18n="feat.sub">매크로를 켜 두는 시간이 길어질수록 손이 덜 가게 만들었어요.</p>
       </div>
-
-      <div class="bento">
-        <article class="card c-gather reveal">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m7.5 0a4.5 4.5 0 1 1-4.5 4.5m4.5-4.5H15m-3 4.5V15"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <h3 data-i18n="f.gather.t">패턴대로 채집하고, 가방이 차면 꿀로</h3>
-          <p data-i18n="f.gather.d">최대 5개 필드를 번갈아 돌며 정해진 패턴으로 꽃가루를 모아요. 가방이 차면 벌집으로 돌아가 꿀로 바꾸고 다시 출발해요. AI 토큰 채집도 지원해요.</p>
-          <div class="field" aria-hidden="true">
-            <span class="flower" style="left:12%;top:16%">🌻</span><span class="flower" style="left:78%;top:22%;animation-delay:-1s">🌼</span>
-            <span class="flower" style="left:60%;top:58%;animation-delay:-2s">🌷</span><span class="flower" style="left:24%;top:54%;animation-delay:-.5s">🌸</span>
-            <span class="flower" style="left:88%;top:62%;animation-delay:-1.5s">🌻</span><span class="flower" style="left:44%;top:12%;animation-delay:-2.4s">🌼</span>
-            <svg class="pattern" viewBox="0 0 600 300" preserveAspectRatio="none">
-              <path class="trail" d="M60 60 H540 V110 H60 V160 H540 V210 H60 V250 H540" />
-            </svg>
-            <div class="bag"><span data-i18n="f.gather.bag">가방</span><div class="bar"><i></i></div><span>🍯</span></div>
-          </div>
-        </article>
-
-        <article class="card c-search reveal" style="--d:.08s">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
-          <h3 data-i18n="f.search.t">설정은 검색으로</h3>
-          <p data-i18n="f.search.d">⌘K를 누르고 "벌집"이라고 치면 그 설정으로 바로 이동해요. 초성(ㅂㅈ)도 돼요.</p>
+      <div class="grid">
+        <article class="card c-search reveal pop">
+          <span class="tag label" style="background:var(--blue)">⌘K</span>
+          <h3 data-i18n="f.search.t">설정이 246개라 검색을 넣었어요</h3>
+          <p data-i18n="f.search.d">⌘K를 누르고 '벌집'이라고 치면 그 설정으로 바로 가요. 초성 ㅂㅈ도 알아들어요.</p>
           <div class="mini-search" aria-hidden="true">
-            <div class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span id="typed"></span><span class="caret"></span></div>
+            <div class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span id="typed"></span><span class="caret"></span></div>
             <div class="r" data-i18n-html="f.search.r1"><span>벌집 번호</span><small>설정 › 게임 설정</small></div>
             <div class="r" data-i18n-html="f.search.r2"><span>벌집으로 돌아가기</span><small>채집 › 필드</small></div>
             <div class="r" data-i18n-html="f.search.r3"><span>벌집 확인 방법</span><small>설정 › 게임 설정</small></div>
           </div>
         </article>
 
-        <article class="card c-discord reveal" style="--d:.16s">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-          <h3 data-i18n="f.discord.t">휴대폰으로 확인</h3>
-          <p data-i18n="f.discord.d">디스코드 알림, 시간별 리포트, 원격 조작 봇, 화면 스트리밍까지.</p>
+        <article class="card c-discord reveal pop" style="--d:.08s">
+          <span class="tag label" style="background:var(--purple)">Discord</span>
+          <h3 data-i18n="f.discord.t">밖에서도 폰으로 확인</h3>
+          <p data-i18n="f.discord.d">디스코드 알림, 시간별 리포트, 원격 명령 봇, 화면 스트리밍을 지원해요.</p>
           <div class="stack" aria-hidden="true">
             <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.1">시간별 리포트가 도착했어요 📊</span></div></div>
-            <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.2">비셔스 비를 처치했어요 🐝</span></div></div>
+            <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.2">비셔스 비를 잡았어요 🐝</span></div></div>
             <div class="note"><span class="av"></span><div><b>RobinMacro</b><span data-i18n="n.3">플랜터를 수확했어요 🌱</span></div></div>
           </div>
         </article>
 
-        <article class="card c-planter reveal">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg></div>
-          <h3 data-i18n="f.planter.t">플랜터 자동 관리</h3>
-          <p data-i18n="f.planter.d">수동 사이클이나 넥타 우선순위 자동 모드. 수확 시간은 홈에서 한눈에.</p>
+        <article class="card c-planter reveal pop">
+          <span class="tag label" style="background:var(--green)">🌱</span>
+          <h3 data-i18n="f.planter.t">플랜터 타이머는 이제 그만</h3>
+          <p data-i18n="f.planter.d">직접 짠 사이클대로 심거나, 넥타 상태를 보고 알아서 심게 할 수 있어요. 수확 시간은 홈에 떠요.</p>
           <div class="rings" aria-hidden="true">
             <div class="ring"><svg viewBox="0 0 72 72"><circle class="bgc" cx="36" cy="36" r="30"/><circle class="fg" cx="36" cy="36" r="30" style="--off:20"/></svg><span>🌻</span></div>
             <div class="ring"><svg viewBox="0 0 72 72"><circle class="bgc" cx="36" cy="36" r="30"/><circle class="fg" cx="36" cy="36" r="30" style="--off:90"/></svg><span>🌲</span></div>
@@ -623,50 +624,49 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
           </div>
         </article>
 
-        <article class="card c-safe reveal" style="--d:.08s">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
-          <h3 data-i18n="f.safe.t">오래 켜 둬도 든든하게</h3>
+        <article class="card c-safe reveal pop" style="--d:.08s">
+          <span class="tag label" style="background:var(--ink);color:#d9f99d">24/7</span>
+          <h3 data-i18n="f.safe.t">튕겨도 다시 들어가요</h3>
           <ul class="checks">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.1">튕기면 비공개 서버로 자동 재접속</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.2">죽어도 알아서 복구하고 이어서 진행</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.3">맥 권한이 꺼지면 바로 알려 줘요</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.4">F1 시작 · F2 일시정지 · F3 정지</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.1">연결이 끊기면 비공개 서버로 재접속</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.2">캐릭터가 쓰러져도 이어서 진행</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.3">맥 권한이 꺼지면 바로 알려 줘요</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f.safe.4">F1 시작 · F2 일시정지 · F3 정지</span></li>
           </ul>
         </article>
 
-        <article class="card c-lang reveal" style="--d:.16s">
-          <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg></div>
-          <h3 data-i18n="f.lang.t">처음부터 한국어로</h3>
-          <p data-i18n="f.lang.d">메뉴, 설명, 설치 안내까지 전부 한국어. 영어로도 바로 바꿀 수 있고, 다크·라이트 테마도 있어요.</p>
-          <div class="lang-flip" aria-hidden="true"><span class="on" id="flipKo">한국어</span><span id="flipEn">English</span></div>
+        <article class="card c-lang reveal pop" style="--d:.16s">
+          <span class="tag label" style="background:var(--honey);color:var(--ink)">가/A</span>
+          <h3 data-i18n="f.lang.t">메뉴부터 설치까지 한국어</h3>
+          <p data-i18n="f.lang.d">영어가 편하면 버튼 하나로 바꿔요. 다크·라이트 테마도 골라요.</p>
+          <div class="lang-flip" aria-hidden="true"><i class="knob" id="knob"></i><span class="on" id="flipKo">한국어</span><span id="flipEn">English</span></div>
         </article>
       </div>
     </div>
   </section>
 
   <!-- SCREENS -->
-  <section id="screens">
+  <section class="screens honeycomb" id="screens">
     <div class="wrap">
-      <div class="center reveal">
-        <span class="kicker" data-i18n="scr.kicker">화면</span>
-        <h2 data-i18n-html="scr.title">보기 좋은 게<br />쓰기도 쉬워요</h2>
-        <p class="sub" data-i18n="scr.sub">React와 shadcn/ui로 새로 만든 화면. 처음 켜면 시작 가이드가 차근차근 알려 줘요.</p>
+      <div class="head reveal">
+        <h2 data-i18n="scr.title">이렇게 생겼어요</h2>
+        <p class="sub" data-i18n="scr.sub">처음 켜면 시작 가이드가 맥 권한부터 하나씩 확인해 줘요.</p>
       </div>
-      <div class="reveal" style="--d:.1s">
+      <div class="reveal" style="--d:.08s">
         <div class="tabs" role="tablist" id="tabs">
-          <span class="pill-bg" id="pillBg"></span>
-          <button role="tab" aria-selected="true" data-shot="0" data-i18n="tab.home">홈</button>
-          <button role="tab" aria-selected="false" data-shot="1" data-i18n="tab.gather">채집</button>
-          <button role="tab" aria-selected="false" data-shot="2" data-i18n="tab.guide">시작 가이드</button>
-          <button role="tab" aria-selected="false" data-shot="3" data-i18n="tab.search">설정 검색</button>
-          <button role="tab" aria-selected="false" data-shot="4" data-i18n="tab.light">라이트 테마</button>
+          <span class="glider" id="glider"></span>
+          <button role="tab" aria-selected="true" data-i18n="tab.home">홈</button>
+          <button role="tab" aria-selected="false" data-i18n="tab.gather">채집</button>
+          <button role="tab" aria-selected="false" data-i18n="tab.guide">시작 가이드</button>
+          <button role="tab" aria-selected="false" data-i18n="tab.search">설정 검색</button>
+          <button role="tab" aria-selected="false" data-i18n="tab.light">라이트 테마</button>
         </div>
       </div>
-      <div class="gallery reveal" style="--d:.18s">
-        <div class="window">
-          <div class="window-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
+      <div class="gallery reveal" style="--d:.14s">
+        <div class="frame">
+          <div class="frame-bar"><i></i><i></i><i></i><span>RobinMacro</span></div>
           <div class="shots" id="shots">
-            <img class="on" src="assets/home.webp" alt="" loading="lazy" width="2160" height="1350" />
+            <img class="top" src="assets/home.webp" alt="" loading="lazy" width="2160" height="1350" />
             <img src="assets/gather.webp" alt="" loading="lazy" width="2160" height="1350" />
             <img src="assets/guide.webp" alt="" loading="lazy" width="2160" height="1350" />
             <img src="assets/search.webp" alt="" loading="lazy" width="2160" height="1350" />
@@ -678,79 +678,61 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
     </div>
   </section>
 
-  <!-- STEPS -->
-  <section id="how">
-    <div class="wrap">
-      <div class="center reveal">
-        <span class="kicker" data-i18n="how.kicker">시작하기</span>
-        <h2 data-i18n-html="how.title">딱 3단계면 끝</h2>
-      </div>
-      <div class="steps reveal" id="steps">
-        <div class="rail"><i></i></div>
-        <div class="step"><div class="num">1</div><h3 data-i18n="how.1t">한 줄 붙여넣기</h3><p data-i18n="how.1d">터미널을 열고 설치 명령을 붙여넣어요. 나머지는 설치 프로그램이 한국어로 안내해요.</p></div>
-        <div class="step"><div class="num">2</div><h3 data-i18n="how.2t">권한 두 개 켜기</h3><p data-i18n="how.2d">손쉬운 사용과 화면 기록에 터미널을 켜요. 앱이 켜졌는지 초록 체크로 확인해 줘요.</p></div>
-        <div class="step"><div class="num">3</div><h3 data-i18n="how.3t">시작 누르기</h3><p data-i18n="how.3d">로블록스에서 비 스웜에 들어가 필드를 고르고 시작. 이제 쉬어도 돼요.</p></div>
-      </div>
-    </div>
-  </section>
-
   <!-- INSTALL -->
-  <section id="install">
-    <div class="wrap">
-      <div class="install">
-        <div class="install-copy reveal">
-          <span class="kicker" data-i18n="ins.kicker">설치</span>
-          <h2 style="font-size:clamp(32px,4.2vw,48px)" data-i18n-html="ins.title">복사, 붙여넣기,<br />끝.</h2>
-          <ol>
-            <li><span data-i18n-html="ins.1"><b>⌘ + 스페이스</b>로 Spotlight를 열고 <b>터미널</b>을 실행해요.</span></li>
-            <li><span data-i18n-html="ins.2">아래 명령을 <b>붙여넣고 엔터</b>. 설치 창이 뜨면 <b>계속/설치</b>를 눌러요.</span></li>
-            <li><span data-i18n-html="ins.3">끝나면 <b>바탕화면의 RobinMacro</b>를 더블클릭!</span></li>
-          </ol>
-          <div class="cmd">
-            <span class="prompt">$</span>
-            <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
-            <button class="copy" type="button" data-copy="cmd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
-          </div>
-          <a class="alt-link" href="https://github.com/Yoon-robin/RobinMacro#-설치하기" target="_blank" rel="noopener" data-i18n="ins.alt">터미널이 어렵다면? ZIP으로 설치하는 방법 →</a>
+  <section class="install" id="install">
+    <div class="wrap install-grid">
+      <div class="reveal">
+        <h2 data-i18n-html="ins.title">설치는<br />터미널에 한 줄</h2>
+        <ol class="steps">
+          <li><span data-i18n-html="ins.1"><b>⌘ + 스페이스</b>를 누르고 <b>터미널</b>을 열어요.</span></li>
+          <li><span data-i18n-html="ins.2">아래 명령어를 <b>붙여 넣고 엔터</b>. 설치 창이 뜨면 <b>계속</b>, <b>설치</b>를 눌러요.</span></li>
+          <li><span data-i18n-html="ins.3"><b>손쉬운 사용</b>과 <b>화면 기록</b>에서 터미널을 켜요. 켜졌는지는 앱이 초록 체크로 알려 줘요.</span></li>
+          <li><span data-i18n-html="ins.4">바탕화면의 <b>RobinMacro</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
+        </ol>
+        <div class="cmd">
+          <span class="prompt">$</span>
+          <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash</code>
+          <button class="copy" type="button" data-copy="cmd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
         </div>
-        <div class="terminal reveal" style="--d:.12s">
-          <div class="window-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 — RobinMacro 설치</span></div>
-          <div class="term-body" id="term" aria-label="설치 과정 예시"></div>
-        </div>
+        <a class="alt-link" href="https://github.com/Yoon-robin/RobinMacro#-설치하기" target="_blank" rel="noopener" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
+      </div>
+      <div class="terminal reveal" style="--d:.12s">
+        <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · RobinMacro 설치</span></div>
+        <div class="term-body" id="term" aria-hidden="true"></div>
       </div>
     </div>
   </section>
 
   <!-- FAQ -->
-  <section id="faq">
+  <section class="faq-sec" id="faq">
     <div class="wrap">
-      <div class="center reveal">
-        <span class="kicker">FAQ</span>
+      <div class="reveal" style="text-align:center">
         <h2 data-i18n="faq.title">자주 묻는 질문</h2>
       </div>
       <div class="faq" id="faqList">
-        <details class="reveal"><summary><span data-i18n="q1">돈 내야 하나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a1">아니요, 완전히 무료예요. 코드도 GitHub에 전부 공개돼 있어요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q2">윈도우에서도 되나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">RobinMacro는 맥 전용이에요. 애플 실리콘(M1 이상)은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상이 필요해요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록이 초록 체크인지 확인하고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">앱 왼쪽 아래의 <b>업데이트 확인</b>을 누르거나, 설치 명령을 한 번 더 붙여넣으면 돼요. 내 설정은 그대로 남아요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">터미널에서 <code>rm -rf ~/robin-macro-env</code> 를 실행한 뒤 설치 명령을 다시 붙여넣으세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q1">돈 내야 하나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a1">아니요, 무료예요. 코드도 GitHub에 전부 공개돼 있어요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q2">윈도우에서도 되나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">아직은 맥 전용이에요. 애플 실리콘(M1 이상)은 macOS 13 Ventura 이상, 인텔 맥은 macOS 10.12 이상이 필요해요. 윈도우 버전은 준비하고 있어요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록에 초록 체크가 있는지 보고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">앱 왼쪽 아래의 <b>업데이트 확인</b>을 누르거나, 설치 명령을 한 번 더 붙여 넣으면 돼요. 설정은 그대로 남아요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">터미널에서 <code>rm -rf ~/robin-macro-env</code> 를 실행한 다음 설치 명령을 다시 붙여 넣으세요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q6">매크로 써도 괜찮나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a6">매크로 사용에 대한 책임은 사용자에게 있어요. 게임 규칙을 확인하고 본인 판단으로 사용해 주세요. RobinMacro는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요.</div></div></details>
       </div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <div class="wrap">
-    <div class="final reveal">
+  <!-- FINAL -->
+  <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true"><path fill="#ffc83d" d="M0 44 C 180 4 360 4 540 34 S 900 78 1080 40 S 1340 6 1440 24 V82 H0 Z"/><path fill="none" stroke="#1c1409" stroke-width="3" vector-effect="non-scaling-stroke" d="M0 44 C 180 4 360 4 540 34 S 900 78 1080 40 S 1340 6 1440 24"/></svg>
+  <section class="final honeycomb" id="final">
+    <div class="wrap">
       <img class="logo-big" src="assets/logo.png" alt="" />
-      <h2 data-i18n-html="end.title">오늘 밤부터<br /><span class="honey-text" style="animation:flow 7s linear infinite">꿀 모으기 시작</span></h2>
-      <p class="sub" data-i18n="end.sub">설치는 한 줄, 설정은 클릭 몇 번. 나머지는 RobinMacro가 할게요.</p>
+      <h2 class="fill-text" id="fillText" data-i18n-html="end.title">오늘 밤엔<br />맥 켜 두고 자요</h2>
+      <p class="sub" data-i18n="end.sub">설치는 한 줄이면 되고, 나머지는 시작 가이드가 알려 줘요.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg><span data-i18n="hero.cta">지금 설치하기</span></a>
-        <a class="btn btn-ghost" href="https://github.com/Yoon-robin/RobinMacro/issues" target="_blank" rel="noopener"><span data-i18n="end.help">도움이 필요해요</span></a>
+        <a class="btn btn-ink" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg><span data-i18n="hero.cta">설치하기</span></a>
+        <a class="btn btn-white" href="https://github.com/Yoon-robin/RobinMacro/issues" target="_blank" rel="noopener"><span data-i18n="end.help">도움이 필요해요</span></a>
       </div>
     </div>
-  </div>
+  </section>
 </main>
 
 <footer>
@@ -768,59 +750,72 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
   </div>
 </footer>
 
-<div class="toast" id="toast" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="copied">복사했어요! 터미널에 붙여넣으세요</span></div>
+<div class="toast" id="toast" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="copied">복사했어요. 터미널에 붙여 넣으세요</span></div>
 
 <script>
 (() => {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches
+  const $ = (s) => document.querySelector(s)
+  const $$ = (s) => [...document.querySelectorAll(s)]
+  const clamp = (v) => Math.min(1, Math.max(0, v))
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
   /* ---------------- i18n ---------------- */
   const EN = {
-    "nav.features": "Features", "nav.screens": "Screens", "nav.install": "Install", "nav.faq": "FAQ",
-    "hero.eyebrow": "Free · Open source · Korean & English",
-    "hero.t1": "Your hive keeps growing", "hero.t2": "while you sleep",
-    "hero.lead": "A <b>Bee Swarm Simulator</b> macro for macOS. Paste one line into Terminal to install, then a few clicks get it gathering, collecting, hunting and questing for you.",
-    "hero.cta": "Install now", "hero.gh": "View on GitHub", copy: "Copy",
-    "meta.1": "Apple Silicon · Intel", "meta.2": "10–20 min install", "meta.3": "No coding needed",
-    "float.1": "Macro started", "float.1s": "Press F1 or one button", "float.2": "Running · <span id=\"clock\">1:02:13</span>", "float.3": "Search all 246 settings",
-    "feat.kicker": "Features", "feat.title": "Turn it on,<br /><em class=\"honey-text\" style=\"animation:flow 7s linear infinite\">it handles the rest</em>",
-    "feat.sub": "Pick your fields and press Start. RobinMacro works through gathering, converting, collecting, mobs, quests and planters in order.",
-    "f.gather.t": "Gathers in patterns, converts when full", "f.gather.d": "Rotates through up to 5 fields using set patterns, heads home to make honey when the bag is full, then goes back out. AI token gathering included.", "f.gather.bag": "Bag",
-    "f.search.t": "Find any setting", "f.search.d": "Press ⌘K, type \"hive\" and jump straight to it.",
+    "nav.hour": "What it does", "nav.features": "Features", "nav.screens": "Screens", "nav.install": "Install", "nav.faq": "FAQ",
+    "hero.t1": "Let your Mac", "hero.t2": "farm the honey",
+    "hero.lead": "RobinMacro plays Bee Swarm Simulator for you on macOS. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
+    "hero.cta": "Install", "hero.gh": "View on GitHub", copy: "Copy",
+    "meta.1": "Apple Silicon & Intel", "meta.2": "10–20 min install", "meta.3": "No coding needed",
+    "float.1": "Press F1 to start", "float.2": "Running <span class=\"clock\">1:02:13</span>", "float.3": "Search 246 settings",
+    "hour.tag": "Example", "hour.title": "What an hour<br />looks like",
+    "m1.t": "F1, and off it goes", "m1.d": "Flies from your hive to the first field.",
+    "m2.t": "Gathers in patterns", "m2.d": "Sweeps the field in the pattern you picked. With AI token gathering on, it grabs tokens too.",
+    "m3.t": "Bag's full", "m3.d": "Heads home, converts to honey, and goes back out.",
+    "m4.t": "Cooldown run", "m4.d": "Makes a round of whatever is ready again, like the Wealth Clock and dispensers.",
+    "m5.t": "Mob hunt", "m5.d": "Takes out ladybugs and rhino beetles when they respawn, then gets back to work.",
+    "m6.t": "Quests", "m6.d": "Moves to the fields your bear quests need and fills the goals.",
+    "m7.t": "Report's in", "m7.d": "Sends the honey you made and what it did this hour to Discord.",
+    "hour.note": "The real order and timing depend on your settings.",
+    "feat.title": "Things you'll use<br />every day", "feat.sub": "The longer you leave it running, the less it should need you.",
+    "f.search.t": "246 settings, so there's search", "f.search.d": "Press ⌘K, type \"hive\" and jump straight to it.",
     "f.search.r1": "<span>Hive slot</span><small>Settings › Game</small>", "f.search.r2": "<span>Return to hive</span><small>Gather › Field</small>", "f.search.r3": "<span>Hive claim method</span><small>Settings › Game</small>",
-    "f.discord.t": "Check from your phone", "f.discord.d": "Discord alerts, hourly reports, a remote-control bot and screen streaming.",
+    "f.discord.t": "Check in from your phone", "f.discord.d": "Discord alerts, hourly reports, a remote-control bot and screen streaming.",
     "n.1": "Your hourly report is here 📊", "n.2": "Defeated Vicious Bee 🐝", "n.3": "Planters harvested 🌱",
-    "f.planter.t": "Automatic planter care", "f.planter.d": "Manual cycles or nectar-priority auto mode, with harvest timers on Home.",
-    "f.safe.t": "Built for long sessions", "f.safe.1": "Rejoins your private server after a disconnect", "f.safe.2": "Recovers from deaths and carries on", "f.safe.3": "Warns you when macOS permissions are off", "f.safe.4": "F1 start · F2 pause · F3 stop",
-    "f.lang.t": "Korean first, English too", "f.lang.d": "Menus, descriptions and the installer are all in Korean. You can switch to English any time, and there's a dark and a light theme.",
-    "scr.kicker": "Screens", "scr.title": "Good looking,<br />easy to use", "scr.sub": "A new interface built with React and shadcn/ui. A Getting Started guide walks you through your first run.",
+    "f.planter.t": "No more planter timers", "f.planter.d": "Plant on your own cycles or let it pick by nectar. Harvest times show on Home.",
+    "f.safe.t": "Disconnects don't stop it", "f.safe.1": "Rejoins your private server", "f.safe.2": "Picks up again after a death", "f.safe.3": "Tells you when Mac permissions are off", "f.safe.4": "F1 start · F2 pause · F3 stop",
+    "f.lang.t": "Korean first, English too", "f.lang.d": "Switch to English with one button. Dark and light themes included.",
+    "scr.title": "Here's the app", "scr.sub": "The first time you open it, Getting Started checks your Mac permissions one by one.",
     "tab.home": "Home", "tab.gather": "Gather", "tab.guide": "Getting Started", "tab.search": "Search", "tab.light": "Light theme",
-    "how.kicker": "Get started", "how.title": "Three steps, that's it",
-    "how.1t": "Paste one line", "how.1d": "Open Terminal and paste the install command. The installer explains every step.",
-    "how.2t": "Allow two permissions", "how.2d": "Turn on Terminal under Accessibility and Screen Recording. The app shows a green check when they're on.",
-    "how.3t": "Press Start", "how.3d": "Join Bee Swarm in Roblox, pick your fields and start. Time to relax.",
-    "ins.kicker": "Install", "ins.title": "Copy, paste,<br />done.",
-    "ins.1": "Press <b>⌘ + Space</b> and open <b>Terminal</b>.", "ins.2": "<b>Paste the command and press Enter</b>. Click <b>Continue/Install</b> if an installer pops up.", "ins.3": "When it's done, double-click <b>RobinMacro on your Desktop</b>!",
-    "ins.alt": "Prefer not to use Terminal? Install from a ZIP →", "ins.term": "Terminal — Installing RobinMacro",
+    "ins.title": "Install with<br />one line",
+    "ins.1": "Press <b>⌘ + Space</b> and open <b>Terminal</b>.",
+    "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>.",
+    "ins.3": "Turn on Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. The app shows a green check when they're on.",
+    "ins.4": "Open <b>RobinMacro</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
+    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.term": "Terminal · Installing RobinMacro",
     "faq.title": "Questions",
-    q1: "Does it cost anything?", a1: "No, it's completely free, and all the code is on GitHub.",
-    q2: "Does it work on Windows?", a2: "RobinMacro is Mac only. Apple Silicon Macs need macOS 13 Ventura or later; Intel Macs need macOS 10.12 or later.",
+    q1: "Does it cost anything?", a1: "No, it's free, and all the code is on GitHub.",
+    q2: "Does it work on Windows?", a2: "Not yet. It's Mac only for now: Apple Silicon Macs need macOS 13 Ventura or later, Intel Macs need macOS 10.12 or later. A Windows version is in the works.",
     q3: "I pressed Start but nothing moves", a3: "It's almost always permissions. Check that Accessibility and Screen Recording show a green check in the app's <b>Getting Started</b> page, then quit Terminal (⌘Q) and open it again.",
     q4: "How do I update?", a4: "Press <b>Check for updates</b> at the bottom left of the app, or paste the install command again. Your settings are kept.",
     q5: "I want a clean reinstall", a5: "Run <code>rm -rf ~/robin-macro-env</code> in Terminal, then paste the install command again.",
     q6: "Is using a macro OK?", a6: "You use macros at your own risk, so check the game's rules first. RobinMacro is not affiliated with Onett, Bee Swarm Simulator or Roblox.",
-    "end.title": "Start making honey<br /><span class=\"honey-text\" style=\"animation:flow 7s linear infinite\">tonight</span>", "end.sub": "One line to install, a few clicks to set up. RobinMacro does the rest.", "end.help": "I need help",
+    "end.title": "Leave your Mac on<br />tonight", "end.sub": "Install takes one line. Getting Started walks you through the rest.", "end.help": "Get help",
     "foot.legal": "RobinMacro is not affiliated with Onett, Bee Swarm Simulator or Roblox. See LICENSE for the licenses of included code. This product includes software developed by exihs (Existance Macro).",
-    "foot.perm": "Permission help", "foot.issues": "Report a problem", copied: "Copied! Paste it into Terminal",
+    "foot.perm": "Permission help", "foot.issues": "Report a problem", copied: "Copied. Paste it into Terminal",
     "alt.home": "RobinMacro Home screen with the start button, task list and live log",
   }
   const CAPTIONS = {
-    ko: ["시작 버튼 하나, 할 일 목록, 실시간 기록까지 한 화면에서.", "필드 5곳을 고르고 패턴과 시간을 정해요.", "처음이라면 시작 가이드가 권한부터 차근차근 확인해 줘요.", "⌘K 한 번이면 설정 246개 어디로든.", "밤에는 다크, 낮에는 라이트."],
-    en: ["One start button, your task list and a live log on one screen.", "Choose up to five fields, then set patterns and times.", "First time? Getting Started checks your permissions step by step.", "⌘K takes you to any of 246 settings.", "Dark at night, light by day."],
+    ko: ["시작 버튼, 할 일 목록, 실시간 기록이 한 화면에 있어요.", "필드는 5곳까지 고르고, 패턴과 시간을 정해요.", "처음이라면 시작 가이드가 권한부터 확인해 줘요.", "⌘K로 설정 246개 중 원하는 걸 바로 찾아요.", "밤에는 다크, 낮에는 라이트."],
+    en: ["Start button, task list and a live log on one screen.", "Pick up to five fields, then set patterns and times.", "First time? Getting Started checks your permissions first.", "⌘K finds any of the 246 settings.", "Dark at night, light by day."],
+  }
+  const TAPE = {
+    ko: [["채집", "꿀 변환", "디스펜서", "부의 시계", "몹 사냥", "비셔스 비"], ["퀘스트", "플랜터", "스티커 프린터", "디스코드 리포트", "자동 재접속", "AI 토큰 채집"]],
+    en: [["Gathering", "Converting", "Dispensers", "Wealth Clock", "Mob hunting", "Vicious Bee"], ["Quests", "Planters", "Sticker Printer", "Discord reports", "Auto rejoin", "AI token gathering"]],
   }
   const KO = {}
-  document.querySelectorAll("[data-i18n]").forEach((el) => (KO[el.dataset.i18n] = el.textContent))
-  document.querySelectorAll("[data-i18n-html]").forEach((el) => (KO[el.dataset.i18nHtml] = el.innerHTML))
+  $$("[data-i18n]").forEach((el) => (KO[el.dataset.i18n] = el.textContent))
+  $$("[data-i18n-html]").forEach((el) => (KO[el.dataset.i18nHtml] = el.innerHTML))
   let lang = "ko"
   try { lang = localStorage.getItem("rm_site_lang") || (navigator.language.startsWith("ko") ? "ko" : "en") } catch {}
 
@@ -828,39 +823,84 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
     lang = next
     const dict = next === "ko" ? KO : EN
     document.documentElement.lang = next
-    document.querySelectorAll("[data-i18n]").forEach((el) => { const v = dict[el.dataset.i18n]; if (v != null) el.textContent = v })
-    document.querySelectorAll("[data-i18n-html]").forEach((el) => { const v = dict[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v })
-    document.querySelectorAll("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "RobinMacro 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
-    document.getElementById("langLabel").textContent = next === "ko" ? "English" : "한국어"
-    document.title = next === "ko" ? "RobinMacro — 맥용 비 스웜 시뮬레이터 매크로" : "RobinMacro — Bee Swarm Simulator macro for macOS"
-    // the hero headline replays its rise when the language changes
-    document.querySelectorAll(".title .line > span").forEach((s) => { s.style.animation = "none"; void s.offsetWidth; s.style.animation = "" })
-    setCaption(current)
-    buildMarquee()
+    $$("[data-i18n]").forEach((el) => { const v = dict[el.dataset.i18n]; if (v != null) el.textContent = v })
+    $$("[data-i18n-html]").forEach((el) => { const v = dict[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v })
+    $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "RobinMacro 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
+    $("#langLabel").textContent = next === "ko" ? "English" : "한국어"
+    document.title = next === "ko" ? "RobinMacro · 맥용 비 스웜 시뮬레이터 매크로" : "RobinMacro · Bee Swarm Simulator macro for macOS"
+    // the headline pops in again in the new language
+    $$(".title .ln").forEach((s) => { s.style.animation = "none"; void s.offsetWidth; s.style.animation = "" })
+    buildTapes(); setCaption(current); moveKnob(); layout()
     try { localStorage.setItem("rm_site_lang", next) } catch {}
   }
-  document.getElementById("langBtn").addEventListener("click", () => applyLang(lang === "ko" ? "en" : "ko"))
+  $("#langBtn").addEventListener("click", () => applyLang(lang === "ko" ? "en" : "ko"))
 
-  /* ---------------- marquee ---------------- */
-  const CHIPS = {
-    ko: ["🌻 해바라기", "🌲 소나무 숲", "🍓 딸기 밭", "🌹 장미 밭", "🍍 파인애플", "🐞 무당벌레", "🪲 장수풍뎅이", "🦂 전갈", "🕷 거미", "🕒 부의 시계", "🎁 디스펜서", "🌱 플랜터", "📜 퀘스트", "🍯 꿀 변환", "🐝 비셔스 비", "🎨 스티커 프린터", "💬 디스코드", "🔁 자동 재접속"],
-    en: ["🌻 Sunflower", "🌲 Pine Tree", "🍓 Strawberry", "🌹 Rose", "🍍 Pineapple", "🐞 Ladybugs", "🪲 Rhino Beetles", "🦂 Scorpions", "🕷 Spider", "🕒 Wealth Clock", "🎁 Dispensers", "🌱 Planters", "📜 Quests", "🍯 Converting", "🐝 Vicious Bee", "🎨 Sticker Printer", "💬 Discord", "🔁 Auto rejoin"],
+  /* ---------------- hive cells ---------------- */
+  // pointy-top hexes, 4 in the middle row; --lvl is how full each cell ends up
+  const CELLS = [[103.5, 70, "38%"], [200.5, 70, "8%"], [297.5, 70, "62%"], [55, 154, "20%"], [152, 154, "0%"], [249, 154, "logo"], [346, 154, "30%"], [103.5, 238, "0%"], [200.5, 238, "14%"], [297.5, 238, "50%"]]
+  const HEX = "M0 -56 L48.5 -28 L48.5 28 L0 56 L-48.5 28 L-48.5 -28 Z"
+  $("#cells").innerHTML = CELLS.map(([x, y, lvl], i) => {
+    const inner = lvl === "logo"
+      ? `<image href="assets/logo.png" x="-40" y="-40" width="80" height="80" clip-path="url(#hexClip)" />`
+      : `<g clip-path="url(#hexClip)"><rect class="honey-fill" x="-50" y="-58" width="100" height="116" fill="url(#honeyGrad)" style="--lvl:${lvl};--d:${(0.35 + i * 0.12).toFixed(2)}s" /></g>`
+    return `<g transform="translate(${x} ${y})"><path class="cell-bg" d="${HEX}" />${inner}<path class="cell-line" d="${HEX}" /></g>`
+  }).join("")
+  if (reduced) $$(".bees animateMotion").forEach((m) => m.remove())
+
+  /* ---------------- tapes: drift, and speed up while you scroll ---------------- */
+  const tapes = [$("#tape1"), $("#tape2")]
+  const tapeX = [0, 0]
+  function buildTapes() {
+    tapes.forEach((t, i) => {
+      const words = TAPE[lang][i].map((w) => `<span>${w}</span>`).join("")
+      t.innerHTML = words + words + words + words
+    })
   }
-  function buildMarquee() {
-    const items = CHIPS[lang].map((c) => `<span>${c}</span>`).join("")
-    document.getElementById("track").innerHTML = items + items
+  let lastY = scrollY, vel = 0, tapesOn = true
+  new IntersectionObserver(([e]) => (tapesOn = e.isIntersecting)).observe($(".tapes"))
+  function tapeTick() {
+    vel = vel * 0.9 + (scrollY - lastY) * 0.1
+    lastY = scrollY
+    if (tapesOn) tapes.forEach((t, i) => {
+      const loop = t.scrollWidth / 4
+      if (!loop) return
+      tapeX[i] += (i ? 1 : -1) * (0.7 + Math.min(10, Math.abs(vel) * 0.5))
+      if (tapeX[i] <= -loop) tapeX[i] += loop
+      if (tapeX[i] > 0) tapeX[i] -= loop
+      t.style.transform = `translate3d(${tapeX[i].toFixed(1)}px,0,0)`
+    })
+    requestAnimationFrame(tapeTick)
   }
+  if (!reduced) requestAnimationFrame(tapeTick)
 
   /* ---------------- copy buttons ---------------- */
-  const toast = document.getElementById("toast")
+  const toast = $("#toast")
   let toastTimer
-  document.querySelectorAll("[data-copy]").forEach((btn) => {
+  function burst(btn) {
+    if (reduced) return
+    const r = btn.getBoundingClientRect()
+    for (let k = 0; k < 12; k++) {
+      const s = document.createElement("i")
+      s.className = "spark"
+      s.style.background = k % 3 ? "#ffc83d" : "#1c1409"
+      s.style.left = r.left + r.width / 2 + "px"
+      s.style.top = r.top + r.height / 2 + "px"
+      document.body.append(s)
+      const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 60
+      s.animate([
+        { transform: "translate(-50%, -50%) scale(1)", opacity: 1 },
+        { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(.2) rotate(${Math.random() * 240}deg)`, opacity: 0 },
+      ], { duration: 650 + Math.random() * 300, easing: "cubic-bezier(.22,1,.36,1)" }).onfinish = () => s.remove()
+    }
+  }
+  $$("[data-copy]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const text = document.getElementById(btn.dataset.copy).textContent
       try { await navigator.clipboard.writeText(text) } catch {
         const r = document.createRange(); r.selectNodeContents(document.getElementById(btn.dataset.copy))
         const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy")
       }
+      burst(btn)
       btn.classList.add("done")
       toast.classList.add("show")
       clearTimeout(toastTimer)
@@ -868,48 +908,86 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
     })
   })
 
-  /* ---------------- nav + pointer ---------------- */
-  const nav = document.getElementById("nav")
-  const root = document.documentElement
-  addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 10), { passive: true })
-  let raf = 0
-  addEventListener("pointermove", (e) => {
-    if (raf) return
-    raf = requestAnimationFrame(() => { root.style.setProperty("--mx", e.clientX + "px"); root.style.setProperty("--my", e.clientY + "px"); raf = 0 })
-  }, { passive: true })
-  document.querySelectorAll(".card").forEach((card) => {
-    card.addEventListener("pointermove", (e) => {
-      const r = card.getBoundingClientRect()
-      card.style.setProperty("--cx", e.clientX - r.left + "px")
-      card.style.setProperty("--cy", e.clientY - r.top + "px")
-    })
-  })
-
-  /* ---------------- hero tilt flattens on scroll ---------------- */
-  const tilt = document.getElementById("tilt")
-  function onScroll() {
-    const r = tilt.getBoundingClientRect()
-    const p = Math.min(1, Math.max(0, 1 - (r.top - innerHeight * 0.15) / (innerHeight * 0.6)))
-    tilt.style.setProperty("--tilt", (22 * (1 - p)).toFixed(2) + "deg")
-    tilt.style.setProperty("--tilt-scale", (0.94 + 0.06 * p).toFixed(3))
-  }
-  if (!reduced) { addEventListener("scroll", onScroll, { passive: true }); onScroll() } else { tilt.style.setProperty("--tilt", "0deg"); tilt.style.setProperty("--tilt-scale", "1") }
-
-  /* ---------------- live clock in the floating badge ---------------- */
+  /* ---------------- live clock on the sticker ---------------- */
   let secs = 3733
-  setInterval(() => { secs++; const el = document.getElementById("clock"); if (!el) return; const h = Math.floor(secs / 3600), m = Math.floor(secs % 3600 / 60), s = secs % 60; el.textContent = `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` }, 1000)
+  setInterval(() => {
+    secs++
+    const h = Math.floor(secs / 3600), m = Math.floor(secs % 3600 / 60), s = secs % 60
+    $$(".clock").forEach((el) => (el.textContent = `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`))
+  }, 1000)
 
   /* ---------------- reveal on scroll ---------------- */
   const io = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target) }
-  }, { threshold: 0.18, rootMargin: "0px 0px -40px 0px" })
-  document.querySelectorAll(".reveal, .card").forEach((el) => io.observe(el))
+    for (const e of entries) if (e.isIntersecting) {
+      e.target.classList.add("in"); io.unobserve(e.target)
+      setTimeout(() => e.target.style.setProperty("--d", "0s"), 1400)
+    }
+  }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" })
+  $$(".reveal").forEach((el) => io.observe(el))
+
+  /* ---------------- cards lean toward the pointer ---------------- */
+  if (!reduced && matchMedia("(hover: hover)").matches) $$(".card").forEach((c) => {
+    c.addEventListener("pointermove", (e) => {
+      const r = c.getBoundingClientRect()
+      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5
+      c.style.setProperty("--rx", (-y * 9).toFixed(2) + "deg")
+      c.style.setProperty("--ry", (x * 11).toFixed(2) + "deg")
+    })
+    c.addEventListener("pointerleave", () => { c.style.setProperty("--rx", "0deg"); c.style.setProperty("--ry", "0deg") })
+  })
+
+  /* ---------------- the hour: pinned and scrolled sideways on wide screens ---------------- */
+  const hour = $("#hour"), track = $("#hourTrack"), moments = $$(".moment"), hourTime = $("#hourTime"), jar = $("#jarFill")
+  let pinned = false, dist = 0
+  function layout() {
+    pinned = !reduced && innerWidth >= 900 && innerHeight >= 640
+    hour.classList.toggle("pinned", pinned)
+    if (pinned) {
+      moments.forEach((m) => m.classList.remove("reveal"))
+      dist = Math.max(0, track.scrollWidth - innerWidth)
+      hour.style.setProperty("--h", dist + innerHeight + "px")
+    } else {
+      track.style.transform = ""
+      moments.forEach((m) => { if (!m.classList.contains("reveal")) { m.classList.add("reveal"); io.observe(m) } })
+    }
+    frame()
+  }
+
+  /* ---------------- everything that follows the scroll position ---------------- */
+  const nav = $("#nav"), tilt = $("#tilt"), stage = $(".stage"), fillText = $("#fillText"), final = $("#final")
+  function frame() {
+    nav.classList.toggle("scrolled", scrollY > 10)
+    if (reduced) return
+    const sr = stage.getBoundingClientRect()
+    tilt.style.setProperty("--p", clamp(1 - (sr.top - innerHeight * 0.18) / (innerHeight * 0.55)).toFixed(3))
+
+    let hp = 1
+    if (pinned) {
+      hp = dist ? clamp((scrollY - hour.offsetTop) / dist) : 0
+      track.style.transform = `translate3d(${(-hp * dist).toFixed(1)}px,0,0)`
+      const mid = innerWidth / 2
+      let best = 0, bestD = Infinity
+      moments.forEach((m, i) => { const r = m.getBoundingClientRect(); const d = Math.abs(r.left + r.width / 2 - mid); if (d < bestD) { bestD = d; best = i } })
+      moments.forEach((m, i) => m.classList.toggle("now", i === best))
+    } else {
+      const r = hour.getBoundingClientRect()
+      hp = clamp((innerHeight - r.top) / (r.height + innerHeight * 0.2))
+    }
+    const mins = Math.round(hp * 60)
+    hourTime.textContent = mins === 60 ? "1:00" : `0:${String(mins).padStart(2, "0")}`
+    jar.style.setProperty("--hp", hp.toFixed(3))
+
+    const fr = final.getBoundingClientRect()
+    fillText.style.setProperty("--fill", (clamp((innerHeight - fr.top) / (innerHeight * 0.75)) * 100).toFixed(1) + "%")
+  }
+  let ticking = false
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; frame() }) } }, { passive: true })
+  addEventListener("resize", () => { layout(); moveGlider(); moveKnob() })
 
   /* ---------------- mini search typing ---------------- */
-  const typed = document.getElementById("typed")
-  const results = [...document.querySelectorAll(".mini-search .r")]
+  const typed = $("#typed")
+  const results = $$(".mini-search .r")
   async function typeLoop() {
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     for (;;) {
       const word = lang === "ko" ? "벌집" : "hive"
       typed.textContent = ""
@@ -924,38 +1002,52 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
       await sleep(2200)
     }
   }
-  typeLoop()
+  if (reduced) { typed.textContent = "벌집"; results[0].classList.add("hl") } else typeLoop()
 
-  /* ---------------- language flip demo ---------------- */
-  const flipKo = document.getElementById("flipKo"), flipEn = document.getElementById("flipEn")
-  setInterval(() => { flipKo.classList.toggle("on"); flipEn.classList.toggle("on") }, 2200)
-
-  /* ---------------- gallery tabs ---------------- */
-  const tabs = [...document.querySelectorAll("#tabs button")]
-  const imgs = [...document.querySelectorAll("#shots img")]
-  const pill = document.getElementById("pillBg")
-  const caption = document.getElementById("caption")
-  let current = 0, auto
-  function movePill() {
-    const b = tabs[current]
-    pill.style.left = b.offsetLeft + "px"
-    pill.style.top = b.offsetTop + "px"
-    pill.style.width = b.offsetWidth + "px"
+  /* ---------------- language switch demo ---------------- */
+  const flipKo = $("#flipKo"), flipEn = $("#flipEn"), knob = $("#knob")
+  function moveKnob() {
+    const on = flipKo.classList.contains("on") ? flipKo : flipEn
+    knob.style.left = on.offsetLeft + "px"
+    knob.style.width = on.offsetWidth + "px"
   }
-  function setCaption(i) { caption.style.opacity = 0; setTimeout(() => { caption.textContent = CAPTIONS[lang][i]; caption.style.opacity = 1 }, 160) }
+  if (!reduced) setInterval(() => { flipKo.classList.toggle("on"); flipEn.classList.toggle("on"); moveKnob() }, 2200)
+
+  /* ---------------- gallery: tabs and a wipe between screenshots ---------------- */
+  const tabs = $$("#tabs button")
+  const imgs = $$("#shots img")
+  const glider = $("#glider"), caption = $("#caption")
+  let current = 0, auto
+  function moveGlider() {
+    const b = tabs[current]
+    glider.style.left = b.offsetLeft + "px"
+    glider.style.top = b.offsetTop + "px"
+    glider.style.width = b.offsetWidth + "px"
+  }
+  function setCaption(i) {
+    caption.classList.add("out")
+    setTimeout(() => { caption.textContent = CAPTIONS[lang][i]; caption.classList.remove("out") }, 180)
+  }
   function show(i, user) {
+    if (i === current) return
+    const prev = imgs[current]
     current = i
     tabs.forEach((t, j) => t.setAttribute("aria-selected", String(j === i)))
-    imgs.forEach((im, j) => im.classList.toggle("on", j === i))
-    movePill(); setCaption(i)
+    imgs.forEach((im) => im.classList.remove("top", "under"))
+    prev.classList.add("under")
+    imgs[i].classList.add("top")
+    if (!reduced) {
+      const ox = ((i + 0.5) / tabs.length) * 100
+      imgs[i].animate([{ clipPath: `circle(0% at ${ox}% 0%)` }, { clipPath: `circle(150% at ${ox}% 0%)` }], { duration: 750, easing: "cubic-bezier(.65,0,.35,1)" })
+    }
+    moveGlider(); setCaption(i)
     if (user) { clearInterval(auto); auto = setInterval(() => show((current + 1) % tabs.length), 6000) }
   }
   tabs.forEach((t, i) => t.addEventListener("click", () => show(i, true)))
-  addEventListener("resize", movePill)
   auto = setInterval(() => show((current + 1) % tabs.length), 6000)
 
   /* ---------------- installer terminal ---------------- */
-  const term = document.getElementById("term")
+  const term = $("#term")
   const SCRIPT = () => [
     ["", "$ ", "t-amber"], ["type", "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash"],
     ["ln", lang === "ko" ? "🐝 RobinMacro 내려받는 중..." : "🐝 Downloading RobinMacro...", "t-amber"],
@@ -973,9 +1065,7 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
     ["ln", lang === "ko" ? "바탕화면에 RobinMacro 앱을 만들었어요." : "Created the RobinMacro app on your Desktop.", "t-green"],
     ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
   ]
-  let termStarted = false
   async function runTerminal() {
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
     for (;;) {
       term.innerHTML = ""
       let line
@@ -996,70 +1086,34 @@ footer a { color: var(--muted); } footer a:hover { color: var(--text); }
       await sleep(5000)
     }
   }
-  new IntersectionObserver((entries, obs) => {
-    if (entries[0].isIntersecting && !termStarted) { termStarted = true; runTerminal(); obs.disconnect() }
-  }, { threshold: 0.3 }).observe(term)
-
-  /* ---------------- steps rail ---------------- */
-  new IntersectionObserver((entries, obs) => { if (entries[0].isIntersecting) { document.getElementById("steps").classList.add("in"); obs.disconnect() } }, { threshold: 0.4 }).observe(document.getElementById("steps"))
+  new IntersectionObserver((entries, obs) => { if (entries[0].isIntersecting) { runTerminal(); obs.disconnect() } }, { threshold: 0.3 }).observe(term)
 
   /* ---------------- smooth faq ---------------- */
-  document.querySelectorAll("#faqList details").forEach((d) => {
+  $$("#faqList details").forEach((d) => {
     const body = d.querySelector(".faq-body")
     d.querySelector("summary").addEventListener("click", (e) => {
       if (reduced) return
       e.preventDefault()
       if (d.open) {
         const h = body.scrollHeight
-        body.animate([{ height: h + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" }).onfinish = () => (d.open = false)
+        body.animate([{ height: h + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" }).onfinish = () => (d.open = false)
       } else {
         d.open = true
         const h = body.scrollHeight
-        body.animate([{ height: "0px", opacity: 0 }, { height: h + "px", opacity: 1 }], { duration: 360, easing: "cubic-bezier(.2,.8,.2,1)" })
+        body.animate([{ height: "0px", opacity: 0 }, { height: h + "px", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.34,1.3,.64,1)" })
       }
     })
   })
 
   /* ---------------- github stars ---------------- */
   fetch("https://api.github.com/repos/Yoon-robin/RobinMacro").then((r) => r.ok ? r.json() : null).then((d) => {
-    if (d && typeof d.stargazers_count === "number") document.getElementById("stars").textContent = "★ " + d.stargazers_count.toLocaleString()
+    if (d && typeof d.stargazers_count === "number") $("#stars").textContent = "★ " + d.stargazers_count.toLocaleString()
   }).catch(() => {})
 
-  /* ---------------- pollen particles ---------------- */
-  const cv = document.getElementById("pollen"), ctx = cv.getContext("2d")
-  let W, H, dots = []
-  function size() {
-    const dpr = Math.min(2, devicePixelRatio || 1)
-    W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + "px"; cv.style.height = H + "px"; ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    const n = Math.round(Math.min(70, W * H / 22000))
-    dots = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2.2 + 0.6, vx: (Math.random() - 0.5) * 0.25, vy: -Math.random() * 0.35 - 0.08, a: Math.random() * 0.6 + 0.2, t: Math.random() * 6.28 }))
-  }
-  function tick() {
-    ctx.clearRect(0, 0, W, H)
-    for (const d of dots) {
-      d.t += 0.02; d.x += d.vx + Math.sin(d.t) * 0.2; d.y += d.vy
-      if (d.y < -10) { d.y = H + 10; d.x = Math.random() * W }
-      if (d.x < -10) d.x = W + 10; else if (d.x > W + 10) d.x = -10
-      const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4)
-      g.addColorStop(0, `rgba(253, 224, 140, ${d.a})`); g.addColorStop(1, "rgba(253, 224, 140, 0)")
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(d.x, d.y, d.r * 4, 0, 6.283); ctx.fill()
-    }
-    requestAnimationFrame(tick)
-  }
-  if (!reduced) { size(); addEventListener("resize", size); tick() }
-
-  /* ---------------- bees scale with the stage ---------------- */
-  const stage = document.querySelector(".stage"), bees = document.getElementById("bees")
-  function scaleBees() {
-    const k = stage.offsetWidth / 1120
-    bees.style.setProperty("--k", k.toFixed(3))
-    // keep the bees themselves a readable size on small screens
-    bees.style.setProperty("--bs", Math.min(2, 0.75 / k > 1 ? 0.75 / k : 1).toFixed(3))
-  }
-  scaleBees(); addEventListener("resize", scaleBees)
-
   applyLang(lang)
-  requestAnimationFrame(movePill)
+  requestAnimationFrame(() => { moveGlider(); moveKnob(); layout() })
+  // fonts change the widths the glider, knob and pinned track were measured with
+  document.fonts?.ready.then(() => { moveGlider(); moveKnob(); layout() })
 })()
 </script>
 </body>
