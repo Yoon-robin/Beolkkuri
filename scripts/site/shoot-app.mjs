@@ -24,13 +24,17 @@ const overrides = (runState) => ({
   getManualPlanterData: { planters: ["planter of plenty", "petal planter", ""], fields: ["sunflower", "pine tree", ""], harvestTimes: [now / 1000 + 3600 * 2.3, now / 1000 - 60, 0], cycle: 1 },
 })
 
+// The app takes its theme and language from the saved general settings (ui_theme / ui_language),
+// so each shot gets the real settings with those two replaced.
+const realSettings = await fetch("http://127.0.0.1:8765/__py/loadAllSettings", { method: "POST", headers: { "Content-Type": "application/json" }, body: "[]" }).then((r) => r.json())
+
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: "shell", pipe: true, protocolTimeout: 90000, args: ["--no-sandbox", "--disable-gpu", "--force-color-profile=srgb", "--lang=ko-KR"] })
 
 async function shot(name, { hash, theme = "dark", runState = 3, width = 1440, height = 900, before }) {
   const page = await browser.newPage()
   await page.setViewport({ width, height, deviceScaleFactor: 2 })
   await page.setRequestInterception(true)
-  const map = overrides(runState)
+  const map = { ...overrides(runState), loadAllSettings: { ...realSettings, ui_theme: theme, ui_language: "ko" } }
   page.on("request", (req) => {
     const m = req.url().match(/\/__py\/(\w+)/)
     if (m && m[1] in map) return req.respond({ status: 200, contentType: "application/json", body: JSON.stringify(map[m[1]]) })
@@ -42,18 +46,19 @@ async function shot(name, { hash, theme = "dark", runState = 3, width = 1440, he
   }, theme)
   // the app polls its backend, so networkidle never settles: wait for load plus a fixed delay
   await page.goto(`http://localhost:5173/${hash}`, { waitUntil: "load" })
-  await page.evaluate(() => {
-    // the browser preview labels itself as dev mode; the real app doesn't
-    for (const el of document.querySelectorAll("header span")) if (el.textContent.includes("·") && el.textContent.length > 12) el.remove()
-  })
   await new Promise((r) => setTimeout(r, 2500))
+  await page.evaluate(() => {
+    // the browser preview labels itself as dev mode in the control panel; the real app doesn't
+    for (const el of document.querySelectorAll("p")) if (el.textContent.startsWith("개발 모드")) el.remove()
+  })
   if (before) await before(page)
   await page.screenshot({ path: `${OUT}/${name}.png` })
   await page.close()
   console.log("saved", name)
 }
 
-await shot("home", { hash: "#/home", runState: 2 })
+// a wide window shows Gather for #/home, so the first shot opens Collect to differ from the second
+await shot("home", { hash: "#/collect", runState: 2 })
 await shot("gather", { hash: "#/gather" })
 await shot("guide", { hash: "#/guide" })
 await shot("home-light", { hash: "#/home", theme: "light", runState: 2 })

@@ -207,8 +207,10 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
 - Refresh the app screenshots:
   1. Run the dev UI plus backend.
-  2. `node scripts/site/shoot-app.mjs <dir>` (fake running state and logs, 2x).
+  2. `node scripts/site/shoot-app.mjs <dir>` (fake running state and logs, 2x). It answers `loadAllSettings` itself with the real settings plus `ui_theme`/`ui_language`, because the app takes its theme from the saved settings, not localStorage. A wide window shows Gather for `#/home`, so the "home" shot opens Collect.
   3. `python scripts/site/to-webp.py <dir> site/assets`.
+  4. `node scripts/site/render-brand.mjs` to re-render `og.png`, which shows `home.webp`.
+- The headless browser reports Windows, so the shots show the Windows UI (the guide starts with the English OCR step). Keep gallery captions true for both OSes.
 - `site/assets/og.png` (1200×630 share card) and the mascot `site/assets/bee.png` come from the brand pipeline (see Brand rules). Re-render the share card after refreshing `site/assets/home.webp`, since it shows that screenshot.
 - Set `CHROME=/path/to/chrome` if the scripts can't find a browser. On Windows with the sandbox on, Chrome may fail to launch; headless-shell with `pipe: true` worked.
 - Copy rules: no made-up stats or user counts. "Not affiliated with Onett/Roblox" stays in the FAQ and footer.
@@ -255,7 +257,7 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 
 Done:
 - v1.0.6:
-  - the cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots (`scripts/site/shoot-app.mjs`) still show the sidebar;
+  - the cockpit layout (see "Window layout"), which replaced the page sidebar. The landing page's app screenshots and share card were re-shot in it after the release;
   - the hive claim route (see "Hive claim"), released after checks against a pretend hive row only, not the game.
 - v1.0.5:
   - the start setup (see "Start setup"), asked over the game or in the app before the first start;
