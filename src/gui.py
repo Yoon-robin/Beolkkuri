@@ -2,6 +2,7 @@ import eel
 import eel.chrome
 import webbrowser
 import modules.misc.settingsManager as settingsManager
+import modules.misc.startSetup as startSetup
 import os
 import modules.misc.update as updateModule
 import modules.misc.modelManager as modelManager
@@ -659,9 +660,24 @@ def start():
         return {"ok": False, "message": "The macro is not fully stopped yet."}
     if isAnyToolRunning():
         return {"ok": False, "message": "Stop the running tool before starting the macro."}
+    # The first start asks how to get into the game; the window sees getStartSetup() and
+    # opens its dialog (see modules/misc/startSetup.py).
+    if startSetup.needed(settingsManager.readSettingsFile(os.path.join(settingsManager.getProfilePath(), "generalsettings.txt"))):
+        startSetup.ask()
+        return {"ok": False, "setup": True}
+    startSetup.cancel()
     run.value = 1
     return {"ok": True}
-    
+
+@eel.expose
+def getStartSetup():
+    """True while the start key or Start button waits for the start-setup answer."""
+    return startSetup.pending.is_set()
+
+@eel.expose
+def cancelStartSetup():
+    startSetup.cancel()
+
 @eel.expose
 def stop():
     try:

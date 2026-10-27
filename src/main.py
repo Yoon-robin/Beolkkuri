@@ -41,6 +41,7 @@ import pyautogui as pag
 from modules.misc.appManager import getWindowSize
 import traceback
 import modules.misc.settingsManager as settingsManager
+import modules.misc.startSetup as startSetup
 import modules.macro as macroModule
 import modules.controls.mouse as mouse
 import json
@@ -2849,6 +2850,15 @@ def watch_for_hotkeys(run):
     def get_cached_settings():
         return settings_cache
 
+    def overlay_can_ask():
+        if sys.platform != "win32":
+            return False
+        try:
+            from modules.misc import overlay
+            return overlay.can_ask()
+        except Exception:
+            return False
+
     def is_recording_keybind():
         # The window reports keybind fields that are capturing keys (gui.setKeybindRecording).
         # Never ask the window from here: eel belongs to the main thread, and this runs in
@@ -3009,6 +3019,17 @@ def watch_for_hotkeys(run):
                         # Reset trigger time if there's a comparison error
                         last_trigger_time["start"] = 0.0
                     last_trigger_time["start"] = current_time
+                    # The first start asks how to get into the game (modules/misc/startSetup.py).
+                    if startSetup.needed(settings):
+                        startSetup.ask()
+                        # The overlay asks over the game. Elsewhere (a Mac, the overlay off, Roblox
+                        # not in front) the app's dialog asks, so say where to look.
+                        if not overlay_can_ask():
+                            if settings.get("ui_language", "ko") != "en":
+                                tell(title="벌꿀이", text="시작하기 전에 벌꿀이 창에서 벌집을 어떻게 할지 골라 주세요.")
+                            else:
+                                tell(title="Beolkkuri", text="Before the first start, choose in the Beolkkuri window how to get your hive.")
+                        return
                     run.value = 1
                     # Update GUI immediately (optimistically show running state)
                     try:
@@ -3030,6 +3051,7 @@ def watch_for_hotkeys(run):
                         gui.stopAllTools()
                     except Exception:
                         pass
+                    startSetup.cancel()
                     if run.value == 3: #already stopped
                         return
                     release_inputs()
@@ -3182,6 +3204,7 @@ if __name__ == "__main__":
     import modules.screen.screenData as screenData
     from modules.controls.keyboard import keyboard as keyboardModule
     import modules.logging.log as logModule
+    import modules.logging.logText as logText
     import modules.misc.appManager as appManager
     import modules.misc.settingsManager as settingsManager
     from modules.discord_bot.discordBot import discordBot
@@ -4006,13 +4029,21 @@ if __name__ == "__main__":
         if not logQueue.empty():
             logData = logQueue.get()
             if logData["type"] == "webhook": #webhook
-                msg = f"{logData['title']}<br>{logData['desc']}"
+                # The app, the overlay and the bot's recent actions show it in the UI language;
+                # Discord webhooks already got the English text.
+                title, desc = logData['title'], logData['desc']
+                try:
+                    if logText.wantsKorean():
+                        title, desc = logText.localize(title, desc)
+                except Exception:
+                    pass
+                msg = f"{title}<br>{desc}"
 
                 # Add to recent logs list (keep last 100 entries)
                 log_entry = {
                     'time': logData['time'],
-                    'title': logData['title'],
-                    'desc': logData['desc'],
+                    'title': title,
+                    'desc': desc,
                     'color': logData['color']
                 }
                 recentLogs.append(log_entry)

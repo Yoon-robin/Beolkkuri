@@ -60,7 +60,15 @@ LOGS = [
 ]
 
 
+START_SETUP = {"pending": False}  # gui.start asks first until start_setup_done (startSetup.py)
+
+
 def _start():
+    general = settingsManager.readSettingsFile(os.path.join(settingsManager.getProfilePath(), "generalsettings.txt"))
+    if general.get("start_setup_done") is not True:
+        START_SETUP["pending"] = True
+        return {"ok": False, "setup": True}
+    START_SETUP["pending"] = False
     RUN_STATE["value"] = 2
     LOGS.append({"time": time.strftime("%H:%M:%S"), "title": "Macro Started", "desc": "(dev stub)", "color": "2ecc71"})
     return {"ok": True}
@@ -87,6 +95,10 @@ STUBS = {
     "pause": lambda: RUN_STATE.update(value=6),
     "resume": lambda: RUN_STATE.update(value=2),
     "getRunState": lambda: RUN_STATE["value"],
+    "getStartSetup": lambda: START_SETUP["pending"],
+    "cancelStartSetup": lambda: START_SETUP.update(pending=False),
+    # what the start key does before the first start (a Mac, or the overlay off); call it by hand
+    "devPressStartKey": lambda: START_SETUP.update(pending=True),
     "getPermissionStatus": lambda: dict(DEV_PERMISSIONS),
     "openPrivacySettings": lambda kind: DEV_PERMISSIONS.update({kind: True}),
     "getOcrStatus": dev_ocr_status,

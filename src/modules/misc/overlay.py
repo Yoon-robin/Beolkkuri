@@ -10,6 +10,9 @@ its latest log lines, so you can follow it without switching to the app.
   that, the card stays hidden rather than get in the macro's way.
 - It shows only while Roblox is the active window, and only when overlay_enabled is on.
   overlay_position picks the corner (Settings > Other > Game Overlay).
+- Before the first start (startSetup.py), the start key shows a question card in the
+  middle of the game instead. That card takes clicks, still without taking focus, and
+  answering it starts the macro.
 """
 import ctypes
 import os
@@ -23,6 +26,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 import modules.misc.settingsManager as settingsManager
+import modules.misc.startSetup as startSetup
 from modules.logging.log import colors as LOG_COLORS
 
 # Private DLL handles: argtypes set on ctypes.windll.* are shared by the whole process,
@@ -44,6 +48,10 @@ SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE = 0x0001, 0x0002, 0x0010
 ULW_ALPHA = 0x2
 WDA_EXCLUDEFROMCAPTURE = 0x11
 PM_REMOVE = 0x1
+GWL_EXSTYLE = -20
+WM_SETCURSOR, WM_MOUSEACTIVATE, WM_LBUTTONUP = 0x0020, 0x0021, 0x0202
+MA_NOACTIVATE = 3
+IDC_ARROW, IDC_HAND = 32512, 32649
 
 LRESULT = ctypes.c_ssize_t
 WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
@@ -87,6 +95,15 @@ user32.SetWindowPos.argtypes = [wintypes.HWND, wintypes.HWND, ctypes.c_int, ctyp
 user32.SetWindowDisplayAffinity.argtypes = [wintypes.HWND, wintypes.DWORD]
 user32.PeekMessageW.argtypes = [ctypes.POINTER(MSG), wintypes.HWND, wintypes.UINT, wintypes.UINT, wintypes.UINT]
 user32.GetForegroundWindow.restype = wintypes.HWND
+user32.GetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int]
+user32.GetWindowLongW.restype = wintypes.LONG
+user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, wintypes.LONG]
+user32.SetWindowLongW.restype = wintypes.LONG
+user32.LoadCursorW.argtypes = [wintypes.HINSTANCE, wintypes.LPVOID]
+user32.LoadCursorW.restype = wintypes.HANDLE
+user32.SetCursor.argtypes = [wintypes.HANDLE]
+user32.SetCursor.restype = wintypes.HANDLE
+user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
 user32.GetDC.restype = wintypes.HDC
 user32.ReleaseDC.argtypes = [wintypes.HWND, wintypes.HDC]
 gdi32.CreateCompatibleDC.argtypes = [wintypes.HDC]
@@ -290,14 +307,113 @@ def render(card, scale):
     return image.resize(out, Image.LANCZOS)
 
 
+SETUP_WIDTH = 360
+INK = (24, 20, 14, 255)
+# ImageDraw replaces pixels instead of blending them, so colours drawn over the card are
+# opaque mixes with BACKGROUND (a see-through one would show the game through the card).
+SURFACE, SURFACE_HOVER = (40, 35, 27, 235), (78, 63, 24, 240)
+OUTLINE, RULE = (112, 88, 22, 240), (58, 52, 42, 235)
+
+
+def render_setup(card, scale):
+    """Draw the start-setup question. card: slot (tried first by "auto"), hover (button
+    index or None), stop_key, korean. Returns the image and its buttons in order, each
+    (action, hive slot, box in image pixels): auto, hives 1-6, cancel."""
+    k = scale * SUPERSAMPLE
+    px = lambda v: max(1, int(round(v * k)))
+    ko = card["korean"]
+    small, body = _font(px(11.5)), _font(px(12.5))
+    title, brand, label = _font(px(16), bold=True), _font(px(12), bold=True), _font(px(13.5), bold=True)
+    width, pad = px(SETUP_WIDTH), px(16)
+    inner = width - 2 * pad
+    line = lambda font: int(sum(font.getmetrics()) * 1.12)
+    probe = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+    hover = card.get("hover")
+
+    auto_h = px(10) + line(label) + px(2) + line(small) + px(10)
+    hive_h = px(40)
+    cancel_h = line(small) + px(10)
+    height = (pad + line(brand) + px(8) + line(title) + px(3) + line(small) + px(14) + auto_h + px(16)
+              + line(body) + px(8) + hive_h + px(7) + 2 * line(small) + px(14) + px(10) + cancel_h + pad)
+
+    image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=px(14), fill=BACKGROUND, outline=(255, 193, 7, 120), width=px(1))
+    buttons = []
+
+    def text(xy, value, font, fill, limit=inner):
+        draw.text(xy, _fit(probe, value, font, limit), font=font, fill=fill)
+
+    y = pad
+    draw.text((pad, y), "벌꿀이" if ko else "Beolkkuri", font=brand, fill=HONEY)
+    tag = "시작 준비" if ko else "Before you start"
+    draw.text((width - pad - draw.textlength(tag, font=small), y + px(1)), tag, font=small, fill=MUTED)
+    y += line(brand) + px(8)
+    text((pad, y), "벌집을 어떻게 할까요?" if ko else "How should the macro get a hive?", title, TEXT)
+    y += line(title) + px(3)
+    text((pad, y), "처음 한 번만 물어봐요." if ko else "Asked once, before the first start.", small, MUTED)
+    y += line(small) + px(14)
+
+    # "auto": the honey button
+    box = (pad, y, width - pad, y + auto_h)
+    draw.rounded_rectangle(box, radius=px(10), fill=(255, 210, 80, 255) if hover == 0 else HONEY)
+    ty = y + px(10)
+    text((pad + px(12), ty), "매크로가 알아서 차지해요" if ko else "Let the macro claim one", label, INK, inner - px(24))
+    ty += line(label) + px(2)
+    sub = (f"로블록스를 다시 켜고 {card['slot']}번부터 빈 벌집을 찾아요" if ko
+           else f"Restarts Roblox and takes a free hive, trying {card['slot']} first")
+    text((pad + px(12), ty), sub, small, (70, 54, 18, 255), inner - px(24))
+    buttons.append(("auto", None, box))
+    y += auto_h + px(16)
+
+    # "manual": the hive the player already claimed
+    text((pad, y), "이미 벌집이 있으면 그 번호를 눌러요" if ko else "Already have a hive? Tap its number", body, TEXT)
+    y += line(body) + px(8)
+    gap = px(8)
+    cell = (inner - 5 * gap) // 6
+    for slot in range(1, 7):
+        x0 = pad + (slot - 1) * (cell + gap)
+        box = (x0, y, x0 + cell, y + hive_h)
+        on = hover == slot
+        draw.rounded_rectangle(box, radius=px(8), fill=SURFACE_HOVER if on else SURFACE,
+                               outline=HONEY if on else OUTLINE, width=px(1))
+        digit = str(slot)
+        draw.text((x0 + (cell - draw.textlength(digit, font=label)) / 2, y + (hive_h - line(label)) / 2 + px(1)),
+                  digit, font=label, fill=TEXT)
+        buttons.append(("manual", slot, box))
+    y += hive_h + px(7)
+    text((pad, y), "입구에서 봤을 때 오른쪽부터 1번이에요." if ko else "Hive 1 is on the right, seen from the entrance.", small, MUTED)
+    y += line(small)
+    text((pad, y), "로블록스를 다시 켜지 않고 지금 게임에서 시작해요." if ko else "Keeps this game open and starts right away.", small, MUTED)
+    y += line(small) + px(14)
+
+    draw.line((pad, y, width - pad, y), fill=RULE, width=px(1))
+    y += px(10)
+    cancel = f"{'취소' if ko else 'Cancel'} · {card['stop_key']}"
+    cw = draw.textlength(cancel, font=small) + px(20)
+    text((pad, y + px(5)), "시작 가이드에서 바꿀 수 있어요" if ko else "Change it in Getting Started", small, MUTED, inner - cw - px(8))
+    box = (width - pad - cw, y, width - pad, y + cancel_h)
+    if hover == 7:
+        draw.rounded_rectangle(box, radius=px(7), fill=SURFACE)
+    draw.text((box[0] + px(10), y + px(5)), cancel, font=small, fill=TEXT if hover == 7 else MUTED)
+    buttons.append(("cancel", None, box))
+
+    out = (round(width / SUPERSAMPLE), round(height / SUPERSAMPLE))
+    shrink = lambda b: tuple(int(round(v / SUPERSAMPLE)) for v in b)
+    return image.resize(out, Image.LANCZOS), [(action, slot, shrink(b)) for action, slot, b in buttons]
+
+
 class _Window:
-    """The layered, click-through, topmost window the card is drawn into."""
+    """The layered, topmost window the card is drawn into. It lets clicks through, except
+    while the start-setup card is up (set_interactive)."""
 
     def __init__(self):
-        self._wndproc = WNDPROC(lambda hwnd, msg, wparam, lparam: user32.DefWindowProcW(hwnd, msg, wparam, lparam))
+        self._wndproc = WNDPROC(self._proc)
         instance = kernel32.GetModuleHandleW(None)
+        self._arrow = user32.LoadCursorW(None, IDC_ARROW)
+        self._hand = user32.LoadCursorW(None, IDC_HAND)
         cls = WNDCLASSEXW(cbSize=ctypes.sizeof(WNDCLASSEXW), lpfnWndProc=self._wndproc,
-                          hInstance=instance, lpszClassName="BeolkkuriOverlay")
+                          hInstance=instance, hCursor=self._arrow, lpszClassName="BeolkkuriOverlay")
         user32.RegisterClassExW(ctypes.byref(cls))
         style = WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE
         self.hwnd = user32.CreateWindowExW(style, "BeolkkuriOverlay", "Beolkkuri overlay", WS_POPUP,
@@ -305,6 +421,44 @@ class _Window:
         # Without this the macro's screenshots would include the card, so don't show it at all.
         self.hidden_from_capture = bool(self.hwnd) and bool(user32.SetWindowDisplayAffinity(self.hwnd, WDA_EXCLUDEFROMCAPTURE))
         self.shown = False
+        self.interactive = False
+        self.origin = (0, 0)  # screen position of the drawn card
+        self.buttons = []     # (action, slot, box) in card pixels
+        self.hover = None     # index into buttons
+        self.clicks = []      # card-pixel points of clicks not handled yet
+
+    def _proc(self, hwnd, msg, wparam, lparam):
+        if msg == WM_MOUSEACTIVATE:
+            return MA_NOACTIVATE  # a click on the card must leave Roblox the active window
+        if msg == WM_LBUTTONUP:
+            self.clicks.append((ctypes.c_short(lparam & 0xFFFF).value, ctypes.c_short((lparam >> 16) & 0xFFFF).value))
+            return 0
+        if msg == WM_SETCURSOR and self.interactive:
+            user32.SetCursor(self._hand if self.hover is not None else self._arrow)
+            return 1
+        return user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+
+    def set_interactive(self, on):
+        if on == self.interactive:
+            return
+        style = user32.GetWindowLongW(self.hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TRANSPARENT if on else style | WS_EX_TRANSPARENT
+        user32.SetWindowLongW(self.hwnd, GWL_EXSTYLE, style)
+        self.interactive = on
+        self.hover = None
+        self.clicks.clear()
+
+    def button_at(self, x, y):
+        for index, (_, _, (x0, y0, x1, y1)) in enumerate(self.buttons):
+            if x0 <= x < x1 and y0 <= y < y1:
+                return index
+        return None
+
+    def cursor_button(self):
+        point = wintypes.POINT()
+        if not self.shown or not user32.GetCursorPos(ctypes.byref(point)):
+            return None
+        return self.button_at(point.x - self.origin[0], point.y - self.origin[1])
 
     def pump(self):
         msg = MSG()
@@ -398,8 +552,38 @@ def _read_settings():
     return settingsManager.readSettingsFile(path)
 
 
+_ready = False   # the overlay window works
+_enabled = True  # overlay_enabled, as last read
+
+
+def can_ask():
+    """Whether the start-setup question can go over the game. The hotkey listener calls
+    this, so it only reads two flags."""
+    return _ready and _enabled
+
+
+def _keys(settings, *pairs):
+    return tuple(str(settings.get(key, default) or default).replace("+", " + ") for key, default in pairs)
+
+
+def _answer_setup(window, run_state):
+    """Act on clicks on the start-setup card. Answering starts the macro."""
+    clicks, window.clicks = window.clicks, []
+    for x, y in clicks:
+        index = window.button_at(x, y)
+        if index is None:
+            continue
+        action, slot, _ = window.buttons[index]
+        if action == "cancel":
+            startSetup.cancel()
+        else:
+            startSetup.choose(action, slot, run_state)
+        return
+
+
 def _loop(run_state, status, recent_logs):
     """The overlay's loop; start() runs it on a daemon thread."""
+    global _ready, _enabled
     try:
         window = _Window()
     except Exception as exc:
@@ -409,13 +593,15 @@ def _loop(run_state, status, recent_logs):
         # e.g. Windows 10 before 2004: the card would show up in the macro's screenshots
         print("[overlay] This Windows version can't hide the overlay from screenshots, so it stays off.")
         return
+    _ready = True
     roblox = _Roblox()
     settings, settings_read = {}, 0.0
     session_started, paused_total, paused_at = None, 0.0, None
     last_card, last_place = None, None
 
     while True:
-        time.sleep(0.25)
+        # faster while the question is up, so hover and clicks feel immediate
+        time.sleep(0.05 if startSetup.pending.is_set() else 0.25)
         try:
             window.pump()
             now = time.monotonic()
@@ -423,10 +609,15 @@ def _loop(run_state, status, recent_logs):
                 settings_read = now
                 try:
                     settings = _read_settings()
+                    _enabled = settings.get("overlay_enabled", True) is not False
                 except Exception:
                     pass
 
             state = _state(run_state.value)
+            setup = state is None and startSetup.pending.is_set()
+            if setup:
+                _answer_setup(window, run_state)
+                setup = startSetup.pending.is_set()
             # session clock without pauses, like the app's run timer
             if state is None:
                 session_started, paused_total, paused_at = None, 0.0, None
@@ -439,13 +630,38 @@ def _loop(run_state, status, recent_logs):
                     paused_total += now - paused_at
                     paused_at = None
 
-            hwnd = roblox.window() if state else None
-            if not state or not settings.get("overlay_enabled", True) or not hwnd or not roblox.active(hwnd):
+            hwnd = roblox.window() if state or setup else None
+            if not (state or setup) or not settings.get("overlay_enabled", True) or not hwnd or not roblox.active(hwnd):
+                window.set_interactive(False)
                 window.hide()
                 last_card = None
                 continue
 
             korean = settings.get("ui_language", "ko") != "en"
+            if setup:
+                window.set_interactive(True)
+                window.hover = window.cursor_button()
+                try:
+                    slot = max(1, min(6, int(settings.get("preferred_hive_slot", 1))))
+                except (TypeError, ValueError):
+                    slot = 1
+                card = {"setup": True, "slot": slot, "hover": window.hover,
+                        "stop_key": _keys(settings, ("stop_keybind", "F3"))[0], "korean": korean}
+                rect = roblox.rect(hwnd)
+                if not rect or rect[2] < 200 or rect[3] < 200:
+                    window.hide()
+                    continue
+                scale = roblox.scale(hwnd)
+                place = (rect, scale, "center")
+                if card == last_card and place == last_place and window.shown:
+                    continue
+                image, window.buttons = render_setup(card, scale)
+                left, top, width, height = rect
+                window.origin = (left + (width - image.width) // 2, top + (height - image.height) // 2)
+                window.draw(image, *window.origin)
+                last_card, last_place = card, place
+                continue
+            window.set_interactive(False)
             try:
                 logs = [dict(entry) for entry in recent_logs[-3:]]
             except Exception:
@@ -456,8 +672,7 @@ def _loop(run_state, status, recent_logs):
                 "task": task_text(status.value, korean) if state != "paused" else ("일시정지했어요" if korean else "Paused"),
                 "elapsed": int(elapsed),
                 "logs": logs,
-                "keys": tuple(str(settings.get(key, default) or default).replace("+", " + ")
-                              for key, default in (("pause_keybind", "F2"), ("stop_keybind", "F3"))),
+                "keys": _keys(settings, ("pause_keybind", "F2"), ("stop_keybind", "F3")),
                 "korean": korean,
             }
             rect = roblox.rect(hwnd)

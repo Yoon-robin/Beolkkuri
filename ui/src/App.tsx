@@ -5,6 +5,7 @@ import { AppSidebar, NAV } from "@/components/app-sidebar"
 import { CommandPalette } from "@/components/command-palette"
 import { PageError, PageLoading } from "@/components/page"
 import { RunButton, RunStatusBadge } from "@/components/run-controls"
+import { StartSetupDialog } from "@/components/start-setup"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
@@ -138,6 +139,7 @@ export default function App() {
           <SettingsProvider>
             <RunStateProvider>
               <Shell />
+              <StartSetupDialog />
               <Toaster richColors position="bottom-right" />
             </RunStateProvider>
           </SettingsProvider>

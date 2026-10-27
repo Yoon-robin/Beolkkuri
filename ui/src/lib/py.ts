@@ -54,7 +54,10 @@ export const py = {
   saveGeneralSetting: (id: string, value: unknown) => callPy("saveGeneralSetting", id, value),
   saveDictProfileSettings: (obj: Settings) => callPy("saveDictProfileSettings", obj),
   getRunState: () => callPy<number>("getRunState"),
-  start: () => callPy<{ ok?: boolean } | null>("start"),
+  /** `setup: true` when the first start has to ask how to get into the game first. */
+  start: () => callPy<{ ok?: boolean; setup?: boolean } | null>("start"),
+  getStartSetup: () => callPy<boolean>("getStartSetup"),
+  cancelStartSetup: () => callPy("cancelStartSetup"),
   stop: () => callPy("stop"),
   pause: () => callPy("pause"),
   resume: () => callPy("resume"),

@@ -28,6 +28,9 @@ export function formatDuration(ms: number) {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`
 }
 
+/** Fired when the Start button finds the start setup unanswered. */
+export const START_SETUP_EVENT = "beolkkuri:start-setup"
+
 const RunContext = createContext<RunStore | null>(null)
 
 const toStatus = (state: number): RunStatus =>
@@ -123,6 +126,8 @@ export function RunStateProvider({ children }: { children: ReactNode }) {
         await py.resume()
       } else {
         const result = await py.start()
+        // the first start asks how to get into the game (components/start-setup.tsx)
+        if (result?.setup) window.dispatchEvent(new Event(START_SETUP_EVENT))
         if (result && result.ok === false) return
       }
       // polls sent while the call was running may still report the old state

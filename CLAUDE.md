@@ -46,6 +46,10 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 - JS → Python: `callPy(name, ...args)` in `ui/src/lib/py.ts` calls `eel.name(...)()` in the app, or POSTs to `/__py/name` in dev. Typed shortcuts live in `py`.
 - Python → JS: `ui/public/bridge.js` is a plain, unbundled script that defines and `eel.expose`s global functions (`log`, `loadInputs`, `toggleStartStop`, `getElementProperty`, ...). They forward to React handlers registered with `usePythonEvent` (`ui/src/lib/bridge.ts`). Add new Python-callable functions there.
 - The app window is Chrome `--incognito`, so localStorage does not survive restarts. Persistent UI prefs go into general settings (`ui_language`, `ui_theme`, `guide_shown`).
+- **Log lines in Korean:** the macro logs in English (`logger.webhook(title, desc, …)`), and Discord gets that text, because `infer_route_category` reads the English. When `ui_language` isn't `en`, `main.py` passes each line through `modules/logging/logText.py` before it reaches the log panel, `recentLogs`, the overlay and the bot's recent actions.
+  - `LINES` maps English templates (`{}` = any text) to Korean (`{0}`, `{0|을}` picks 을/를 and the other particles).
+  - `NAMES` turns game names inside a line into Korean.
+  - A line with no entry stays English, so a new `.webhook(` line needs an entry too. In October 2026 all 300 lines had one.
 
 ## Keeping the app responsive
 
@@ -66,6 +70,11 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 - **Keys:** Roblox ignores pyautogui's Windows key events (virtual-key codes only). `modules/controls/winInput.py` swaps pyautogui's `_keyDown`/`_keyUp` for `SendInput` with scan codes. `keyboard.py` installs it at import, so spawned processes get it too.
 - **ctypes:** bind Win32 functions on a private `ctypes.WinDLL("user32", use_last_error=True)` (likewise gdi32/kernel32), never on `ctypes.windll.*`. Function objects there are shared by the whole process, so `argtypes` set in one module replace pynput's: v1.0.2's overlay set `PeekMessageW` with its own `MSG` type, and the hotkey listener died at start (`expected LP_MSG instance`), so F1/F3 did nothing.
 - **Roblox language must be English.** The macro reads the game's English text and matches image templates with English words on them (claim hive, blender, disconnect). The guide has a step for it (roblox.com → Settings → Account Info → Language), and so do the README and `docs/display-settings.md`.
+- **Start setup** (`modules/misc/startSetup.py`, both platforms): the macro used to restart Roblox and claim a hive on every start (`always_rejoin`, default on), which closed the game of a player who had already claimed one. Now the first start asks instead, until the general setting `start_setup_done` is set:
+  - "auto" keeps that behaviour (`always_rejoin` on, `preferred_hive_slot` tried first); "manual" keeps the open game (`always_rejoin` off) and saves the claimed hive as `hive_number` and `preferred_hive_slot`. A disconnect still rejoins and claims a free hive either way.
+  - The start key asks with a clickable card in the middle of the Roblox window (overlay, see below). Where the overlay can't (a Mac, the overlay off), `tell()` points at the app, whose `StartSetupDialog` (`components/start-setup.tsx`) polls `gui.getStartSetup()`. The Start button gets `{"setup": true}` from `gui.start()` and opens the same dialog. The stop key cancels.
+  - The guide's "벌집 정하기" step and the dialog save the settings in TypeScript (`saveStartMode`); the overlay saves them through `startSetup.choose`. Keep the two in step.
+  - The Discord bot's start command doesn't ask: nobody is at the PC to answer.
 - **Rejoin load check** (`rejoin` in `macro.py`, both platforms): the game counts as loaded when the sprinkler shows on the hotbar or the honey bar shows at the top. Before 1.0.3 only the sprinkler counted, so a player with an empty hotbar got "Game load was not confirmed" on every attempt.
 - **OCR:** Apple Vision (`ocrmac`) on macOS. On Windows, `modules/screen/winOcr.py` uses the built-in Windows.Media.Ocr through `winocr`. It upscales 4x because the engine misses small text otherwise. It prefers en-US and falls back to the user's languages; Korean Windows often has only `ko`, which still reads digits and most English.
 - **Image matching:** the compiled `bitmap_matcher` `.so` is macOS only. Elsewhere `bitmap_matcher/numpy_matcher.py` provides the same three functions in NumPy.
@@ -80,6 +89,7 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 - **Game overlay:** `modules/misc/overlay.py`, Windows only, a thread that `main.py` starts after the window opens. While the macro runs and Roblox is the active window, it draws a card in a corner of the Roblox client area:
   - what the macro is doing (`task_text` turns the status key into Korean or English), the run time without pauses, the last three log lines and the pause/stop keys;
   - a layered `WS_EX_TRANSPARENT | WS_EX_NOACTIVATE` window, so clicks pass through and it never takes focus;
+  - the start-setup question is the one card that takes clicks: `set_interactive` drops `WS_EX_TRANSPARENT` while it shows, `WM_MOUSEACTIVATE` answers `MA_NOACTIVATE` so Roblox stays the active window, and `WM_LBUTTONUP` is matched against the buttons `render_setup` returns. ImageDraw replaces pixels instead of blending, so colours drawn on the card are opaque mixes with its background;
   - `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` keeps it out of the macro's screenshots, OCR and the stream. If that call fails (Windows 10 before 2004), the overlay stays off.
   - Settings `overlay_enabled` (default on) and `overlay_position` (`bottom_left`, `top_left`, `top_right`, `bottom_right`) in Settings → Other → Game Overlay. That schema section has `"platform": "windows"`, so the Mac never shows it.
 - **UI:** `ui/src/lib/platform.ts` exports `isMac` / `isWindows`. Strings that differ per OS pick their text inside the string tables (`isMac ? … : …`), so ko/en keys stay the same.
@@ -156,7 +166,7 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts. It also flags Python as unresponsive after 6 s without an answer: a "응답 없음" badge and a toast pointing at the console window.
 - **First launch:** `useFirstRunGuide` in `App.tsx` opens the 시작 가이드 once and saves `guide_shown`. It skips that when a private server link is already set (an install from before the setting).
 - **시작 가이드** (`pages/guide.tsx`), written for a new player who has never touched the settings:
-  - Steps: permissions (Mac) or English OCR (Windows), Roblox language, display, 내 캐릭터 정보 (walk speed, bees, sprinkler and its slot, edited in place), private server (optional, edited in place), hive, fields, start.
+  - Steps: permissions (Mac) or English OCR (Windows), Roblox language, display, 내 캐릭터 정보 (walk speed, bees, sprinkler and its slot, edited in place), private server (optional, edited in place), 벌집 정하기 (the start setup, see "Platforms"), fields, start.
   - The walk speed is the Movement Speed in the game's Settings (gear) menu, without haste. The macro walks by it, so the guide asks for it instead of trusting the default 29.
   - A finished step folds; a step that becomes unfinished again unfolds and stays open. The header shows progress and a "다음 할 일" button that scrolls to the first unfinished step.
   - Steps with nothing to detect are marked by the user and saved as general settings: `guide_lang_done`, `guide_display_done`, `guide_player_done` (also set by editing any value in that step).
@@ -234,6 +244,9 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
+- v1.0.5:
+  - the start setup (see "Start setup"), asked over the game or in the app before the first start;
+  - log lines in Korean (see "Log lines in Korean").
 - v1.0.4, for a new player with no sprinkler:
   - the guide rework with the character step and the bee-gated fields (see "시작 가이드");
   - sprinkler `none`, the walk speed guard, the Silver count and the settings save retry (see "Settings schema").
@@ -300,6 +313,7 @@ Not yet verified on Windows with Roblox, so test these first:
 5. The source install (`install_dependencies.bat`) on a PC without Python.
 6. The Microsoft Store build of Roblox (`appManagerWindows` finds it only by its window title).
 7. The game overlay over a real Roblox window: the position at other display scales, Roblox fullscreen (F11), and that the macro's captures stay clean. Away from Roblox it was checked that both mss and ImageGrab captures leave it out, that clicks pass through and that it doesn't take focus.
+   The start-setup card: that a real click on it over Roblox (windowed and F11) answers it, that Roblox keeps focus and the cursor shows, and that F1 → answer starts the macro. So far it was checked with window messages only (click → answer, `MA_NOACTIVATE`, click-through restored afterwards).
 8. The English OCR install's progress: whether DISM writes its percentage into the redirected log. The steps, timer and log lines work either way.
 9. The first-launch console minimizing under Windows Terminal as the default terminal, and the "응답 없음" warning during an in-app update's model download (that step still blocks the main loop).
 

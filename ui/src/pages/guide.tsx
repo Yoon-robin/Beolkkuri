@@ -21,6 +21,7 @@ import { useEffect, useState, type ReactNode } from "react"
 
 import { Page } from "@/components/page"
 import { RunButton } from "@/components/run-controls"
+import { readStartMode, saveStartMode, StartModeChooser } from "@/components/start-setup"
 import { TextControl } from "@/components/settings/controls"
 import { keybindDisplay } from "@/components/settings/keybind"
 import { SettingControl, SettingRowLayout, useDefaultBinding, type Binding } from "@/components/settings/schema-section"
@@ -108,7 +109,6 @@ const strings: PageStrings<
   | "game.psHow"
   | "hive.title"
   | "hive.body"
-  | "hive.slot"
   | "fields.title"
   | "fields.body"
   | "fields.pick"
@@ -195,9 +195,8 @@ const strings: PageStrings<
     "game.body": "로블록스에서 비 스웜 시뮬레이터에 들어가요. 매크로를 시작했을 때 게임이 꺼져 있거나 튕기면 알아서 다시 들어가요.",
     "game.ps": "비공개 서버 링크",
     "game.psHow": "비공개 서버가 있으면 링크를 붙여 넣어요. 다른 사람 방해를 덜 받아요. 없으면 비워 둬도 돼요. 공개 서버로 들어가요.",
-    "hive.title": "내 벌집 번호 고르기",
-    "hive.body": "벌집은 입구에서 바라봤을 때 오른쪽부터 1번이에요. 매크로가 이 번호의 벌집을 차지하려고 해요.",
-    "hive.slot": "벌집 번호",
+    "hive.title": "벌집 정하기",
+    "hive.body": "매크로를 시작할 때 벌집을 어떻게 할지 골라요. 여기서 고르지 않으면 처음 시작할 때 물어봐요.",
     "fields.title": "채집할 필드 고르기",
     "fields.body": "꽃가루를 모을 필드를 골라요. 벌이 모자라서 들어갈 수 없는 필드는 고를 수 없어요. 처음에는 필드 하나면 충분해요.",
     "fields.pick": "채집 필드",
@@ -284,9 +283,8 @@ const strings: PageStrings<
     "game.body": "Open Bee Swarm Simulator in Roblox. If the game is closed when the macro starts, or you get disconnected, it joins again by itself.",
     "game.ps": "Private server link",
     "game.psHow": "Paste a private server link if you have one; other players get in the way less. You can leave it empty to join public servers.",
-    "hive.title": "Pick your hive slot",
-    "hive.body": "Hives are numbered from the right, looking in from the entrance. The macro tries to claim this one.",
-    "hive.slot": "Hive slot",
+    "hive.title": "Choose how to get your hive",
+    "hive.body": "Pick what the macro does about your hive when it starts. If you skip this, it asks at the first start.",
     "fields.title": "Choose a field to gather",
     "fields.body": "Pick the field to collect pollen in. Fields you don't have enough bees for can't be picked. One field is plenty to start with.",
     "fields.pick": "Gather field",
@@ -677,7 +675,8 @@ export default function GuidePage() {
   const { status: ocr, install: installOcr, error: ocrError } = useOcrStatus()
   const permsOk = !!perms && perms.accessibility !== false && perms.screenRecording !== false && !perms.fullKeyboardAccess
 
-  const hiveSlot = String(useSetting<number | string>("preferred_hive_slot", 1) ?? 1)
+  const startMode = readStartMode(settings)
+  const [hiveSlot, setHiveSlot] = useState<number | null>(null)
   const privateServer = String(useSetting<string>("private_server_link", "") ?? "").trim()
   const { on: fieldsOn, locked: fieldsLocked } = useFieldPlan()
   const startKey = keybindDisplay(useSetting<string>("start_keybind", "F1") || "F1")
@@ -695,14 +694,16 @@ export default function GuidePage() {
   const displayDone = flag("guide_display_done")
   const playerDone = flag("guide_player_done")
   const fieldsDone = loaded ? fieldsOn.length > 0 && fieldsLocked.length === 0 : undefined
+  const hiveDone = loaded ? startMode.done : undefined
 
-  // in page order; the private server and the hive slot have nothing that must be done
+  // in page order; the private server is optional
   const checks: { key: string; n: number; title: string; done: boolean | undefined }[] = [
     ...(isMac ? [{ key: "perm", n: 1, title: s("perm.title"), done: perms ? permsOk : undefined }] : []),
     ...(showOcr && ocrKnown ? [{ key: "ocr", n: 1, title: s("ocr.title"), done: ocr.installed === true }] : []),
     { key: "lang", n: first + 1, title: s("lang.title"), done: langDone },
     { key: "display", n: first + 2, title: s("display.title"), done: displayDone },
     { key: "player", n: first + 3, title: s("player.title"), done: playerDone },
+    { key: "hive", n: first + 5, title: s("hive.title"), done: hiveDone },
     { key: "fields", n: first + 6, title: s("fields.title"), done: fieldsDone },
   ]
   const doneCount = checks.filter((c) => c.done).length
@@ -806,23 +807,16 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step stepKey="hive" n={first + 5} icon={<HomeIcon />} title={s("hive.title")}>
+          <Step stepKey="hive" n={first + 5} icon={<HomeIcon />} title={s("hive.title")} done={hiveDone}>
             <p>{s("hive.body")}</p>
-            <div className="flex items-center gap-3">
-              <span className="text-foreground">{s("hive.slot")}</span>
-              <Select value={hiveSlot} onValueChange={(v) => void saveGeneral("preferred_hive_slot", Number(v))} disabled={!settings}>
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6].map((n) => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <StartModeChooser
+              mode={startMode.mode}
+              slot={hiveSlot ?? startMode.slot}
+              onChange={(mode, slot) => {
+                setHiveSlot(slot)
+                if (mode) void saveStartMode(saveGeneral, mode, slot)
+              }}
+            />
           </Step>
 
           <FieldStep n={first + 6} done={fieldsDone} />
