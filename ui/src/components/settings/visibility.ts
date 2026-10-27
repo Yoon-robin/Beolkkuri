@@ -14,6 +14,8 @@ const RULES: Record<string, (get: Getter) => boolean> = {
   rejoin_timezone: (get) => lower(get("rejoin_schedule_type")) === "daily",
   // where the game overlay sits only matters while it is on
   overlay_position: (get) => get("overlay_enabled") !== false,
+  // no sprinkler, no hotbar slot to pick
+  sprinkler_slot: (get) => lower(get("sprinkler_type")) !== "none",
 }
 
 export function isVisible(id: string, get: Getter) {

@@ -135,6 +135,11 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - Korean text for the schema: `ui/src/i18n/settings-ko.json` (settings by id; sections and options by English label; id-less separators as `sep:<title>`).
 - Pages render schema sections with `SchemaSections` and customise them with `overrides` (`ui/src/components/settings/schema-section.tsx`).
 - A section with `"platform": "windows"` or `"mac"` exists only on that OS (`ui/src/schema/index.ts` filters `sections`, which the search palette uses too).
+- Values a new player hits:
+  - `sprinkler_type` has `none` for players without a sprinkler. `placeSprinkler` then returns at once, and the slot row is hidden (`components/settings/visibility.ts`). That also drops the one check that the macro landed in the field (the "notinfield" text after placing).
+  - An empty walk speed box saves `0`, which divides by zero in every walk. `_withSafeMovespeed` in `macro.py` swaps in the default when the macro loads settings.
+  - Silver places two sprinklers (the old check `times > 2` placed one).
+- **Saving:** `saveSettingFile` holds a process-wide lock, so two saves can't drop each other's change. On Windows `saveDict` retries `os.replace` for up to 2 s, because Windows refuses to replace a file that the macro, the hotkey cache or the overlay is reading (the dev server returned 500 for it).
 
 ## UI conventions
 
@@ -150,6 +155,13 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. Sub-tab labels live in `ui.ts` as `subtab.<page>.<tab value>`; the page and the palette both read them, so a new sub-tab needs that key plus the same hooks. A custom row needs `useFocusTarget`.
 - **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts. It also flags Python as unresponsive after 6 s without an answer: a "응답 없음" badge and a toast pointing at the console window.
 - **First launch:** `useFirstRunGuide` in `App.tsx` opens the 시작 가이드 once and saves `guide_shown`. It skips that when a private server link is already set (an install from before the setting).
+- **시작 가이드** (`pages/guide.tsx`), written for a new player who has never touched the settings:
+  - Steps: permissions (Mac) or English OCR (Windows), Roblox language, display, 내 캐릭터 정보 (walk speed, bees, sprinkler and its slot, edited in place), private server (optional, edited in place), hive, fields, start.
+  - The walk speed is the Movement Speed in the game's Settings (gear) menu, without haste. The macro walks by it, so the guide asks for it instead of trusting the default 29.
+  - A finished step folds; a step that becomes unfinished again unfolds and stays open. The header shows progress and a "다음 할 일" button that scrolls to the first unfinished step.
+  - Steps with nothing to detect are marked by the user and saved as general settings: `guide_lang_done`, `guide_display_done`, `guide_player_done` (also set by editing any value in that step).
+  - The fields step picks gather slot 1 and turns it on. Fields the bee count can't enter are disabled there.
+- **Bee gates:** `FIELD_BEES` in `lib/game-data.ts` (5: strawberry, spider, bamboo; 10: pineapple, stump; 15: cactus, pumpkin, pine tree, rose; 25: mountain top; 35: pepper, coconut). The gather page's field picker marks them with "벌 N마리부터" and shows a warning when the chosen field needs more bees than the `bees` setting. The default field, pine tree, needs 15.
 - **Updates in Korean:** `update-panel.tsx` maps the updater's English step messages to Korean (`KO_STEPS`).
 - **Permissions:** `state/permissions.ts` polls `getPermissionStatus` in `gui.py`.
 - **Components:** use the shadcn components in `ui/src/components/ui` and Tailwind. Don't add dependencies casually.
@@ -215,13 +227,17 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 - `.gitattributes` forces LF, except CRLF for `*.bat`. Windows has `core.autocrlf=true`, so expect CRLF warnings; they are harmless.
 - `*.command` files must keep mode 100755. When adding one from Windows: `git update-index --chmod=+x <file>`.
 - Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/Beolkkuri` (tags like `v1.0.0`; the leading `v` is ignored). `install.sh` installs the latest release zipball, or `main` if there are no releases.
-- **Releasing:** bump `ui/public/version.txt`, rebuild the UI, commit and push, then publish a GitHub release whose tag matches (`v1.0.1`). The windows-installer workflow attaches `Beolkkuri-Setup.exe` to it a few minutes later; the website's Windows button and `install.ps1` download that file from the latest release.
+- **Releasing:** bump `ui/public/version.txt`, rebuild the UI, commit and push, then publish a GitHub release whose tag matches (`v1.0.1`). The owner wants `Beolkkuri-Setup.exe` built on their PC, not by CI: `git fetch --tags`, `scripts/windows/build_installer.ps1 -Ref <tag>`, then `gh release upload <tag> dist/Beolkkuri-Setup.exe --clobber` (this replaces the file the windows-installer workflow attached). The website's Windows button and `install.ps1` download that file from the latest release.
 - **Updates:** `update.py` downloads the release zip, swaps the files (keeping gitignored and protected paths such as profiles, `runtime/` and the exes), and on Windows installs new requirements with the bundled Python (`runtime\python.exe`) or the venv. When the app opens, `update-panel.tsx` checks for a new release and, with `auto_update` on (default) and the macro stopped, installs it and calls `restart_app()`. That exits with code **75** when `BEOLKKURI_LAUNCHER` is set (`Beolkkuri.exe`, `run_macro.ps1` start it again), uses `os.execv` on macOS, and on older Windows launchers starts `run_macro.bat` itself. With `auto_update` off it offers the update instead. Git checkouts never auto-update.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Status and next steps (as of 2026-10-27)
 
 Done:
+- v1.0.4, for a new player with no sprinkler:
+  - the guide rework with the character step and the bee-gated fields (see "시작 가이드");
+  - sprinkler `none`, the walk speed guard, the Silver count and the settings save retry (see "Settings schema").
+  - Since v1.0.3, Setup.exe is built on the owner's PC and uploaded by hand (see "Releasing").
 - v1.0.3, from the owner's first real run of v1.0.2 with Roblox:
   - the hotkeys working again (see "ctypes");
   - the rejoin load check with an empty hotbar;

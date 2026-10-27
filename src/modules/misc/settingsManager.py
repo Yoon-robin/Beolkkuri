@@ -4,6 +4,9 @@ import shutil
 import json
 import zipfile
 import tempfile
+import sys
+import threading
+import time
 from datetime import datetime
 import re
 
@@ -786,6 +789,10 @@ def _resolveSettingsFileType(setting, requested_type):
         return "general"
     return requested_type
 
+# One save at a time in this process: two saves that read the file together would each
+# write it back without the other's change.
+_saveLock = threading.RLock()
+
 def saveDict(path, data):
     out = "\n".join([f"{k}={v}" for k,v in data.items()])
     # Ensure file ends with a newline to avoid accidental concatenation
@@ -801,7 +808,16 @@ def saveDict(path, data):
     try:
         with os.fdopen(fd, "w") as f:
             f.write(out)
-        os.replace(tmp_path, abs_path)
+        # Windows refuses to replace a file while another reader has it open (the macro,
+        # the hotkey cache and the overlay all read settings). Reads are short, so wait.
+        for attempt in range(40):
+            try:
+                os.replace(tmp_path, abs_path)
+                break
+            except PermissionError:
+                if sys.platform != "win32" or attempt == 39:
+                    raise
+                time.sleep(0.05)
     except Exception:
         try:
             if os.path.exists(tmp_path):
@@ -812,16 +828,17 @@ def saveDict(path, data):
 
 #update one property of a setting
 def saveSettingFile(setting,value, path):
-    #get the dictionary, creating from defaults when possible
-    if os.path.exists(path):
-        data = readSettingsFile(path)
-    else:
-        defaults = _defaultsForSettingsPath(path)
-        data = deepcopy_default(defaults) if defaults is not None else {}
-    #update the dictionary
-    data[setting] = value
-    #write it
-    saveDict(path, data)
+    with _saveLock:
+        #get the dictionary, creating from defaults when possible
+        if os.path.exists(path):
+            data = readSettingsFile(path)
+        else:
+            defaults = _defaultsForSettingsPath(path)
+            data = deepcopy_default(defaults) if defaults is not None else {}
+        #update the dictionary
+        data[setting] = value
+        #write it
+        saveDict(path, data)
 
 def removeSettingFile(setting, path):
     #get the dictionary

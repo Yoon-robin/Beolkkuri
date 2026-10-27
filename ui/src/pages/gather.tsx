@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n, useStrings } from "@/i18n"
-import { FIELD_EMOJI, FIELD_KO, fieldKey, fieldLabel, titleCase } from "@/lib/game-data"
+import { FIELD_EMOJI, FIELD_KO, beeCount, fieldBees, fieldKey, fieldLabel, titleCase } from "@/lib/game-data"
 import { callPy, type FieldSettings } from "@/lib/py"
 import { cn } from "@/lib/utils"
 import { sectionsFor, type SectionDef, type SettingDef } from "@/schema"
@@ -298,8 +298,9 @@ function SlotPicker({
   )
 }
 
-function FieldSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function FieldSelect({ value, bees, onChange }: { value: string; bees: number; onChange: (v: string) => void }) {
   const { lang } = useI18n()
+  const ts = useStrings(strings)
   const options = FIELD_OPTIONS.includes(value) || !value ? FIELD_OPTIONS : [...FIELD_OPTIONS, value]
   return (
     <Select value={value || undefined} onValueChange={onChange}>
@@ -310,6 +311,8 @@ function FieldSelect({ value, onChange }: { value: string; onChange: (v: string)
         {options.map((f) => (
           <SelectItem key={f} value={f}>
             {fieldLabel(f, lang)}
+            {/* still selectable: the bee count may be out of date */}
+            {fieldBees(f) > bees && <span className="ml-2 text-xs text-muted-foreground">{ts("needBees", { n: fieldBees(f) })}</span>}
           </SelectItem>
         ))}
       </SelectContent>
@@ -381,6 +384,8 @@ function FieldPanel({
   const isHiveHub = shape === "hive_hub" || field === "hive hub"
   const infinite = Boolean(data.infinite_gather)
   const aiModel = robinAIModelName(settings?.ai_gather_model)
+  const bees = beeCount(settings?.bees ?? 50)
+  const needBees = field ? fieldBees(field) : 0
 
   // saveField(): store the edited value and remember it in the current pattern's preset
   const saveValue = (id: string, value: unknown) => {
@@ -413,7 +418,7 @@ function FieldPanel({
     hidden: (id) => !field && id !== "field" && id !== "field_enable",
     render: {
       field_enable: () => <Switch id="field_enable" checked={enabled} onCheckedChange={onEnabledChange} />,
-      field: () => <FieldSelect value={field} onChange={onFieldChange} />,
+      field: () => <FieldSelect value={field} bees={bees} onChange={onFieldChange} />,
       shape: () => <PatternSelect value={String(data.shape ?? "")} patterns={patterns} onChange={changePattern} />,
       mins: limitControl,
       backpack: limitControl,
@@ -447,6 +452,13 @@ function FieldPanel({
           binding={binding}
           overrides={overrides}
         />
+      )}
+
+      {needBees > bees && (
+        <Alert variant="warning">
+          <InfoIcon />
+          <AlertDescription>{ts("lockedField", { n: needBees, bees })}</AlertDescription>
+        </Alert>
       )}
 
       {isHiveHub && (

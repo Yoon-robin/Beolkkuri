@@ -9,6 +9,8 @@ type Key =
   | "noField"
   | "slotTitle"
   | "slotDesc"
+  | "needBees"
+  | "lockedField"
   | "hiveHubNotice"
   | "patternMissing"
   | "patternDesc.blooms_ai"
@@ -76,6 +78,8 @@ export const strings: PageStrings<Key> = {
     noField: "필드 없음",
     slotTitle: "필드 {n}",
     slotDesc: "이 칸에서 채집할 필드를 고르고 켜거나 꺼요.",
+    needBees: "벌 {n}마리부터",
+    lockedField: "이 필드는 벌이 {n}마리 있어야 들어갈 수 있어요. 지금 벌 수는 {bees}마리로 되어 있어요. 숫자가 틀렸다면 시작 가이드나 설정 → 게임 설정에서 고쳐 주세요.",
     hiveHubNotice: "하이브 허브에서 매크로를 시작하지 마세요. 매크로가 알아서 그곳으로 이동해요.",
     patternMissing: "{name} (설치 안 됨)",
     "patternDesc.blooms_ai": "꽃(블룸)을 쫓아가고, 꽃잎을 모으려고 빙글빙글 돌아요.",
@@ -142,6 +146,8 @@ export const strings: PageStrings<Key> = {
     noField: "No field",
     slotTitle: "Field {n}",
     slotDesc: "Choose which field this slot gathers in and turn it on or off.",
+    needBees: "{n}+ bees",
+    lockedField: "This field needs {n} bees to enter, and your bee count is set to {bees}. If that number is wrong, fix it in Getting Started or Settings → Game.",
     hiveHubNotice: "Don't start the macro in Hive Hub. It goes there on its own.",
     patternMissing: "{name} (not installed)",
     "patternDesc.blooms_ai": "Chases blooms and circles for petals.",

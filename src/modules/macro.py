@@ -694,6 +694,18 @@ PING_SETTING_KEYS = [
 ]
 
 
+def _withSafeMovespeed(setdat):
+    """An emptied walk speed box saves 0, which divides by zero in every walk.
+    Fall back to the default speed instead."""
+    try:
+        valid = float(setdat.get("movespeed", 0)) > 0
+    except (TypeError, ValueError):
+        valid = False
+    if not valid:
+        setdat["movespeed"] = settingsManager.getDefaultGeneralSettings().get("movespeed", 29)
+    return setdat
+
+
 class macro:
     def __init__(self, status, logQueue, updateGUI, run=None, skipTask=None, presence=None, discordMessageQueue=None, skipServer=None):
         self.status = status
@@ -710,7 +722,7 @@ class macro:
         if skipTask is not None:
             set_interrupt_action(skipTask)
         
-        self.setdat = settingsManager.loadAllSettings()
+        self.setdat = _withSafeMovespeed(settingsManager.loadAllSettings())
         self.fieldSettings = settingsManager.loadFields()
         # Track profile changes to reload settings when profile is switched
         self._last_profile_change_counter = settingsManager.getProfileChangeCounter()
@@ -795,7 +807,7 @@ class macro:
             self._last_profile_change_counter = current_counter
             # Reload settings
             old_profile = settingsManager.getCurrentProfile()
-            self.setdat = settingsManager.loadAllSettings()
+            self.setdat = _withSafeMovespeed(settingsManager.loadAllSettings())
             self.tadAltSync.update_settings(self.setdat)
             self.fieldSettings = settingsManager.loadFields()
             # Update logger with new webhook settings
@@ -2139,8 +2151,13 @@ class macro:
             "diamond":4,
             "saturator":1
         }
+        sprinklerType = str(self.setdat.get("sprinkler_type", "")).strip().lower()
+        # New players may not own a sprinkler yet: nothing to place, and nothing
+        # to tell whether the macro landed in the field either.
+        if sprinklerType == "none":
+            return True
         sprinklerSlot = str(self.setdat['sprinkler_slot'])
-        times = sprinklerCount[self.setdat["sprinkler_type"]]
+        times = sprinklerCount.get(sprinklerType, 1)
         #place one sprinkler and check if its in field
         self.keyboard.press(sprinklerSlot)
         time.sleep(1)
@@ -2148,7 +2165,7 @@ class macro:
             return False
         #place the remaining sprinklers
         #hold jump and spam place sprinklers
-        if times > 2:
+        if times > 1:
             self.keyboard.keyDown("space")
             st = time.time()
             while time.time() - st < times*2:

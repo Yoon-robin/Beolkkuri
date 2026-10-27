@@ -213,6 +213,30 @@ export const titleCase = (s: string) => s.replace(/\w\S*/g, (w) => w[0].toUpperC
 /** "pine tree" / "pine_tree" -> "pine_tree" */
 export const fieldKey = (field: string) => String(field ?? "").toLowerCase().trim().replace(/\s+/g, "_")
 
+/** Bees needed to pass the gate into each field's zone; starter fields need none. */
+export const FIELD_BEES: Record<string, number> = {
+  strawberry: 5,
+  spider: 5,
+  bamboo: 5,
+  pineapple: 10,
+  stump: 10,
+  cactus: 15,
+  pumpkin: 15,
+  pine_tree: 15,
+  rose: 15,
+  mountain_top: 25,
+  pepper: 35,
+  coconut: 35,
+}
+
+export const fieldBees = (field: string) => FIELD_BEES[fieldKey(field)] ?? 0
+
+/** The `bees` setting as a number (it may be saved as a string; empty saves 0). */
+export const beeCount = (value: unknown) => {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
+}
+
 export function fieldLabel(field: string, lang: "ko" | "en") {
   const key = fieldKey(field)
   const name = lang === "ko" ? (FIELD_KO[key] ?? titleCase(field)) : titleCase(String(field ?? "").replaceAll("_", " "))

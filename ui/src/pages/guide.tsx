@@ -1,5 +1,8 @@
 import {
+  ArrowDownIcon,
   CheckCircle2Icon,
+  CheckIcon,
+  ChevronDownIcon,
   CircleIcon,
   ExternalLinkIcon,
   FlowerIcon,
@@ -12,22 +15,28 @@ import {
   MonitorIcon,
   ScanTextIcon,
   ShieldCheckIcon,
+  UserRoundIcon,
 } from "lucide-react"
-import type { ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 
 import { Page } from "@/components/page"
 import { RunButton } from "@/components/run-controls"
+import { TextControl } from "@/components/settings/controls"
 import { keybindDisplay } from "@/components/settings/keybind"
+import { SettingControl, SettingRowLayout, useDefaultBinding, type Binding } from "@/components/settings/schema-section"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
+import { beeCount, fieldBees, fieldLabel } from "@/lib/game-data"
 import { isMac, isWindows } from "@/lib/platform"
 import { py, type OcrStatus, type PermissionKind } from "@/lib/py"
 import type { PageId } from "@/lib/route"
 import { cn } from "@/lib/utils"
+import { FIELD_OPTIONS, SLOT_COUNT } from "@/pages/gather/data"
+import { sections, type SettingDef } from "@/schema"
 import { useOcrStatus } from "@/state/ocr"
 import { formatDuration } from "@/state/run-state"
 import { usePermissions } from "@/state/permissions"
@@ -41,8 +50,14 @@ const strings: PageStrings<
   | "progress"
   | "done"
   | "todo"
+  | "optional"
   | "more"
-  | "open"
+  | "next"
+  | "allDone"
+  | "markDone"
+  | "undoDone"
+  | "expand"
+  | "collapse"
   | "perm.title"
   | "perm.body"
   | "perm.accessibility"
@@ -74,17 +89,34 @@ const strings: PageStrings<
   | "lang.how"
   | "display.title"
   | "display.body"
+  | "player.title"
+  | "player.body"
+  | "player.speed"
+  | "player.speedHow"
+  | "player.speedEmpty"
+  | "player.bees"
+  | "player.beesHow"
+  | "player.beesEmpty"
+  | "player.sprinkler"
+  | "player.sprinklerHow"
+  | "player.slot"
+  | "player.slotHow"
+  | "player.confirm"
   | "game.title"
   | "game.body"
   | "game.ps"
-  | "game.psSet"
+  | "game.psHow"
   | "hive.title"
   | "hive.body"
   | "hive.slot"
   | "fields.title"
   | "fields.body"
+  | "fields.pick"
+  | "fields.needBees"
   | "fields.count"
   | "fields.none"
+  | "fields.locked"
+  | "fields.more"
   | "start.title"
   | "start.body"
   | "keys.start"
@@ -95,17 +127,24 @@ const strings: PageStrings<
   | "tips.2"
   | "tips.3"
   | "tips.4"
+  | "tips.5"
   | "help.title"
   | "help.body"
   | "help.button"
 > = {
   ko: {
-    subtitle: "처음이라면 위에서부터 차례대로 따라 해 보세요. 5분이면 충분해요.",
+    subtitle: "처음이라면 위에서부터 차례대로 따라 해 보세요. 필요한 설정은 모두 여기서 바로 넣을 수 있어요.",
     progress: "{done}/{total} 완료",
     done: "완료",
     todo: "할 일",
+    optional: "선택",
     more: "자세히 보기",
-    open: "열기",
+    next: "다음 할 일",
+    allDone: "준비 끝",
+    markDone: "했어요",
+    undoDone: "아직 안 했어요",
+    expand: "펼치기",
+    collapse: "접기",
     "perm.title": "맥 권한 주기",
     "perm.body": "매크로가 키보드·마우스를 움직이고 화면을 보려면 '터미널'에 두 가지 권한이 필요해요. 켜기를 누르면 설정 화면이 열려요.",
     "perm.accessibility": "손쉬운 사용 (키보드·마우스)",
@@ -139,18 +178,34 @@ const strings: PageStrings<
     "display.body": isMac
       ? "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요."
       : "Windows 디스플레이 배율은 100%로, 야간 모드와 HDR은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요.",
+    "player.title": "내 캐릭터 정보 넣기",
+    "player.body": "매크로는 이 숫자로 걷는 시간과 갈 수 있는 필드를 정해요. 게임에서 확인하고 그대로 넣어 주세요. 처음 값은 오래 한 사람 기준이라 새로 시작했다면 꼭 바꿔야 해요.",
+    "player.speed": "이동 속도",
+    "player.speedHow": "게임 화면 왼쪽 위 톱니바퀴(Settings)를 열면 Movement Speed가 나와요. 헤이스트 같은 버프가 없을 때의 숫자를 소수점까지 그대로 넣어요.",
+    "player.speedEmpty": "이동 속도를 넣어 주세요. 비어 있으면 매크로가 기본값으로 걸어서 자주 엇나가요.",
+    "player.bees": "벌 수",
+    "player.beesHow": "내 벌집에 있는 벌이 몇 마리인지예요. 벌이 모자라면 들어갈 수 없는 필드가 있어서, 아래 필드 고르기에 바로 반영돼요.",
+    "player.beesEmpty": "벌 수를 넣어 주세요.",
+    "player.sprinkler": "스프링클러",
+    "player.sprinklerHow": "가진 스프링클러를 골라요. 아직 없으면 '없음'을 골라요.",
+    "player.slot": "스프링클러 칸",
+    "player.slotHow": "스프링클러를 화면 아래 핫바의 몇 번 칸에 넣어 뒀는지예요. 핫바에 없으면 매크로가 놓지 못해요.",
+    "player.confirm": "이대로 맞아요",
     "game.title": "비 스웜 시뮬레이터 들어가기",
-    "game.body":
-      "로블록스에서 비 스웜 시뮬레이터에 들어가요. 다른 사람 방해를 덜 받는 비공개 서버를 추천해요. 링크를 넣어 두면 튕겼을 때 알아서 다시 들어가요.",
-    "game.ps": "비공개 서버 링크 넣기",
-    "game.psSet": "비공개 서버 링크가 저장돼 있어요",
+    "game.body": "로블록스에서 비 스웜 시뮬레이터에 들어가요. 매크로를 시작했을 때 게임이 꺼져 있거나 튕기면 알아서 다시 들어가요.",
+    "game.ps": "비공개 서버 링크",
+    "game.psHow": "비공개 서버가 있으면 링크를 붙여 넣어요. 다른 사람 방해를 덜 받아요. 없으면 비워 둬도 돼요. 공개 서버로 들어가요.",
     "hive.title": "내 벌집 번호 고르기",
     "hive.body": "벌집은 입구에서 바라봤을 때 오른쪽부터 1번이에요. 매크로가 이 번호의 벌집을 차지하려고 해요.",
     "hive.slot": "벌집 번호",
     "fields.title": "채집할 필드 고르기",
-    "fields.body": "채집 메뉴에서 꽃가루를 모을 필드를 켜요. 처음에는 필드 하나만 켜도 충분해요.",
+    "fields.body": "꽃가루를 모을 필드를 골라요. 벌이 모자라서 들어갈 수 없는 필드는 고를 수 없어요. 처음에는 필드 하나면 충분해요.",
+    "fields.pick": "채집 필드",
+    "fields.needBees": "벌 {n}마리부터",
     "fields.count": "필드 {n}곳이 켜져 있어요",
     "fields.none": "아직 켜진 필드가 없어요",
+    "fields.locked": "{slot}번 칸의 필드({field})는 벌이 {n}마리 있어야 들어갈 수 있어요. 다른 필드를 고르거나 벌 수를 다시 확인해 주세요.",
+    "fields.more": "채집 메뉴에서 더 설정하기",
     "start.title": "시작!",
     "start.body": "로블록스 창을 한 번 클릭해 두고 시작을 누르거나 단축키를 눌러요. 그다음엔 마우스와 키보드에서 손을 떼 주세요.",
     "keys.start": "시작",
@@ -159,19 +214,26 @@ const strings: PageStrings<
     "tips.title": "알아 두면 좋아요",
     "tips.1": "매크로가 도는 동안 로블록스 창을 가리거나 움직이지 마세요.",
     "tips.2": isMac ? "터미널 창은 닫으면 안 돼요. 최소화는 괜찮아요." : "벌꿀이 명령 창은 닫으면 안 돼요. 최소화는 괜찮아요.",
-    "tips.3": "디스펜서, 몹 사냥, 퀘스트는 각 메뉴에서 하나씩 켜 보면서 늘려 가요.",
-    "tips.4": "디스코드 웹후크를 넣으면 휴대폰으로 진행 상황을 받아볼 수 있어요.",
+    "tips.3": "벌이 늘거나 새 스프링클러를 얻으면 '내 캐릭터 정보 넣기'의 숫자도 바꿔 주세요.",
+    "tips.4": "디스펜서, 몹 사냥, 퀘스트는 각 메뉴에서 하나씩 켜 보면서 늘려 가요.",
+    "tips.5": "디스코드 웹후크를 넣으면 휴대폰으로 진행 상황을 받아볼 수 있어요.",
     "help.title": "잘 안 되나요?",
     "help.body": "설정 → 기타 설정에서 '디버그 파일 저장'을 눌러 만든 파일을 증상과 함께 GitHub Issues에 올려 주세요.",
     "help.button": "문제 알리기",
   },
   en: {
-    subtitle: "New here? Work through these steps from the top. It takes about five minutes.",
+    subtitle: "New here? Work through these steps from the top. Everything you need to set is right on this page.",
     progress: "{done}/{total} done",
     done: "Done",
     todo: "To do",
+    optional: "Optional",
     more: "Learn more",
-    open: "Open",
+    next: "Next step",
+    allDone: "All set",
+    markDone: "Done it",
+    undoDone: "Not yet",
+    expand: "Show",
+    collapse: "Hide",
     "perm.title": "Grant macOS permissions",
     "perm.body": "To move the mouse and keyboard and see the screen, Terminal needs two permissions. Press Turn on to open the right settings page.",
     "perm.accessibility": "Accessibility (keyboard & mouse)",
@@ -205,18 +267,34 @@ const strings: PageStrings<
     "display.body": isMac
       ? "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor."
       : "Set Windows display scale to 100% and turn off Night light and HDR. Run Roblox maximised on your main monitor.",
+    "player.title": "Enter your character's stats",
+    "player.body": "The macro times its walks and picks fields from these numbers, so copy them from the game. The starting values suit a long-time player; change them if you're new.",
+    "player.speed": "Movement speed",
+    "player.speedHow": "Open the gear (Settings) at the top left of the game to see Movement Speed. Enter it without haste or other buffs, decimals included.",
+    "player.speedEmpty": "Enter your movement speed. Without it the macro walks at the default speed and often misses.",
+    "player.bees": "Bees",
+    "player.beesHow": "How many bees are in your hive. Some fields need more bees to enter, and the field picker below follows this number.",
+    "player.beesEmpty": "Enter your bee count.",
+    "player.sprinkler": "Sprinkler",
+    "player.sprinklerHow": "Choose the sprinkler you have, or None if you don't have one yet.",
+    "player.slot": "Sprinkler slot",
+    "player.slotHow": "The hotbar slot (bottom of the screen) your sprinkler is in. The macro can't place it if it isn't on the hotbar.",
+    "player.confirm": "These are right",
     "game.title": "Join Bee Swarm Simulator",
-    "game.body":
-      "Open Bee Swarm Simulator in Roblox. A private server is best. If you save its link, the macro rejoins on its own after a disconnect.",
-    "game.ps": "Add private server link",
-    "game.psSet": "Private server link saved",
+    "game.body": "Open Bee Swarm Simulator in Roblox. If the game is closed when the macro starts, or you get disconnected, it joins again by itself.",
+    "game.ps": "Private server link",
+    "game.psHow": "Paste a private server link if you have one; other players get in the way less. You can leave it empty to join public servers.",
     "hive.title": "Pick your hive slot",
     "hive.body": "Hives are numbered from the right, looking in from the entrance. The macro tries to claim this one.",
     "hive.slot": "Hive slot",
-    "fields.title": "Choose fields to gather",
-    "fields.body": "Turn on the fields to collect pollen from under Gather. One field is plenty to start with.",
+    "fields.title": "Choose a field to gather",
+    "fields.body": "Pick the field to collect pollen in. Fields you don't have enough bees for can't be picked. One field is plenty to start with.",
+    "fields.pick": "Gather field",
+    "fields.needBees": "{n}+ bees",
     "fields.count": "{n} field(s) on",
     "fields.none": "No fields are on yet",
+    "fields.locked": "Slot {slot}'s field ({field}) needs {n} bees to enter. Pick another field or check your bee count.",
+    "fields.more": "More in Gather",
     "start.title": "Start!",
     "start.body": "Click the Roblox window once, then press Start or the hotkey. Keep your hands off the mouse and keyboard after that.",
     "keys.start": "Start",
@@ -225,8 +303,9 @@ const strings: PageStrings<
     "tips.title": "Good to know",
     "tips.1": "Don't cover or move the Roblox window while the macro runs.",
     "tips.2": isMac ? "Keep the Terminal window open. Minimising it is fine." : "Keep the Beolkkuri console window open. Minimising it is fine.",
-    "tips.3": "Turn on dispensers, mobs and quests one at a time from their menus.",
-    "tips.4": "Add a Discord webhook to follow progress from your phone.",
+    "tips.3": "When you get more bees or a new sprinkler, update them under Enter your character's stats too.",
+    "tips.4": "Turn on dispensers, mobs and quests one at a time from their menus.",
+    "tips.5": "Add a Discord webhook to follow progress from your phone.",
     "help.title": "Something not working?",
     "help.body": "Press Export debug folder in Settings → Other, then attach the file to a GitHub issue with what happened.",
     "help.button": "Report a problem",
@@ -237,22 +316,61 @@ const goTo = (page: PageId) => {
   window.location.hash = `/${page}`
 }
 
+const SETTING_DEFS = new Map(sections.flatMap((s) => s.settings).map((d) => [d.id, d] as const))
+const settingDef = (id: string) => SETTING_DEFS.get(id) as SettingDef
+
+/** "hive hub" is a place to stand, not a field with flowers. */
+const GUIDE_FIELDS = FIELD_OPTIONS.filter((f) => f !== "hive hub")
+
+const stepAnchor = (key: string) => `guide-${key}`
+
+/** Scroll a step into view and make it glow once, like a setting reached from search. */
+function showStep(key: string) {
+  const el = document.getElementById(stepAnchor(key))
+  if (!el) return
+  el.scrollIntoView({ behavior: "smooth", block: "start" })
+  el.classList.remove("bk-flash")
+  void el.offsetWidth
+  el.classList.add("bk-flash")
+  const done = (e: AnimationEvent) => {
+    if (e.target !== el || e.animationName !== "bk-flash") return
+    el.classList.remove("bk-flash")
+    el.removeEventListener("animationend", done)
+  }
+  el.addEventListener("animationend", done)
+}
+
 function Step({
+  stepKey,
   n,
   icon,
   title,
   done,
+  optional,
   children,
 }: {
+  stepKey: string
   n: number
   icon: ReactNode
   title: string
+  /** undefined while it can't be told yet (settings loading) or for steps without a check */
   done?: boolean
+  optional?: boolean
   children: ReactNode
 }) {
   const s = useStrings(strings)
+  // Steps already done when the page opens start folded. One that needs work again opens
+  // and stays open after you finish it, so what you're editing doesn't vanish.
+  const [folded, setFolded] = useState<boolean | undefined>(undefined)
+  useEffect(() => {
+    if (done === undefined) return
+    if (folded === undefined) setFolded(done)
+    else if (!done && folded) setFolded(false)
+  }, [done, folded])
+  const open = !done || folded !== true
+
   return (
-    <Card className={cn(done && "ring-emerald-500/35 dark:ring-emerald-400/30")}>
+    <Card id={stepAnchor(stepKey)} className={cn("scroll-mt-20", done && "ring-emerald-500/35 dark:ring-emerald-400/30")}>
       <CardHeader>
         <div className="flex items-center gap-3">
           <div
@@ -269,15 +387,41 @@ function Step({
             <span className="mr-1.5 text-muted-foreground">{n}.</span>
             {title}
           </CardTitle>
-          {done !== undefined && (
-            <Badge variant={done ? "outline" : "secondary"} className={cn(done && "text-emerald-600 dark:text-emerald-400")}>
-              {done ? s("done") : s("todo")}
+          {done ? (
+            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400">
+              {s("done")}
             </Badge>
+          ) : optional ? (
+            <Badge variant="outline">{s("optional")}</Badge>
+          ) : (
+            done === false && <Badge variant="secondary">{s("todo")}</Badge>
+          )}
+          {done && (
+            <Button variant="ghost" size="icon-sm" aria-label={open ? s("collapse") : s("expand")} aria-expanded={open} onClick={() => setFolded(open)}>
+              <ChevronDownIcon className={cn("transition-transform duration-200", open && "rotate-180")} />
+            </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm text-muted-foreground">{children}</CardContent>
+      {open && <CardContent className="space-y-3 text-sm text-muted-foreground">{children}</CardContent>}
     </Card>
+  )
+}
+
+/** For steps that can't be checked from here: you say when you've done them. */
+function MarkDone({ settingId }: { settingId: string }) {
+  const s = useStrings(strings)
+  const { settings, saveGeneral } = useSettings()
+  const done = settings?.[settingId] === true
+  return done ? (
+    <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => void saveGeneral(settingId, false)}>
+      {s("undoDone")}
+    </Button>
+  ) : (
+    <Button size="sm" onClick={() => void saveGeneral(settingId, true)} disabled={!settings}>
+      <CheckIcon />
+      {s("markDone")}
+    </Button>
   )
 }
 
@@ -412,17 +556,130 @@ function DocLink({ doc }: { doc: string }) {
   )
 }
 
+function Warning({ children }: { children: ReactNode }) {
+  return <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">{children}</p>
+}
+
+/** Walk speed, bees and sprinkler: what every walk and field choice is worked out from. */
+function PlayerStep({ n, done }: { n: number; done: boolean | undefined }) {
+  const s = useStrings(strings)
+  const { settings, saveGeneral } = useSettings()
+  const base = useDefaultBinding()
+  // changing any of them here counts as having checked them (all four are general settings)
+  const binding: Binding = {
+    get: base.get,
+    set: (def, value) =>
+      void saveGeneral(def.id, value).then(() => (settings?.guide_player_done !== true ? saveGeneral("guide_player_done", true) : undefined)),
+  }
+  const speed = Number(settings?.movespeed ?? 0)
+  const bees = beeCount(settings?.bees)
+  const noSprinkler = String(settings?.sprinkler_type ?? "").toLowerCase() === "none"
+
+  const row = (id: string, title: string, desc: string) => (
+    <SettingRowLayout htmlFor={id} title={title} desc={desc}>
+      <SettingControl def={settingDef(id)} binding={binding} />
+    </SettingRowLayout>
+  )
+
+  return (
+    <Step stepKey="player" n={n} icon={<UserRoundIcon />} title={s("player.title")} done={done}>
+      <p>{s("player.body")}</p>
+      <div className="divide-y rounded-lg border bg-muted/30 px-3">
+        {row("movespeed", s("player.speed"), s("player.speedHow"))}
+        {row("bees", s("player.bees"), s("player.beesHow"))}
+        {row("sprinkler_type", s("player.sprinkler"), s("player.sprinklerHow"))}
+        {!noSprinkler && row("sprinkler_slot", s("player.slot"), s("player.slotHow"))}
+      </div>
+      {settings && !(speed > 0) && <Warning>{s("player.speedEmpty")}</Warning>}
+      {settings && !(bees > 0) && <Warning>{s("player.beesEmpty")}</Warning>}
+      {settings && !done && (
+        <Button size="sm" onClick={() => void saveGeneral("guide_player_done", true)}>
+          <CheckIcon />
+          {s("player.confirm")}
+        </Button>
+      )}
+    </Step>
+  )
+}
+
+/** The fields switched on, and those of them the bee count doesn't reach yet. */
+function useFieldPlan() {
+  const { settings } = useSettings()
+  const bees = beeCount(settings?.bees ?? 50)
+  const list = Array.isArray(settings?.fields) ? (settings.fields as unknown[]).map((f) => String(f ?? "")) : []
+  const enabled = Array.isArray(settings?.fields_enabled) ? (settings.fields_enabled as unknown[]).map(Boolean) : []
+  const on = list.map((field, slot) => ({ field, slot })).filter(({ field, slot }) => field && enabled[slot])
+  const locked = on.filter(({ field }) => fieldBees(field) > bees)
+  return { bees, list, enabled, on, locked }
+}
+
+function FieldStep({ n, done }: { n: number; done: boolean | undefined }) {
+  const s = useStrings(strings)
+  const { lang } = useI18n()
+  const { settings, saveProfile } = useSettings()
+  const { bees, list, enabled, on, locked } = useFieldPlan()
+  const first = list[0] ?? ""
+
+  // the same saves the Gather page makes for slot 1, then switch it on
+  const pick = async (field: string) => {
+    const fields = [...list]
+    const flags = [...enabled]
+    while (fields.length < SLOT_COUNT) fields.push("")
+    while (flags.length < SLOT_COUNT) flags.push(false)
+    fields[0] = field
+    flags[0] = true
+    await saveProfile("fields", fields)
+    await saveProfile("fields_enabled", flags)
+  }
+
+  return (
+    <Step stepKey="fields" n={n} icon={<FlowerIcon />} title={s("fields.title")} done={done}>
+      <p>{s("fields.body")}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-foreground">{s("fields.pick")}</span>
+        <Select value={GUIDE_FIELDS.includes(first) ? first : undefined} onValueChange={(v) => void pick(v)} disabled={!settings}>
+          <SelectTrigger className="w-56">
+            <SelectValue placeholder="—" />
+          </SelectTrigger>
+          <SelectContent className="max-h-80">
+            {GUIDE_FIELDS.map((f) => {
+              const need = fieldBees(f)
+              return (
+                <SelectItem key={f} value={f} disabled={need > bees}>
+                  {fieldLabel(f, lang)}
+                  {need > 0 && <span className="ml-2 text-xs text-muted-foreground">{s("fields.needBees", { n: need })}</span>}
+                </SelectItem>
+              )
+            })}
+          </SelectContent>
+        </Select>
+      </div>
+      {locked.map(({ field, slot }) => (
+        <Warning key={slot}>{s("fields.locked", { slot: slot + 1, field: fieldLabel(field, lang), n: fieldBees(field) })}</Warning>
+      ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={cn(on.length > 0 && !locked.length ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
+          {on.length > 0 ? s("fields.count", { n: on.length }) : s("fields.none")}
+        </span>
+        <Button variant="outline" size="sm" onClick={() => goTo("gather")}>
+          {s("fields.more")}
+        </Button>
+      </div>
+    </Step>
+  )
+}
+
 export default function GuidePage() {
   const { t } = useI18n()
   const s = useStrings(strings)
-  const { settings, fields, saveGeneral } = useSettings()
+  const { settings, saveGeneral } = useSettings()
   const { status: perms, refresh: refreshPerms } = usePermissions()
   const { status: ocr, install: installOcr, error: ocrError } = useOcrStatus()
   const permsOk = !!perms && perms.accessibility !== false && perms.screenRecording !== false && !perms.fullKeyboardAccess
 
   const hiveSlot = String(useSetting<number | string>("preferred_hive_slot", 1) ?? 1)
   const privateServer = String(useSetting<string>("private_server_link", "") ?? "").trim()
-  const enabledFields = ((settings?.fields_enabled as boolean[] | undefined) ?? []).filter(Boolean).length
+  const { on: fieldsOn, locked: fieldsLocked } = useFieldPlan()
   const startKey = keybindDisplay(useSetting<string>("start_keybind", "F1") || "F1")
   const pauseKey = keybindDisplay(useSetting<string>("pause_keybind", "F2") || "F2")
   const stopKey = keybindDisplay(useSetting<string>("stop_keybind", "F3") || "F3")
@@ -431,21 +688,48 @@ export default function GuidePage() {
   // app is too old to check it). A check that can't run doesn't count as a step to do.
   const showOcr = isWindows && ocr !== null
   const ocrKnown = !!ocr && !ocr.installing && ocr.installed !== null
-  const checks = [...(isMac ? [permsOk] : []), ...(showOcr && ocrKnown ? [ocr.installed === true] : []), !!privateServer, enabledFields > 0]
   const first = isMac || showOcr ? 1 : 0
-  const doneCount = checks.filter(Boolean).length
+  const loaded = !!settings
+  const flag = (id: string) => (loaded ? settings[id] === true : undefined)
+  const langDone = flag("guide_lang_done")
+  const displayDone = flag("guide_display_done")
+  const playerDone = flag("guide_player_done")
+  const fieldsDone = loaded ? fieldsOn.length > 0 && fieldsLocked.length === 0 : undefined
+
+  // in page order; the private server and the hive slot have nothing that must be done
+  const checks: { key: string; n: number; title: string; done: boolean | undefined }[] = [
+    ...(isMac ? [{ key: "perm", n: 1, title: s("perm.title"), done: perms ? permsOk : undefined }] : []),
+    ...(showOcr && ocrKnown ? [{ key: "ocr", n: 1, title: s("ocr.title"), done: ocr.installed === true }] : []),
+    { key: "lang", n: first + 1, title: s("lang.title"), done: langDone },
+    { key: "display", n: first + 2, title: s("display.title"), done: displayDone },
+    { key: "player", n: first + 3, title: s("player.title"), done: playerDone },
+    { key: "fields", n: first + 6, title: s("fields.title"), done: fieldsDone },
+  ]
+  const doneCount = checks.filter((c) => c.done).length
+  const next = checks.find((c) => c.done === false)
 
   return (
     <Page
       title={t("nav.guide")}
       description={s("subtitle")}
       actions={
-        settings && fields ? (
-          <div className="flex items-center gap-2.5">
+        loaded ? (
+          <div className="flex flex-wrap items-center gap-2.5">
             <Progress value={(doneCount / checks.length) * 100} className="h-1.5 w-24 [&>*]:duration-500" aria-label={s("progress", { done: doneCount, total: checks.length })} />
-            <Badge variant={doneCount === checks.length ? "outline" : "secondary"} className={cn(doneCount === checks.length && "text-emerald-600 dark:text-emerald-400")}>
+            <Badge variant={next ? "secondary" : "outline"} className={cn(!next && "text-emerald-600 dark:text-emerald-400")}>
               {s("progress", { done: doneCount, total: checks.length })}
             </Badge>
+            {next ? (
+              <Button size="sm" variant="outline" onClick={() => showStep(next.key)}>
+                <ArrowDownIcon />
+                {s("next")} · {next.n}
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => showStep("start")}>
+                <ArrowDownIcon />
+                {s("allDone")}
+              </Button>
+            )}
           </div>
         ) : null
       }
@@ -453,7 +737,7 @@ export default function GuidePage() {
       <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
         <div className="space-y-4">
           {isMac && (
-            <Step n={1} icon={<ShieldCheckIcon />} title={s("perm.title")} done={perms ? permsOk : undefined}>
+            <Step stepKey="perm" n={1} icon={<ShieldCheckIcon />} title={s("perm.title")} done={perms ? permsOk : undefined}>
               <p>{s("perm.body")}</p>
               <div className="space-y-2">
                 <PermissionRow label={s("perm.accessibility")} value={perms ? perms.accessibility : undefined} kind="accessibility" onOpened={refreshPerms} />
@@ -473,7 +757,7 @@ export default function GuidePage() {
           )}
 
           {showOcr && (
-            <Step n={1} icon={<ScanTextIcon />} title={s("ocr.title")} done={ocrKnown ? ocr.installed === true : undefined}>
+            <Step stepKey="ocr" n={1} icon={<ScanTextIcon />} title={s("ocr.title")} done={ocrKnown ? ocr.installed === true : undefined}>
               <p>{s("ocr.body")}</p>
               <OcrRow status={ocr} onInstall={() => void installOcr()} />
               {ocr?.installing && <OcrProgress status={ocr} />}
@@ -488,29 +772,41 @@ export default function GuidePage() {
             </Step>
           )}
 
-          <Step n={first + 1} icon={<LanguagesIcon />} title={s("lang.title")}>
+          <Step stepKey="lang" n={first + 1} icon={<LanguagesIcon />} title={s("lang.title")} done={langDone}>
             <p>{s("lang.body")}</p>
-            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">{s("lang.how")}</p>
-            <DocLink doc="display-settings" />
+            <Warning>{s("lang.how")}</Warning>
+            <div className="flex flex-wrap items-center gap-2">
+              <MarkDone settingId="guide_lang_done" />
+              <DocLink doc="display-settings" />
+            </div>
           </Step>
 
-          <Step n={first + 2} icon={<MonitorIcon />} title={s("display.title")}>
+          <Step stepKey="display" n={first + 2} icon={<MonitorIcon />} title={s("display.title")} done={displayDone}>
             <p>{s("display.body")}</p>
-            <DocLink doc="display-settings" />
+            <div className="flex flex-wrap items-center gap-2">
+              <MarkDone settingId="guide_display_done" />
+              <DocLink doc="display-settings" />
+            </div>
           </Step>
 
-          <Step n={first + 3} icon={<GamepadIcon />} title={s("game.title")} done={!!privateServer}>
+          <PlayerStep n={first + 3} done={playerDone} />
+
+          <Step stepKey="game" n={first + 4} icon={<GamepadIcon />} title={s("game.title")} done={privateServer ? true : undefined} optional>
             <p>{s("game.body")}</p>
-            {privateServer ? (
-              <p className="text-emerald-600 dark:text-emerald-400">{s("game.psSet")}</p>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => goTo("settings")}>
-                {s("game.ps")}
-              </Button>
-            )}
+            <div className="rounded-lg border bg-muted/30 px-3">
+              <SettingRowLayout htmlFor="private_server_link" title={s("game.ps")} desc={s("game.psHow")} stacked>
+                <TextControl
+                  id="private_server_link"
+                  value={settings?.private_server_link ?? ""}
+                  onCommit={(v) => void saveGeneral("private_server_link", v)}
+                  width={32}
+                  placeholder="https://www.roblox.com/share?code=..."
+                />
+              </SettingRowLayout>
+            </div>
           </Step>
 
-          <Step n={first + 4} icon={<HomeIcon />} title={s("hive.title")}>
+          <Step stepKey="hive" n={first + 5} icon={<HomeIcon />} title={s("hive.title")}>
             <p>{s("hive.body")}</p>
             <div className="flex items-center gap-3">
               <span className="text-foreground">{s("hive.slot")}</span>
@@ -529,19 +825,9 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step n={first + 5} icon={<FlowerIcon />} title={s("fields.title")} done={enabledFields > 0}>
-            <p>{s("fields.body")}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className={cn(enabledFields > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
-                {enabledFields > 0 ? s("fields.count", { n: enabledFields }) : s("fields.none")}
-              </span>
-              <Button variant="outline" size="sm" onClick={() => goTo("gather")}>
-                {t("nav.gather")}
-              </Button>
-            </div>
-          </Step>
+          <FieldStep n={first + 6} done={fieldsDone} />
 
-          <Step n={first + 6} icon={<KeyboardIcon />} title={s("start.title")}>
+          <Step stepKey="start" n={first + 7} icon={<KeyboardIcon />} title={s("start.title")}>
             <p>{s("start.body")}</p>
             <div className="flex flex-wrap items-center gap-4">
               <RunButton size="lg" />
@@ -568,7 +854,7 @@ export default function GuidePage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2.5 text-sm text-muted-foreground">
-                {(["tips.1", "tips.2", "tips.3", "tips.4"] as const).map((k) => (
+                {(["tips.1", "tips.2", "tips.3", "tips.4", "tips.5"] as const).map((k) => (
                   <li key={k} className="flex gap-2">
                     <CircleIcon className="mt-1.5 size-2 shrink-0 fill-primary text-primary" />
                     <span>{s(k)}</span>

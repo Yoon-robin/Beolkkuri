@@ -95,9 +95,10 @@ PowerShell을 쓴다면 `irm https://raw.githubusercontent.com/Yoon-robin/Beolkk
 
 1. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요. 로블록스 언어는 **영어(English)** 로 해 주세요 (웹사이트 → 설정 → 계정 정보 → 언어). 매크로가 게임 속 영어 글자를 보고 움직여요.
 2. 바탕화면의 **벌꿀이**를 더블클릭해요. (윈도우는 시작 메뉴에도 있어요. 맥은 폴더 안의 `run_macro.command` 로도 열 수 있어요)
-3. 매크로 화면이 열리면 왼쪽의 **시작 가이드** 를 따라 해요.
-   - **설정 → 게임 설정** 에서 내 **벌집 번호**를 맞추고,
-   - **채집** 에서 갈 필드를 켜고,
+3. 매크로 화면이 열리면 왼쪽의 **시작 가이드** 를 따라 해요. 가이드 안에서 바로 고칠 수 있어요.
+   - **내 캐릭터 정보**: 걷는 속도, 벌 수, 스프링클러를 넣어요. 걷는 속도는 게임 화면 왼쪽 위 톱니바퀴(Settings)의 **Movement Speed** 예요 (헤이스트 같은 버프가 없을 때 숫자).
+   - **벌집 번호**를 맞추고,
+   - 갈 **필드**를 골라요. 벌 수가 모자라서 못 들어가는 필드는 가이드가 알려 줘요.
    - **홈** 에서 **시작** 을 누르면 끝!
 4. 단축키: **F1** 시작 · **F2** 일시정지 · **F3** 정지 (설정에서 바꿀 수 있어요)
 
@@ -130,6 +131,14 @@ PowerShell을 쓴다면 `irm https://raw.githubusercontent.com/Yoon-robin/Beolkk
 - 로블록스 언어가 **영어(English)** 인지 확인해요. 한국어로 보이면 버튼과 글자를 못 찾아요.
 - **설정 → 게임 설정** 의 벌집 번호가 맞는지 확인해요.
 - 디스플레이 배율과 로블록스 화면 설정을 확인해요: [docs/display-settings.md](docs/display-settings.md)
+</details>
+
+<details>
+<summary><b>게임을 막 시작해서 벌도 적고 스프링클러도 없어요</b></summary>
+
+- **시작 가이드 → 내 캐릭터 정보** 에서 스프링클러를 **없음** 으로 고르고, 벌 수를 지금 숫자로 넣어요.
+- 필드마다 들어가려면 벌이 몇 마리 필요해요 (딸기·거미·대나무 5마리, 파인애플·그루터기 10마리, 선인장·호박·소나무·장미 15마리, 산 정상 25마리, 고추·코코넛 35마리). 처음엔 해바라기, 민들레, 버섯, 파란 꽃, 클로버가 좋아요. 기본으로 켜진 소나무는 15마리부터라서 가이드가 바꾸라고 알려 줘요.
+- 벌이 늘거나 새 스프링클러를 얻으면 숫자도 같이 바꿔 주세요.
 </details>
 
 <details>
@@ -181,7 +190,7 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 
 **Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, Beolkkuri opens by itself; its *Getting Started* page has buttons for allowing **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*. Then quit Terminal (⌘Q) and open Beolkkuri again.
 **Install on Windows:** Download [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) and open it (if "Windows protected your PC" appears, click *More info → Run anyway*). It installs for your account with Python included and needs no administrator rights. In PowerShell, `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` opens the same installer. Windows needs no permissions; 100% display scaling is recommended. Windows support is new, so please report anything odd. See [docs/windows.md](docs/windows.md).
-**Run:** Set Roblox to English (roblox.com → Settings → Account Info → Language), since the macro reads the game's English text. Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer made (on Windows it's in the Start menu too). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
+**Run:** Set Roblox to English (roblox.com → Settings → Account Info → Language), since the macro reads the game's English text. Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer made (on Windows it's in the Start menu too). Follow *Getting Started* in the sidebar: it asks for your walk speed (Movement Speed in the game's Settings menu, without haste), bee count and sprinkler (pick *None* if you have none yet), and only offers fields your bees can enter. Default hotkeys: F1 start, F2 pause, F3 stop.
 **Updates:** Beolkkuri updates itself and restarts when you open it, never while the macro runs. You can turn this off under *Settings → Other*.
 
 Features: field gathering with patterns and AI token gathering, dispensers/collectibles, mob and boss runs, quests, manual and auto planters, hotbar and field boosts, rejoining, death recovery, profiles, Discord webhooks, a bot and streaming, and hourly reports.

@@ -1908,10 +1908,11 @@
       {
         "id": "sprinkler_type",
         "title": "Sprinkler Type",
-        "desc": "The type of sprinkler that you use. Note that the macro will stack the sprinklers on top of each other when placing them",
+        "desc": "The type of sprinkler that you use. Note that the macro will stack the sprinklers on top of each other when placing them. Choose None if you don't have one yet",
         "type": {
           "name": "dropdown",
           "data": [
+            "None",
             "Basic",
             "Silver",
             "Golden",
