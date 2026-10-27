@@ -54,8 +54,11 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 
 - **Strings:** app-wide strings go in `ui/src/i18n/ui.ts`; page strings go in a local `PageStrings` table read with `useStrings`. Always keep ko and en in sync. Korean copy uses natural, friendly 해요체 and stays short.
 - **Motion utilities** in `ui/src/index.css`:
-  - `.rm-page` staggers a page's children automatically.
-  - `.rm-stagger`, `.rm-shimmer`, `.rm-glow`, `.rm-pop` and `.rm-flash` are opt-in.
+  - Easing tokens `--ease-out-soft` (things arriving) and `--ease-glide` (things moving between two places), also usable as `ease-out-soft` / `ease-glide`.
+  - `.rm-page` staggers a page's children automatically (rise + slight blur, under ~0.4s in total). Tab panels use the shorter `.rm-tab-in`.
+  - `.rm-stagger`, `.rm-shimmer`, `.rm-pop`, `.rm-swap` (an icon/label replacing another in place) and `.rm-flash` are opt-in.
+  - The selected tab (`components/ui/tabs.tsx`) and sidebar item (`NavGlider` in `app-sidebar.tsx`) have one sliding highlight (`.rm-glider`) instead of per-item backgrounds.
+  - No looping attention effects (glows, pulsing buttons): the macro can run for hours. The small status dot is the one exception.
   - There is a global `prefers-reduced-motion` override.
   - Theme switching uses a view-transition circle (`ui/src/lib/theme.tsx`).
 - **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. Sub-tab labels live in `ui.ts` as `subtab.<page>.<tab value>`; the page and the palette both read them, so a new sub-tab needs that key plus the same hooks. A custom row needs `useFocusTarget`.

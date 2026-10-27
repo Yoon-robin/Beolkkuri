@@ -89,7 +89,7 @@ const strings: PageStrings<
     renameTitle: "'{name}' 이름 바꾸기",
     renameDesc: "새 이름을 입력해 주세요.",
     duplicateTitle: "'{name}' 복제하기",
-    duplicateDesc: "똑같은 설정을 가진 프로필을 새 이름으로 만들어요.",
+    duplicateDesc: "설정이 똑같은 프로필을 새 이름으로 만들어요.",
     newName: "새 이름",
     nameHint: "이름은 영문 소문자로 저장되고, 띄어쓰기는 _로 바뀌어요.",
     deleteTitle: "'{name}' 프로필을 삭제할까요?",

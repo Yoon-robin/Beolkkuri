@@ -47,6 +47,9 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    /* motion: things arriving decelerate hard; things moving between two places ease both ways */
+    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-glide: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 :root {
@@ -144,9 +147,16 @@
 }
 /* ---------------------------------------------------------------- motion */
 
+/* arriving content comes into focus as it settles */
 @keyframes rm-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* an icon or label replacing another in place (start -> stop) */
+@keyframes rm-swap {
+  from { opacity: 0; transform: scale(0.85); filter: blur(3px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes rm-shimmer {
@@ -154,36 +164,38 @@
   to { background-position: 200% 0; }
 }
 
-@keyframes rm-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--destructive) 35%, transparent); }
-  50% { box-shadow: 0 0 0 6px color-mix(in oklch, var(--destructive) 0%, transparent); }
-}
-
 @keyframes rm-pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.12); opacity: 1; }
+  0% { transform: scale(0.8); opacity: 0; filter: blur(2px); }
+  60% { transform: scale(1.06); opacity: 1; filter: none; }
   100% { transform: scale(1); }
 }
 
 @layer utilities {
-  /* Page content: each direct child rises in shortly after the previous one. */
+  /* Page content: each direct child rises in shortly after the previous one. Pages are
+     opened often, so the whole sequence stays under ~0.4s. */
   .rm-page > * {
-    animation: rm-rise 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: rm-rise 0.3s var(--ease-out-soft) both;
   }
-  .rm-page > *:nth-child(2) { animation-delay: 40ms; }
-  .rm-page > *:nth-child(3) { animation-delay: 80ms; }
-  .rm-page > *:nth-child(4) { animation-delay: 120ms; }
-  .rm-page > *:nth-child(n + 5) { animation-delay: 160ms; }
+  .rm-page > *:nth-child(2) { animation-delay: 30ms; }
+  .rm-page > *:nth-child(3) { animation-delay: 60ms; }
+  .rm-page > *:nth-child(n + 4) { animation-delay: 90ms; }
 
   /* Same, for the cards inside a grid or list. */
   .rm-stagger > * {
-    animation: rm-rise 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: rm-rise 0.3s var(--ease-out-soft) both;
   }
-  .rm-stagger > *:nth-child(2) { animation-delay: 50ms; }
-  .rm-stagger > *:nth-child(3) { animation-delay: 100ms; }
-  .rm-stagger > *:nth-child(4) { animation-delay: 150ms; }
-  .rm-stagger > *:nth-child(5) { animation-delay: 200ms; }
-  .rm-stagger > *:nth-child(n + 6) { animation-delay: 240ms; }
+  .rm-stagger > *:nth-child(2) { animation-delay: 35ms; }
+  .rm-stagger > *:nth-child(3) { animation-delay: 70ms; }
+  .rm-stagger > *:nth-child(4) { animation-delay: 105ms; }
+  .rm-stagger > *:nth-child(5) { animation-delay: 140ms; }
+  .rm-stagger > *:nth-child(n + 6) { animation-delay: 170ms; }
+
+  /* A sub-tab's panel: shorter and closer than a page, since tabs flip back and forth. */
+  .rm-tab-in {
+    animation: rm-rise 0.22s var(--ease-out-soft) both;
+  }
+
+  .rm-swap { animation: rm-swap 0.24s var(--ease-out-soft) both; }
 
   .rm-shimmer {
     background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted), var(--foreground) 6%) 50%, var(--muted) 100%);
@@ -191,8 +203,15 @@
     animation: rm-shimmer 1.6s linear infinite;
   }
 
-  .rm-glow { animation: rm-glow 1.8s ease-in-out infinite; }
-  .rm-pop { animation: rm-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .rm-pop { animation: rm-pop 0.35s var(--ease-out-soft) both; }
+
+  /* Sliding highlight behind the selected tab or menu item (see tabs.tsx, app-sidebar.tsx). */
+  .rm-glider {
+    transition:
+      transform 0.28s var(--ease-glide),
+      width 0.28s var(--ease-glide),
+      height 0.28s var(--ease-glide);
+  }
 }
 
 /* Theme switch: the new theme grows out of the toggle button (see lib/theme.tsx). */

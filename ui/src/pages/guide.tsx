@@ -120,7 +120,7 @@ const strings: PageStrings<
     "tips.3": "디스펜서, 몹 사냥, 퀘스트는 각 메뉴에서 하나씩 켜 보면서 늘려 가요.",
     "tips.4": "디스코드 웹후크를 넣으면 휴대폰으로 진행 상황을 받아볼 수 있어요.",
     "help.title": "잘 안 되나요?",
-    "help.body": "설정 → 기타 설정에서 '디버그 폴더 내보내기'를 눌러 받은 파일을 증상과 함께 GitHub Issues에 올려 주세요.",
+    "help.body": "설정 → 기타 설정에서 '디버그 파일 저장'을 눌러 만든 파일을 증상과 함께 GitHub Issues에 올려 주세요.",
     "help.button": "문제 알리기",
   },
   en: {
@@ -167,7 +167,7 @@ const strings: PageStrings<
     "tips.3": "Turn on dispensers, mobs and quests one at a time from their menus.",
     "tips.4": "Add a Discord webhook to follow progress from your phone.",
     "help.title": "Something not working?",
-    "help.body": "Press Export Debug Folder in Settings → Other, then attach the file to a GitHub issue with what happened.",
+    "help.body": "Press Export debug folder in Settings → Other, then attach the file to a GitHub issue with what happened.",
     "help.button": "Report a problem",
   },
 }

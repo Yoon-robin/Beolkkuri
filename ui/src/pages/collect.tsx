@@ -24,10 +24,10 @@ const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
     description: "Dispensers, events, sprouts, the blender and other things to collect around the map.",
-    tokenButton: "Customize Tokens",
+    tokenButton: "Customize tokens",
     zoomHint: "Click to enlarge",
-    petalsAlt: "Petals and Blooms Cheat Sheet",
-    sproutsAlt: "Sprout Drops Cheat Sheet",
+    petalsAlt: "Petals and blooms cheat sheet",
+    sproutsAlt: "Sprout drops cheat sheet",
   },
 }
 

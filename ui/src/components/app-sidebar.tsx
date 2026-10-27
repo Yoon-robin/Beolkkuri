@@ -14,6 +14,8 @@ import {
   ZapIcon,
   type LucideIcon,
 } from "lucide-react"
+import { useLayoutEffect, useState } from "react"
+
 import { useTheme } from "@/lib/theme"
 
 import { Button } from "@/components/ui/button"
@@ -66,10 +68,50 @@ export const NAV: { group: UiKey; items: { id: PageId; label: UiKey; icon: Lucid
   },
 ]
 
+type Box = { x: number; y: number; w: number; h: number }
+
+/**
+ * One highlight behind the current page's menu item that slides to the next item,
+ * across the group labels, instead of each item lighting up on its own.
+ */
+// `container` is the element itself, not a ref: the sidebar swaps its mobile and desktop
+// versions after the first render, and the new one has to be measured.
+function NavGlider({ container: el, page }: { container: HTMLDivElement | null; page: PageId }) {
+  const [box, setBox] = useState<Box | null>(null)
+
+  useLayoutEffect(() => {
+    if (!el) return setBox(null)
+    const measure = () => {
+      const active = el.querySelector<HTMLElement>('[data-sidebar="menu-button"][data-active="true"]')
+      if (!active?.offsetWidth) return setBox(null)
+      const a = active.getBoundingClientRect()
+      const c = el.getBoundingClientRect()
+      setBox({ x: a.left - c.left, y: a.top - c.top + el.scrollTop, w: a.width, h: a.height })
+    }
+    measure()
+    // collapsing to icons and resizing the window move the items
+    const resize = new ResizeObserver(measure)
+    resize.observe(el)
+    return () => resize.disconnect()
+  }, [el, page])
+
+  if (!box) return null
+  return (
+    <span
+      aria-hidden
+      className="rm-glider pointer-events-none absolute top-0 left-0 rounded-md bg-sidebar-accent"
+      style={{ transform: `translate(${box.x}px, ${box.y}px)`, width: box.w, height: box.h }}
+    >
+      <span className="absolute top-1/2 left-0 h-4 w-[3px] -translate-y-1/2 rounded-full bg-primary group-data-[collapsible=icon]:hidden" />
+    </span>
+  )
+}
+
 export function AppSidebar({ page, onNavigate }: { page: PageId; onNavigate: (id: PageId) => void }) {
   const { t, lang, setLang } = useI18n()
   const { resolvedTheme, setTheme } = useTheme()
   const { state, isMobile } = useSidebar()
+  const [nav, setNav] = useState<HTMLDivElement | null>(null)
   // footer buttons lose their text in icon mode, so they explain themselves on hover there
   const iconOnly = state === "collapsed" && !isMobile
   const nextLang = lang === "ko" ? "English" : "한국어"
@@ -90,7 +132,8 @@ export function AppSidebar({ page, onNavigate }: { page: PageId; onNavigate: (id
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent ref={setNav} className="relative">
+        <NavGlider container={nav} page={page} />
         {NAV.map((group) => (
           <SidebarGroup key={group.group}>
             <SidebarGroupLabel>{t(group.group)}</SidebarGroupLabel>
@@ -102,7 +145,8 @@ export function AppSidebar({ page, onNavigate }: { page: PageId; onNavigate: (id
                       isActive={page === item.id}
                       tooltip={t(item.label)}
                       onClick={() => onNavigate(item.id)}
-                      className="relative before:absolute before:top-1/2 before:left-0 before:h-4 before:w-[3px] before:-translate-y-1/2 before:scale-y-0 before:rounded-full before:bg-primary before:transition-transform before:duration-300 data-active:before:scale-y-100 group-data-[collapsible=icon]:before:hidden [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110 data-active:[&>svg]:text-primary"
+                      // NavGlider draws the selected item's background and bar
+                      className="relative data-active:bg-transparent [&>svg]:transition-[transform,color] [&>svg]:duration-200 hover:[&>svg]:scale-110 data-active:[&>svg]:text-primary"
                     >
                       <item.icon />
                       <span>{t(item.label)}</span>

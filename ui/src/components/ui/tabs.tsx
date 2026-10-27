@@ -84,16 +84,56 @@ function useOverflowingTabs(list: React.RefObject<HTMLDivElement | null>) {
   return mask
 }
 
+type Box = { x: number; y: number; w: number; h: number }
+
+/**
+ * Where the selected tab sits inside the list, so one highlight can slide between tabs
+ * instead of each tab drawing its own. Null while the list isn't laid out (a hidden
+ * panel), so the highlight appears in place rather than growing from nothing.
+ */
+function useActiveTabBox(list: React.RefObject<HTMLDivElement | null>) {
+  const [box, setBox] = React.useState<Box | null>(null)
+
+  React.useLayoutEffect(() => {
+    const el = list.current
+    if (!el) return
+    // this list's own triggers, not those of tabs nested inside a panel
+    const triggers = () =>
+      [...el.querySelectorAll<HTMLElement>('[data-slot="tabs-trigger"]')].filter((t) => t.closest('[data-slot="tabs-list"]') === el)
+    const measure = () => {
+      const active = triggers().find((t) => t.dataset.state === "active")
+      if (!active || !active.offsetWidth || active.offsetParent !== el) return setBox(null)
+      const next = { x: active.offsetLeft, y: active.offsetTop, w: active.offsetWidth, h: active.offsetHeight }
+      setBox((prev) => (prev && prev.x === next.x && prev.y === next.y && prev.w === next.w && prev.h === next.h ? prev : next))
+    }
+    measure()
+    // tabs change width with the language, a "running" dot, or the window
+    const resize = new ResizeObserver(measure)
+    resize.observe(el)
+    triggers().forEach((t) => resize.observe(t))
+    const tabs = new MutationObserver(measure)
+    tabs.observe(el, { subtree: true, attributes: true, attributeFilter: ["data-state"] })
+    return () => {
+      resize.disconnect()
+      tabs.disconnect()
+    }
+  }, [list])
+
+  return box
+}
+
 function TabsList({
   className,
   variant = "default",
   ref,
   style,
+  children,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
   VariantProps<typeof tabsListVariants>) {
   const local = React.useRef<HTMLDivElement | null>(null)
   const mask = useOverflowingTabs(local)
+  const box = useActiveTabBox(local)
   const setRef = React.useCallback(
     (node: HTMLDivElement | null) => {
       local.current = node
@@ -107,10 +147,21 @@ function TabsList({
       ref={setRef}
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-glider={box && variant === "default" ? "" : undefined}
+      className={cn(tabsListVariants({ variant }), "relative", className)}
       style={mask ? { maskImage: mask, WebkitMaskImage: mask, ...style } : style}
       {...props}
-    />
+    >
+      {box && variant === "default" && (
+        <span
+          aria-hidden
+          data-slot="tabs-glider"
+          className="rm-glider pointer-events-none absolute top-0 left-0 rounded-md border border-transparent bg-background shadow-sm dark:border-input dark:bg-input/30"
+          style={{ transform: `translate(${box.x}px, ${box.y}px)`, width: box.w, height: box.h }}
+        />
+      )}
+      {children}
+    </TabsPrimitive.List>
   )
 }
 
@@ -125,6 +176,8 @@ function TabsTrigger({
         "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-3 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
         "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
+        // the list's sliding highlight draws the selected tab's background instead
+        "group-data-glider/tabs-list:data-active:border-transparent group-data-glider/tabs-list:data-active:bg-transparent group-data-glider/tabs-list:data-active:shadow-none dark:group-data-glider/tabs-list:data-active:border-transparent dark:group-data-glider/tabs-list:data-active:bg-transparent",
         "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
         className
       )}
@@ -140,7 +193,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 text-sm outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 data-[state=active]:duration-300", className)}
+      className={cn("rm-tab-in flex-1 text-sm outline-none", className)}
       {...props}
     />
   )

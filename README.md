@@ -22,7 +22,7 @@
 | | |
 |---|---|
 | 🌻 **자동 채집** | 원하는 필드(최대 5곳)에서 패턴대로 꽃가루를 모으고, 가방이 차면 벌집으로 돌아가 꿀로 바꿔요. AI 토큰 채집도 지원해요. |
-| 🕒 **수집** | 부의 시계, 각종 디스펜서, 스티커 프린터, 몬도 버프, 메모리 매치, 비스마스 아이템, 블렌더, 새싹까지 시간 맞춰 챙겨요. |
+| 🕒 **수집** | 부의 시계, 각종 디스펜서, 스티커 프린터, 몬도 버프, 메모리 매치, 비즈마스 아이템, 블렌더, 새싹까지 시간 맞춰 챙겨요. |
 | 🐞 **사냥** | 무당벌레·장수풍뎅이·전갈·사마귀·거미·늑대인간, 그루터기 달팽이·코코넛 게·킹 비틀·터널 곰, 밤에는 비셔스 비(스팅어 헌트)까지. |
 | 📜 **퀘스트** | 북극곰, 갈색곰, 흑곰, 허니 비, 버코 비, 라일리 비 퀘스트를 알아서 받아서 깨요. |
 | 🌱 **플랜터** | 수동(최대 5사이클) 또는 넥타 우선순위에 맞춘 자동 플랜터. 수확 타이머도 홈 화면에서 볼 수 있어요. |
@@ -31,7 +31,7 @@
 | 💬 **디스코드** | 웹후크 알림, 시간별 리포트 이미지, 원격 조작 봇, 화면 스트리밍. |
 
 > 새 화면은 **React + shadcn/ui**로 만들었고, **한국어/영어**를 왼쪽 아래 버튼으로 바꿀 수 있어요. 라이트/다크 테마도 있어요.
-> **Ctrl+K(⌘K)** 를 누르면 설정 246개를 한국어로 바로 검색해서 해당 화면으로 이동할 수 있어요. 실행 시간은 위쪽 상태 표시에 나오고, 맥 권한이 꺼져 있으면 홈 화면에서 알려 줘요.
+> **Ctrl+K(⌘K)** 를 누르면 설정 246개를 한국어로 검색해서 그 화면으로 바로 갈 수 있어요. 실행 시간은 위쪽 상태 표시에 나오고, 맥 권한이 꺼져 있으면 홈 화면에서 알려 줘요.
 
 ---
 
@@ -98,7 +98,7 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.
 <details>
 <summary><b>시작을 눌러도 캐릭터가 안 움직여요</b></summary>
 
-거의 항상 권한 문제예요. [권한 주기](#2-권한-주기-꼭-필요해요)를 다시 확인하고, 목록에 터미널이 이미 켜져 있다면 **꺼다가 다시 켜고** 터미널을 재시작해 보세요.
+거의 항상 권한 문제예요. [권한 주기](#2-권한-주기-꼭-필요해요)를 다시 확인하고, 목록에 터미널이 이미 켜져 있다면 **껐다가 다시 켜고** 터미널을 재시작해 보세요.
 </details>
 
 <details>
@@ -156,7 +156,7 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 
 ## English
 
-**RobinMacro** is a Bee Swarm Simulator macro for macOS with a modern React + shadcn/ui interface in Korean and English.
+**RobinMacro** is a Bee Swarm Simulator macro for macOS with a React + shadcn/ui interface in Korean and English.
 
 **Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/RobinMacro/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
 **Run:** Open Bee Swarm Simulator in Roblox, then open the **RobinMacro** app the installer put on your Desktop (or run `run_macro.command`). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.

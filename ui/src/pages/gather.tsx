@@ -263,6 +263,8 @@ function SlotPicker({
             className={cn(
               "group relative flex cursor-pointer flex-col gap-1 rounded-xl border bg-card p-3 text-left transition-all outline-none select-none",
               "hover:border-primary/50 focus-visible:ring-3 focus-visible:ring-ring/50",
+              // pressing the card (not its switch) gives a little under the finger
+              "[&:active:not(:has([role=switch]:active))]:scale-[0.98]",
               active ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border",
             )}
           >

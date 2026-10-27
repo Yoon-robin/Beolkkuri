@@ -93,7 +93,7 @@ export const ko = {
   "update.check": "업데이트 확인",
   "update.updating": "업데이트 중",
   "update.available": "새 버전이 나왔어요",
-  "update.availableDesc": "지금 버전 {current} → 최신 버전 {latest}",
+  "update.availableDesc": "현재 버전 {current} → 최신 버전 {latest}",
   "update.now": "지금 업데이트",
   "update.dontShow": "다시 보지 않기",
   "update.latest": "최신 버전이에요",

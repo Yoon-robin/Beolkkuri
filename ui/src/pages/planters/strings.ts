@@ -156,7 +156,7 @@ export const strings: PageStrings<K> = {
     "gather.desc": "Gather the planter's field right after placing it so it collects while the planter grows.",
 
     reset: "Clear planter timers",
-    "reset.desc": "Resets the macro's tracking data for the planters.",
+    "reset.desc": "Clears the planter spots and harvest times the macro remembers.",
     resetButton: "Reset",
     resetConfirmTitle: "Clear planter timers?",
     resetConfirmDesc: "The macro will forget the planters it placed. Planters in the game stay where they are.",
@@ -178,7 +178,7 @@ export const strings: PageStrings<K> = {
     rank: "Rank",
     nectar: "Nectar",
     minPercent: "Min %",
-    duplicateNectar: "The same nectar appears more than once. Picking a different nectar per rank is recommended.",
+    duplicateNectar: "The same nectar appears more than once. Try a different nectar for each rank.",
     nectarCheat: "Nectar cheat sheet",
 
     restrictTitle: "Allowed planters & restrictions",
@@ -202,7 +202,7 @@ export const strings: PageStrings<K> = {
     import: "Import settings",
     exported: "Planter settings copied to clipboard",
     exportedDetail: "Macro version {version} · {date}",
-    exportFailed: "Failed to export planter settings",
+    exportFailed: "Couldn't export planter settings",
     importTitle: "Import planter settings",
     importDesc: "Paste the exported settings below. This replaces your current planter settings.",
     importPlaceholder: "Paste here…",

@@ -47,7 +47,7 @@ const strings: PageStrings<
     title: "검색",
     placeholder: "설정, 메뉴, 기능을 찾아보세요… (예: 벌집, 디스코드, 시계)",
     empty: "검색 결과가 없어요",
-    emptyHint: "다른 낱말로 찾아보세요. 초성으로도 찾을 수 있어요. (예: ㅂㅈ → 벌집)",
+    emptyHint: "다른 단어로 찾아보세요. 초성으로도 찾을 수 있어요. (예: ㅂㅈ → 벌집)",
     move: "이동",
     open: "열기",
     close: "닫기",

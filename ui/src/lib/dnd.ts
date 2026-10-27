@@ -93,7 +93,7 @@ const A11Y = {
     instructions:
       "스페이스바를 누르면 항목을 집어요. 집은 동안 방향키로 옮기고, 스페이스바를 다시 누르면 내려놓아요. Esc를 누르면 취소돼요.",
     start: (id: string) => `${id} 항목을 집었어요.`,
-    over: (id: string, over: string) => `${id} 항목이 ${over} 자리로 옮겨졌어요.`,
+    over: (id: string, over: string) => `${id} 항목을 ${over} 자리로 옮겼어요.`,
     outside: (id: string) => `${id} 항목이 목록 밖에 있어요.`,
     end: (id: string, over: string) => `${id} 항목을 ${over} 자리에 내려놓았어요.`,
     dropOutside: (id: string) => `${id} 항목을 내려놓았어요.`,

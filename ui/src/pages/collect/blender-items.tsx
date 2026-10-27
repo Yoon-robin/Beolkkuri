@@ -45,8 +45,8 @@ const ko = {
 const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
-    itemsTitle: "Blender Items",
-    itemsDesc: "Choose up to 5 items to craft. They are crafted from top to bottom.",
+    itemsTitle: "Blender items",
+    itemsDesc: "Choose up to 5 items to craft. The macro crafts them from top to bottom.",
     slot: "Item {n}",
     item: "Item",
     quantity: "Quantity",
@@ -58,11 +58,11 @@ const strings: PageStrings<keyof typeof ko> = {
     repeatHint: "How many more times to craft it. Goes down by 1 after each craft.",
     resetButton: "Reset",
     resetTitle: "Reset blender timers?",
-    resetDesc: "Clears the macro's tracking data on blender items (current item and wait time). Your item settings are kept.",
+    resetDesc: "Clears the blender progress the macro remembers (current item and wait time). Your item settings are kept.",
     resetCancel: "Cancel",
     resetConfirm: "Reset",
     resetDone: "Blender timers reset",
-    resetFailed: "Could not reset: {error}",
+    resetFailed: "Couldn't reset: {error}",
   },
 }
 

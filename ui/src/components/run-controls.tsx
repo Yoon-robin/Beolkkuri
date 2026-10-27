@@ -1,4 +1,5 @@
 import { Loader2Icon, PlayIcon, SquareIcon } from "lucide-react"
+import { useRef } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,22 +40,33 @@ export function RunButton({ size = "default", className }: { size?: "default" | 
   const pauseKey = keybindDisplay(useSetting<string>("pause_keybind", "F2") || "F2")
   const stopKey = keybindDisplay(useSetting<string>("stop_keybind", "F3") || "F3")
   const big = size === "lg"
+  // One button that changes colour in place; its contents are keyed by state so the new
+  // icon and label come into focus instead of snapping. Not on mount: opening a page
+  // shouldn't replay it.
+  const mountedAs = useRef(status)
+  const changed = useRef(false)
+  if (status !== mountedAs.current) changed.current = true
+  const swap = changed.current ? "rm-swap" : undefined
 
   if (status === "running" || status === "stopping") {
     return (
-      <Button variant="destructive" size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", status === "running" && "rm-glow", className)} onClick={stop} disabled={status === "stopping"}>
-        {status === "stopping" ? <Loader2Icon className="animate-spin" /> : <SquareIcon className="fill-current" />}
-        {status === "stopping" ? t("run.stopping") : t("run.stop")}
-        {status !== "stopping" && <kbd className="ml-1 rounded bg-background/40 px-1.5 font-mono text-[0.7em]">{stopKey}</kbd>}
+      <Button variant="destructive" size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", className)} onClick={stop} disabled={status === "stopping"}>
+        <span key={status} className={cn("inline-flex items-center gap-[inherit]", swap)}>
+          {status === "stopping" ? <Loader2Icon className="animate-spin" /> : <SquareIcon className="fill-current" />}
+          {status === "stopping" ? t("run.stopping") : t("run.stop")}
+          {status !== "stopping" && <kbd className="ml-1 rounded bg-background/40 px-1.5 font-mono text-[0.7em]">{stopKey}</kbd>}
+        </span>
       </Button>
     )
   }
   const paused = status === "paused"
   return (
     <Button size={big ? "lg" : "default"} className={cn(big && "h-12 px-6 text-base", className)} onClick={start}>
-      <PlayIcon className="fill-current" />
-      {paused ? t("run.resume") : t("run.start")}
-      <kbd className="ml-1 rounded bg-background/25 px-1.5 font-mono text-[0.7em]">{paused ? pauseKey : startKey}</kbd>
+      <span key={status} className={cn("inline-flex items-center gap-[inherit]", swap)}>
+        <PlayIcon className="fill-current" />
+        {paused ? t("run.resume") : t("run.start")}
+        <kbd className="ml-1 rounded bg-background/25 px-1.5 font-mono text-[0.7em]">{paused ? pauseKey : startKey}</kbd>
+      </span>
     </Button>
   )
 }

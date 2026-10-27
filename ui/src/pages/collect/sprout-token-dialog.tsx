@@ -25,7 +25,7 @@ import {
 
 const ko = {
   title: "새싹 토큰 우선순위",
-  desc: "새싹이 터진 뒤 AI가 주우러 갈 토큰을 켜 주세요. 끌어서 위에 있을수록 먼저 주워요.",
+  desc: "새싹이 터진 뒤 AI가 주우러 갈 토큰을 켜 주세요. 끌어서 순서를 바꾸면 위에 있는 토큰부터 주워요.",
   model: "지금 고른 AI 모델({model})이 알아보는 토큰만 보여요.",
   presetField: "이 필드 드롭 위주",
   presetAll: "새싹 드롭 전부",
@@ -42,20 +42,20 @@ const ko = {
 const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
-    title: "Sprout Token Priority",
-    desc: "Enable the tokens the AI should chase after the sprout pops. Drag tokens to sort them from highest to lowest priority.",
+    title: "Sprout token priority",
+    desc: "Turn on the tokens the AI should chase after the sprout pops. Drag to reorder; tokens at the top are picked up first.",
     model: "Selected model: {model}. Only tokens detected by this model are shown.",
-    presetField: "Field Drops",
-    presetAll: "All Sprout Drops",
+    presetField: "Field drops",
+    presetAll: "All sprout drops",
     presetClear: "Clear",
     enabledCount: "{count} enabled",
     up: "Up",
     down: "Down",
     drag: "Drag to reorder",
     cancel: "Cancel",
-    save: "Save Tokens",
+    save: "Save tokens",
     saved: "Sprout token priority saved",
-    saveFailed: "Could not save: {error}",
+    saveFailed: "Couldn't save: {error}",
   },
 }
 

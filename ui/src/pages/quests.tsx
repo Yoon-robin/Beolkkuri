@@ -10,22 +10,22 @@ import { useSettings } from "@/state/settings"
 import { SubTabs } from "./collect/shared"
 
 const ko = {
-  description: "곰과 벌 NPC의 퀘스트를 자동으로 진행해요.",
+  description: "곰과 벌 NPC 퀘스트를 자동으로 해요.",
   overrideTitle: "퀘스트별 채집 설정",
-  overrideDesc: "퀘스트를 할 때만 채집 시간과 하이브 복귀 방법을 따로 정할 수 있어요. 시간을 0으로 두면 원래 채집 설정을 그대로 써요.",
+  overrideDesc: "퀘스트를 할 때만 채집 시간과 벌집 귀환 방법을 따로 정할 수 있어요. 시간을 0으로 두면 원래 채집 설정을 그대로 써요.",
   quest: "퀘스트",
   mins: "채집 시간(분)",
-  returnToHive: "하이브 복귀",
+  returnToHive: "벌집 귀환",
 }
 const strings: PageStrings<keyof typeof ko> = {
   ko,
   en: {
     description: "Complete quests from the bear and bee NPCs automatically.",
-    overrideTitle: "Override Gather Settings",
-    overrideDesc: "Per-quest gather overrides (mins / return). Set mins to 0 for no override.",
+    overrideTitle: "Per-quest gather settings",
+    overrideDesc: "Set a separate gather time and return method used only for quests. Leave the time at 0 to use your normal gather settings.",
     quest: "Quest",
-    mins: "Gather Until Mins",
-    returnToHive: "Return To Hive",
+    mins: "Gather time (mins)",
+    returnToHive: "Return to hive",
   },
 }
 

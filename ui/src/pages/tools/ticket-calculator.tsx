@@ -114,9 +114,9 @@ const strings: PageStrings<
     rounded: "Ticket prices below 100K are raised to 100K, and prices are rounded to the nearest 1,000 honey.",
     tickets: "Tickets",
     cost: "Cost",
-    nTickets: "{count} Tickets",
-    customRow: "{count} Tickets (Custom)",
-    maxRow: "Max ({count} Tickets)",
+    nTickets: "{count} tickets",
+    customRow: "{count} tickets (custom)",
+    maxRow: "Max ({count} tickets)",
   },
 }
 

@@ -36,7 +36,7 @@ function ModePicker({ mode, onChange }: { mode: number; onChange: (mode: number)
             aria-checked={on}
             onClick={() => onChange(value)}
             className={cn(
-              "flex items-start gap-3 rounded-xl border p-3 text-left transition-[background-color,border-color,box-shadow] duration-200 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              "flex items-start gap-3 rounded-xl border p-3 text-left transition-[background-color,border-color,box-shadow,scale] duration-200 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-[0.98]",
               on ? "border-primary bg-primary/10 ring-1 ring-primary" : "bg-card hover:border-primary/40 hover:bg-accent",
             )}
           >

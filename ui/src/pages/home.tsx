@@ -492,53 +492,56 @@ export default function HomePage() {
           </AlertAction>
         </Alert>
       )}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-gradient-to-br from-primary/15 via-card to-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {t("control")}
-              <RunStatusBadge />
-            </CardTitle>
-            <CardDescription>{t("controlDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <RunButton size="lg" className="w-full" />
-            <p className="flex flex-wrap items-center justify-center gap-x-1 text-xs text-muted-foreground">
-              {t("firstTime")}
-              <a
-                href="#/guide"
-                className="inline-flex items-center gap-1 rounded-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                <CompassIcon className="size-3.5" />
-                {tc("nav.guide")}
-              </a>
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("mode")}</CardTitle>
-            <CardDescription>{t(`mode.${mode}.desc` as "mode.normal.desc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Select value={mode} onValueChange={(v) => void saveGeneral("macro_mode", v)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MODES.map((m) => (
-                  <SelectItem key={m} value={m}>
-                    {t(`mode.${m}` as "mode.normal")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* left: what runs and in which order; right: what it is doing, as tall as the left side */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
+          <Card className="bg-gradient-to-br from-primary/15 via-card to-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {t("control")}
+                <RunStatusBadge />
+              </CardTitle>
+              <CardDescription>{t("controlDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <RunButton size="lg" className="w-full" />
+                <p className="flex flex-wrap items-center justify-center gap-x-1 text-xs text-muted-foreground">
+                  {t("firstTime")}
+                  <a
+                    href="#/guide"
+                    className="inline-flex items-center gap-1 rounded-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    <CompassIcon className="size-3.5" />
+                    {tc("nav.guide")}
+                  </a>
+                </p>
+              </div>
+              <div className="space-y-1.5 border-t border-foreground/10 pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span id="home-macro-mode" className="text-sm font-medium">
+                    {t("mode")}
+                  </span>
+                  <Select value={mode} onValueChange={(v) => void saveGeneral("macro_mode", v)}>
+                    <SelectTrigger className="w-full sm:w-52" aria-labelledby="home-macro-mode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MODES.map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {t(`mode.${m}` as "mode.normal")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* keyed so a new mode's description fades in rather than swapping silently */}
+                <p key={mode} className="rm-tab-in text-xs text-muted-foreground">
+                  {t(`mode.${mode}.desc` as "mode.normal.desc")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>{t("tasks")}</CardTitle>

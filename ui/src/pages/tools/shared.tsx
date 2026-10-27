@@ -104,7 +104,7 @@ const exactKo: Record<string, string> = {
   "Auto clicker running. Stop it with the macro's configured stop hotkey.": "클릭하는 중이에요.",
   "Auto clicker is already stopped.": "이미 멈춰 있어요.",
   "Stopping auto clicker.": "멈추는 중이에요.",
-  "Auto clicker stop requested.": "멈추라고 요청했어요.",
+  "Auto clicker stop requested.": "정지를 요청했어요.",
   "The tool is already running.": "이미 실행 중이에요.",
   "Stop the macro before starting this tool.": "매크로를 먼저 멈춰야 이 도구를 시작할 수 있어요.",
   "The tool is still stopping. Try again in a moment.": "아직 멈추는 중이에요. 잠시 후 다시 눌러 주세요.",
@@ -112,14 +112,14 @@ const exactKo: Record<string, string> = {
   "Hotbar buff tool running. Stop it with the macro's configured stop hotkey.": "핫바 버프가 돌아가고 있어요.",
   "Hotbar buff tool is already stopped.": "이미 멈춰 있어요.",
   "Stopping hotbar buff tool.": "멈추는 중이에요.",
-  "Hotbar buff tool stop requested.": "멈추라고 요청했어요.",
+  "Hotbar buff tool stop requested.": "정지를 요청했어요.",
   "Hotbar buff tool running. Enable at least one slot in the tool settings.":
     "돌아가고 있지만 켜진 칸이 없어요. 아래에서 칸을 하나 이상 켜 주세요.",
   "Hotbar buff tool running. Waiting for the next configured slot timer.": "다음 칸을 누를 시간을 기다리는 중이에요.",
   "Preparing Roblox window.": "로블록스 창을 준비하는 중이에요.",
   "Tool started. Roblox will be focused automatically.": "도구를 시작했어요. 로블록스 창이 자동으로 앞으로 나와요.",
   "Stopping after the current step.": "지금 하던 단계까지만 하고 멈춰요.",
-  "Stop requested.": "멈추라고 요청했어요.",
+  "Stop requested.": "정지를 요청했어요.",
   "Stopped after a paused result was kept.": "원하던 결과가 나와서 그대로 두고 멈췄어요.",
   "Hover over the target bee slot in Roblox.": "로블록스에서 굴릴 벌 칸 위에 마우스를 올려 두세요.",
   "Bee slot captured. Starting rolls.": "벌 칸 위치를 저장했어요. 굴리기를 시작해요.",
@@ -138,7 +138,7 @@ const exactKo: Record<string, string> = {
   "Mythic skipped. Returning to Basic Eggs.": "신화 벌은 건너뛰고 다시 기본 알로 돌아가요.",
   "Legendary skipped. Returning to Basic Eggs.": "전설 벌은 건너뛰고 다시 기본 알로 돌아가요.",
   "Gifted non-Basic skipped. Returning to Basic Eggs.": "기프티드 벌은 건너뛰고 다시 기본 알로 돌아가요.",
-  "Tool finished.": "도구가 끝났어요.",
+  "Tool finished.": "끝났어요.",
 }
 
 const patternKo: [RegExp, (m: RegExpMatchArray) => string][] = [
