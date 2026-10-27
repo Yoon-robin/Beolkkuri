@@ -3996,9 +3996,12 @@ class macro:
             # it were already on slot 1.
             clientAlreadyOpen = appManager.isAppOpen("roblox")
             appManager.openDeeplink(deeplink)
-            # The sprinkler prompt is the macro's established indicator that the
-            # joined Bee Swarm session is ready for macro inputs.
+            # The sprinkler on the hotbar, or the honey bar at the top, shows the
+            # joined Bee Swarm session is ready for macro inputs. The hotbar can be
+            # empty (the player never put the sprinkler there); the honey bar is
+            # always part of the loaded game UI.
             sprinklerImg = self.adjustImage("./images/menu", "sprinkler")
+            honeyBarImg = Image.open(f"./images/menu/honeybar-{self.robloxWindow.display_type}.png").convert('RGBA')
             loadStartTime = time.time()
             # A deeplink is asynchronous, so ignore the old join-error dialog
             # briefly while Roblox starts processing this new request.
@@ -4018,9 +4021,9 @@ class macro:
             robloxOpenTime = 0
             gameLoaded = False
             lastJoinErrorScan = 0
-            # Cold starts have no prior sprinkler. In-game deeplink retries must
+            # Cold starts have no prior game UI. In-game deeplink retries must
             # see it disappear (loading) before the post-rejoin appearance counts.
-            sawSprinklerGap = not clientAlreadyOpen
+            sawGameUiGap = not clientAlreadyOpen
             softRejoinReadyAt = loadStartTime + (2 if clientAlreadyOpen else 0)
             while time.time() - loadStartTime < 36:
                 if joinPS and self.skipServer is not None and self.skipServer.value == 1:
@@ -4080,7 +4083,7 @@ class macro:
                             time.sleep(30)
                         rejoinSuccess = False
                         break
-                sprinklerVisible = bool(locateImageOnScreen(
+                gameUiVisible = bool(locateImageOnScreen(
                     sprinklerImg,
                     self.robloxWindow.mx,
                     self.robloxWindow.my + (self.robloxWindow.mh * 3 / 4),
@@ -4088,11 +4091,16 @@ class macro:
                     self.robloxWindow.mh / 4,
                     0.75,
                 ))
-                if clientAlreadyOpen and not sprinklerVisible:
-                    sawSprinklerGap = True
-                if sprinklerVisible and (
-                    sawSprinklerGap
-                    # Soft rejoins sometimes keep the hotbar visible; once the
+                if not gameUiVisible and robloxOpenTime:
+                    try:
+                        gameUiVisible = bool(self.robloxWindow._detectContentYOffset(honeyBarImg))
+                    except Exception:
+                        pass
+                if clientAlreadyOpen and not gameUiVisible:
+                    sawGameUiGap = True
+                if gameUiVisible and (
+                    sawGameUiGap
+                    # Soft rejoins sometimes keep the game UI visible; once the
                     # teleport has had time to finish, walk from spawn again.
                     or time.time() >= softRejoinReadyAt
                 ):

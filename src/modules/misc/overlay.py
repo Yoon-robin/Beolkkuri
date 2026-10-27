@@ -25,9 +25,11 @@ from PIL import Image, ImageDraw, ImageFont
 import modules.misc.settingsManager as settingsManager
 from modules.logging.log import colors as LOG_COLORS
 
-user32 = ctypes.windll.user32
-gdi32 = ctypes.windll.gdi32
-kernel32 = ctypes.windll.kernel32
+# Private DLL handles: argtypes set on ctypes.windll.* are shared by the whole process,
+# and pynput's PeekMessageW with its own MSG type would stop the hotkey listener.
+user32 = ctypes.WinDLL("user32", use_last_error=True)
+gdi32 = ctypes.WinDLL("gdi32", use_last_error=True)
+kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
 WS_POPUP = 0x80000000
 WS_EX_LAYERED = 0x00080000

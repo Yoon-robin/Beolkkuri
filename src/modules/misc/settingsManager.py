@@ -540,8 +540,7 @@ def saveRobinAITokenRanking(field_name, ranking, model="standard"):
 def getMacroVersion():
     """Get the macro version from version.txt file"""
     try:
-        destination = os.getcwd().replace("/src", "")
-        version_file = os.path.join(destination, "src", "webapp", "version.txt")
+        version_file = os.path.join(getProjectRoot(), "src", "webapp", "version.txt")
         if os.path.exists(version_file):
             with open(version_file, "r") as f:
                 version = f.read().strip()

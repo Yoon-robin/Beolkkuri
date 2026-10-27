@@ -64,7 +64,9 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 
 - **Roblox window:** `modules/misc/appManager.py` imports `appManagerMac.py` (AppKit, AppleScript, Accessibility) or `appManagerWindows.py` (ctypes user32/kernel32: process list, client rect, focus, close). Both export the same functions plus `FULLSCREEN_HOTKEY`.
 - **Keys:** Roblox ignores pyautogui's Windows key events (virtual-key codes only). `modules/controls/winInput.py` swaps pyautogui's `_keyDown`/`_keyUp` for `SendInput` with scan codes. `keyboard.py` installs it at import, so spawned processes get it too.
+- **ctypes:** bind Win32 functions on a private `ctypes.WinDLL("user32", use_last_error=True)` (likewise gdi32/kernel32), never on `ctypes.windll.*`. Function objects there are shared by the whole process, so `argtypes` set in one module replace pynput's: v1.0.2's overlay set `PeekMessageW` with its own `MSG` type, and the hotkey listener died at start (`expected LP_MSG instance`), so F1/F3 did nothing.
 - **Roblox language must be English.** The macro reads the game's English text and matches image templates with English words on them (claim hive, blender, disconnect). The guide has a step for it (roblox.com → Settings → Account Info → Language), and so do the README and `docs/display-settings.md`.
+- **Rejoin load check** (`rejoin` in `macro.py`, both platforms): the game counts as loaded when the sprinkler shows on the hotbar or the honey bar shows at the top. Before 1.0.3 only the sprinkler counted, so a player with an empty hotbar got "Game load was not confirmed" on every attempt.
 - **OCR:** Apple Vision (`ocrmac`) on macOS. On Windows, `modules/screen/winOcr.py` uses the built-in Windows.Media.Ocr through `winocr`. It upscales 4x because the engine misses small text otherwise. It prefers en-US and falls back to the user's languages; Korean Windows often has only `ko`, which still reads digits and most English.
 - **Image matching:** the compiled `bitmap_matcher` `.so` is macOS only. Elsewhere `bitmap_matcher/numpy_matcher.py` provides the same three functions in NumPy.
 - **Screen:** Windows coordinates are physical pixels (pyautogui makes the process DPI aware), so `screenData` reports a `built-in` display with no Retina factor. `screenshot.pillowGrab` uses `ImageGrab` instead of Quartz.
@@ -220,6 +222,10 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
+- v1.0.3, from the owner's first real run of v1.0.2 with Roblox:
+  - the hotkeys working again (see "ctypes");
+  - the rejoin load check with an empty hotbar;
+  - the macro version in logs and reports on Windows (it read `1.0` because `getMacroVersion` only stripped `/src`).
 - v1.0.1 follow-ups:
   - the first-run guide;
   - the console moving out of the way;
@@ -268,7 +274,7 @@ Not yet verified on a real Mac, so test these first:
 6. `main.py` had a SyntaxError (a raw line break inside the missing-dependencies message) from 1.0.0 until the Windows work fixed it, so no 1.0 build could start. Confirm the Mac launcher now starts the app.
 
 Not yet verified on Windows with Roblox, so test these first:
-1. A real macro run: Roblox window focus, movement keys through `winInput`, fullscreen with F11, reconnect via deeplink.
+1. A real macro run: Roblox window focus, movement keys through `winInput`, fullscreen with F11, reconnect via deeplink. So far (v1.0.2 on the owner's PC, 1920×1080 at 100%), the deeplink started Roblox and the game loaded in English; the run then stopped at the load check, which 1.0.3 fixes. Everything after joining is still untested, as are the F1/F3 hotkeys after the fix in a real run (it was checked with pynput and the overlay in one process).
 2. Image templates at Windows scaling (100% and others) and OCR on real game frames, with the `ko` and the `en-US` engine.
 3. A real release:
    - the workflow attaching `Beolkkuri-Setup.exe`;
