@@ -18,6 +18,8 @@
 
 ## 로블록스
 
+- **로블록스 언어는 영어(English)로 해 주세요.** 매크로는 게임 속 영어 글자와 버튼 모양(꿀 만들기, 벌집 차지, 블렌더, 연결 끊김 안내 등)을 보고 상황을 알아봐요. 한국어로 보이면 이걸 못 찾아서 멈춰요.
+  로블록스 웹사이트 → **설정 → 계정 정보 → 언어** 를 **English** 로 바꾸고 게임에 다시 들어가요. 게임 안 Esc 메뉴 → 설정에 언어 항목이 있으면 거기서 바꿔도 돼요.
 - 로블록스 창은 **최대화(전체 화면)** 상태로 두고, 매크로가 도는 동안 다른 창으로 가리지 마세요.
 - 게임 안 **그래픽 품질**은 너무 낮게 두지 않는 게 좋아요(자동 또는 중간 이상).
 - 카메라를 직접 돌리거나 확대/축소하지 마세요. 매크로가 카메라를 맞춰 둬요.
@@ -28,4 +30,4 @@
 
 ---
 
-**English:** Keep macOS display scaling at *Default for display* (on Windows, set display scale to 100% and turn off Night light and HDR), run Roblox maximised on the main monitor, turn off Night Shift, True Tone and colour filters, and don't move the camera or cover the Roblox window while the macro runs. If detection still fails, attach a debug export (*Settings → Other → Export debug folder*) to a GitHub issue.
+**English:** Set Roblox to English (roblox.com → Settings → Account Info → Language), because the macro reads the game's English text and buttons. Keep macOS display scaling at *Default for display* (on Windows, set display scale to 100% and turn off Night light and HDR), run Roblox maximised on the main monitor, turn off Night Shift, True Tone and colour filters, and don't move the camera or cover the Roblox window while the macro runs. If detection still fails, attach a debug export (*Settings → Other → Export debug folder*) to a GitHub issue.

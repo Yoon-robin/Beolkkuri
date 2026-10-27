@@ -834,14 +834,47 @@ def _install_windows_dependencies(destination, progress_callback=None):
     _report_update_progress(progress_callback, 97, "Installing libraries")
     try:
         import subprocess
-        subprocess.run([python, "-m", "pip", "install", "--prefer-binary", "--disable-pip-version-check",
-                        "--no-warn-script-location", "-r", requirements, "-c", requirements],
-                       stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL,
-                       stdin=subprocess.DEVNULL,
-                       creationflags=subprocess.CREATE_NO_WINDOW,
-                       timeout=900,
-                       check=False)
+        import threading
+        import time
+        process = subprocess.Popen([python, "-m", "pip", "install", "--prefer-binary", "--disable-pip-version-check",
+                                    "--no-warn-script-location", "-r", requirements, "-c", requirements],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT,
+                                   stdin=subprocess.DEVNULL,
+                                   creationflags=subprocess.CREATE_NO_WINDOW,
+                                   text=True, encoding="utf-8", errors="replace")
+        # pip's latest line, minus the "already satisfied" ones that fly by: the window shows
+        # it so a download of a few minutes doesn't look stuck.
+        latest = {"line": ""}
+
+        def read_output():
+            for line in process.stdout:
+                line = line.strip()
+                if line and not line.startswith("Requirement already satisfied"):
+                    latest["line"] = line
+
+        reader = threading.Thread(target=read_output, daemon=True)
+        reader.start()
+        deadline = time.monotonic() + 900
+        shown = None
+        while process.poll() is None:
+            if time.monotonic() > deadline:
+                process.kill()
+                print("\n[updater] Installing libraries took over 15 minutes; stopped it.")
+                break
+            message = f"Installing libraries: {latest['line'][:90]}" if latest["line"] else "Installing libraries"
+            if message != shown:
+                shown = message
+                _report_update_progress(progress_callback, 97, message)
+            elif progress_callback is not None:
+                # The callback waits for the app window, which lets the window answer
+                # its other calls in between instead of seeing the macro as stuck.
+                try:
+                    progress_callback(97, message)
+                except Exception:
+                    pass
+            time.sleep(0.25)
+        reader.join(timeout=5)
     except Exception as exc:
         print(f"[updater] Could not install libraries: {exc}")
 

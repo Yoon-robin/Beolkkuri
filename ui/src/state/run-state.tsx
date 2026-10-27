@@ -14,6 +14,8 @@ type RunStore = {
   stop: () => Promise<void>
   /** When the current session started (ms) and how long it has been paused, for the run timer. */
   session: { startedAt: number; pausedMs: number; pausedAt: number | null } | null
+  /** Python hasn't answered for a few seconds, so `status` may be stale. */
+  unresponsive: boolean
 }
 
 /** "1:02:03" / "4:05" style duration. */
@@ -69,11 +71,16 @@ export function RunStateProvider({ children }: { children: ReactNode }) {
   // (that flicker would announce a stop and a fresh start).
   const actionSeq = useRef(0)
   const firstPoll = useRef(true)
+  // When Python stops answering (something blocks its main thread, or it quit), the state
+  // above goes stale; say so instead of showing "running" or "stopping" forever.
+  const lastAnswer = useRef(0)
+  const [unresponsive, setUnresponsive] = useState(false)
 
   const poll = useCallback(async () => {
     const seq = actionSeq.current
     try {
       const next = toStatus(await py.getRunState())
+      lastAnswer.current = Date.now()
       if (seq !== actionSeq.current) return
       // a macro already running when the window opens isn't news, so no toast for it
       if (firstPoll.current) prev.current = next
@@ -89,6 +96,20 @@ export function RunStateProvider({ children }: { children: ReactNode }) {
     const timer = setInterval(poll, 500)
     return () => clearInterval(timer)
   }, [poll])
+
+  useEffect(() => {
+    const timer = setInterval(() => setUnresponsive(lastAnswer.current > 0 && Date.now() - lastAnswer.current > 6000), 1000)
+    return () => clearInterval(timer)
+  }, [])
+  const wasUnresponsive = useRef(false)
+  useEffect(() => {
+    if (unresponsive) {
+      toast.error(t("run.unresponsive"), { id: "unresponsive", description: t("run.unresponsiveDesc"), duration: Infinity })
+    } else if (wasUnresponsive.current) {
+      toast.success(t("run.recovered"), { id: "unresponsive", description: undefined, duration: 4000 })
+    }
+    wasUnresponsive.current = unresponsive
+  }, [unresponsive, t])
 
   usePythonEvent("toggleStartStop", () => {
     void poll()
@@ -123,7 +144,7 @@ export function RunStateProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value = useMemo(() => ({ status, start, stop, session }), [status, start, stop, session])
+  const value = useMemo(() => ({ status, start, stop, session, unresponsive }), [status, start, stop, session, unresponsive])
   return <RunContext.Provider value={value}>{children}</RunContext.Provider>
 }
 

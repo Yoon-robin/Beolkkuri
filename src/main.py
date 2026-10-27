@@ -1,6 +1,11 @@
 import os
 import subprocess
 import sys
+if __name__ == "__main__":
+    # The imports below take a while with nothing on screen, much longer on the first
+    # launch, when Python compiles every library once.
+    print("벌꿀이를 불러오는 중... 처음 켤 때는 1분쯤 걸릴 수 있어요.", flush=True)
+    print("Loading Beolkkuri. The first launch can take about a minute.", flush=True)
 from modules.misc import messageBox
 #check if installing dependencies was ran
 try:
@@ -2778,15 +2783,28 @@ def watch_for_hotkeys(run):
     force_stop_check_interval = 0.1  # Check every 100ms
     last_force_stop_check = 0
     
-    # Cache settings to avoid reloading on every keypress
-    settings_cache = {}
-    last_settings_load = 0
-    settings_cache_duration = 1.0  # Reload settings every 1 second max
-    
-    # Cache Eel recording state to avoid repeated calls
-    recording_cache = {"start": False, "pause": False, "stop": False, "hotbar_buff_start": False, "autoclicker": False, "auto_gifted_basic_bee_start": False}
-    last_recording_check = 0
-    recording_cache_duration = 0.5  # Check recording state every 0.5 seconds max
+    # Settings for the key callbacks, refreshed by a thread instead of on a key press: on
+    # Windows the callbacks run inside the keyboard hook, so every key on the PC (including
+    # the ones the macro presses) waits for them, and Windows drops a hook that is too slow.
+    try:
+        settings_cache = settingsManager.loadAllSettings()
+    except Exception:
+        settings_cache = {}
+
+    def refresh_settings():
+        nonlocal settings_cache
+        while True:
+            time.sleep(1.0)
+            try:
+                settings_cache = settingsManager.loadAllSettings()
+            except Exception:
+                pass
+
+    threading.Thread(target=refresh_settings, daemon=True).start()
+
+    def tell(title, text):
+        # A message box waits for a click, which the keyboard hook can't do.
+        threading.Thread(target=messageBox.msgBox, args=(title, text), daemon=True).start()
 
     def release_inputs():
         try:
@@ -2829,30 +2847,18 @@ def watch_for_hotkeys(run):
     }
     
     def get_cached_settings():
-        nonlocal settings_cache, last_settings_load
-        current_time = time.time()
-        if current_time - last_settings_load > settings_cache_duration:
-            settings_cache = settingsManager.loadAllSettings()
-            last_settings_load = current_time
         return settings_cache
-    
+
     def is_recording_keybind():
-        nonlocal recording_cache, last_recording_check
-        current_time = time.time()
-        if current_time - last_recording_check > recording_cache_duration:
-            try:
-                import eel
-                recording_cache["start"] = eel.getElementProperty("start_keybind", "dataset.recording")() == "true"
-                recording_cache["pause"] = eel.getElementProperty("pause_keybind", "dataset.recording")() == "true"
-                recording_cache["stop"] = eel.getElementProperty("stop_keybind", "dataset.recording")() == "true"
-                recording_cache["hotbar_buff_start"] = eel.getElementProperty("hotbar_buff_start_keybind", "dataset.recording")() == "true"
-                recording_cache["autoclicker"] = eel.getElementProperty("autoclicker_keybind", "dataset.recording")() == "true"
-                recording_cache["auto_gifted_basic_bee_start"] = eel.getElementProperty("auto_gifted_basic_bee_start_keybind", "dataset.recording")() == "true"
-                last_recording_check = current_time
-            except:
-                recording_cache = {"start": False, "pause": False, "stop": False, "hotbar_buff_start": False, "autoclicker": False, "auto_gifted_basic_bee_start": False}
-            return any(recording_cache.values())
-    
+        # The window reports keybind fields that are capturing keys (gui.setKeybindRecording).
+        # Never ask the window from here: eel belongs to the main thread, and this runs in
+        # the keyboard hook.
+        try:
+            import gui
+            return gui.isRecordingKeybind()
+        except Exception:
+            return False
+
     def normalize_key_name(key_name):
         key_name = str(key_name or "").strip()
         if not key_name:
@@ -2973,11 +2979,10 @@ def watch_for_hotkeys(run):
                     if run.value != 0:  # Only if not already stopped
                         release_inputs()
                         run.value = 0
-                        # Update GUI immediately so the app shows cleanup in progress.
+                        # The window polls the run state, so it shows cleanup in progress within half a second.
                         try:
                             import gui
                             gui.setRunState(0)
-                            gui.toggleStartStop()
                         except:
                             pass  # If gui is not ready, continue
                 else:
@@ -2992,7 +2997,7 @@ def watch_for_hotkeys(run):
                     try:
                         import gui
                         if gui.isAnyToolRunning():
-                            messageBox.msgBox(title="Tool Running", text="Stop the running tool before starting the macro.")
+                            tell(title="Tool Running", text="Stop the running tool before starting the macro.")
                             return
                     except Exception:
                         pass
@@ -3009,7 +3014,6 @@ def watch_for_hotkeys(run):
                     try:
                         import gui
                         gui.setRunState(2)  # Update GUI state optimistically to running
-                        gui.toggleStartStop()  # Update UI immediately
                     except:
                         pass  # If gui is not ready, continue
                 elif keys_match_keybind(stop_keybind) and not stop_key_held:
@@ -3030,11 +3034,10 @@ def watch_for_hotkeys(run):
                         return
                     release_inputs()
                     run.value = 0
-                    # Update GUI immediately so the app shows cleanup in progress.
+                    # The window polls the run state, so it shows cleanup in progress within half a second.
                     try:
                         import gui
                         gui.setRunState(0)
-                        gui.toggleStartStop()
                     except:
                         pass  # If gui is not ready, continue
                 elif keys_match_keybind(hotbar_buff_start_keybind):
@@ -3050,7 +3053,7 @@ def watch_for_hotkeys(run):
                         import gui
                         result = gui.startHotbarBuffTool()
                         if not result.get("ok") and not gui.isAnyToolRunning():
-                            messageBox.msgBox(title="Hotbar Buff", text=result.get("message", "Could not start Hotbar Buff."))
+                            tell(title="Hotbar Buff", text=result.get("message", "Could not start Hotbar Buff."))
                     except Exception:
                         pass
                 elif keys_match_keybind(autoclicker_keybind):
@@ -3063,7 +3066,7 @@ def watch_for_hotkeys(run):
                         import gui
                         result = gui.startAutoClickerTool()
                         if not result.get("ok") and not gui.isAnyToolRunning():
-                            messageBox.msgBox(title="Auto Clicker", text=result.get("message", "Could not start Auto Clicker."))
+                            tell(title="Auto Clicker", text=result.get("message", "Could not start Auto Clicker."))
                     except Exception:
                         pass
                 elif keys_match_keybind(auto_gifted_basic_bee_start_keybind):
@@ -3076,7 +3079,7 @@ def watch_for_hotkeys(run):
                         import gui
                         result = gui.startAutoGiftedBasicBeeTool()
                         if not result.get("ok") and not gui.isAnyToolRunning():
-                            messageBox.msgBox(title="Auto Gifted Basic Bee", text=result.get("message", "Could not start Auto Gifted Basic Bee."))
+                            tell(title="Auto Gifted Basic Bee", text=result.get("message", "Could not start Auto Gifted Basic Bee."))
                     except Exception:
                         pass
                 elif keys_match_keybind(pause_keybind):
@@ -3100,7 +3103,6 @@ def watch_for_hotkeys(run):
                         try:
                             import gui
                             gui.setRunState(6)
-                            gui.toggleStartStop()
                         except:
                             pass
                     elif run.value == 6:  # Paused -> Resume
@@ -3164,8 +3166,17 @@ def watch_for_hotkeys(run):
     # Return the function so it can be called later on the main thread
     return start_keyboard_listener
 
+def waitForMessageBox(title, text):
+    """Show a message box and wait until it is closed, while the app window keeps working.
+    Called on the main loop, a plain msgBox would freeze the window (it would stop
+    answering) until the box was closed, and the box can sit behind Roblox unseen."""
+    box = Thread(target=messageBox.msgBox, args=(title, text), daemon=True)
+    box.start()
+    while box.is_alive():
+        eel.sleep(0.1)
+
 if __name__ == "__main__":
-    print("Loading gui...")
+    print("앱 창을 여는 중... / Opening the app window...", flush=True)
     global stopThreads, macroProc
     import gui
     import modules.screen.screenData as screenData
@@ -3387,6 +3398,13 @@ if __name__ == "__main__":
     #setup and launch gui
     gui.run = run
     gui.launch()
+    # Progress card over the Roblox window while the macro runs (Windows only, see overlay.py)
+    if sys.platform == "win32":
+        try:
+            from modules.misc import overlay
+            overlay.start(run, status, recentLogs)
+        except Exception as e:
+            print(f"[overlay] Could not start: {e}")
     # Ensure GUI loads current settings immediately on open (adds Brown Bear if missing)
     try:
         gui.updateGUI()
@@ -3500,7 +3518,7 @@ if __name__ == "__main__":
             Thread(target=waitForStreamURL, daemon=True).start()
             return True
 
-        messageBox.msgBox(text='Cloudflared is required for streaming but is not installed. Visit https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/stream-setup.md for installation instructions', title='Cloudflared not installed')
+        waitForMessageBox(text='Cloudflared is required for streaming but is not installed. Visit https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/stream-setup.md for installation instructions', title='Cloudflared not installed')
         return False
 
     def processStreamControlCommands(settings):
@@ -3585,7 +3603,25 @@ if __name__ == "__main__":
                 route_category="macro_status",
             )
 
+    # If the loop below stops ticking, something is blocking the main thread, and the window
+    # freezes with it (it keeps showing "stopping", for example). Every thread's stack then
+    # goes into hang_report.txt so the cause can be found; Export Debug includes the file.
+    import faulthandler
+    hangReport = None
+    try:
+        hangReportPath = settingsManager.getUserDataPath("hang_report.txt")
+        if os.path.exists(hangReportPath) and os.path.getsize(hangReportPath) > 512 * 1024:
+            os.remove(hangReportPath)
+        hangReport = open(hangReportPath, "a", encoding="utf-8")
+        hangReport.write(f"\n--- Beolkkuri {settingsManager.getMacroVersion()} started {time.strftime('%Y-%m-%d %H:%M:%S')}. A stack dump below this line means the main loop stalled for 30 s.\n")
+        hangReport.flush()
+    except Exception:
+        hangReport = None
+
     while True:
+        # Each pass pushes the stall timer back.
+        if hangReport:
+            faulthandler.dump_traceback_later(30, file=hangReport)
         # Keep Eel responsive so GUI controls and hotkey recording checks can
         # complete. Standby still skips settings refresh and macro supervision.
         eel.sleep(1 if standbyState.active else 0.5)
@@ -3728,6 +3764,9 @@ if __name__ == "__main__":
             prevRunState = run.value
 
         if run.value == 1:
+            # The window keeps polling while a warning below waits for OK; it should
+            # see the start going ahead, not the macro still stopped.
+            gui.setRunState(2)
             if standbyState.active:
                 stopStandbyKeepAwake()
                 standbyState.active = False
@@ -3756,7 +3795,7 @@ if __name__ == "__main__":
                 for field in setdat.get("fields", []):
                     fs = fieldSettings.get(field, {})
                     if fs.get("field_drift_compensation", False) and setdat.get("sprinkler_type") != "saturator":
-                        messageBox.msgBox(title="Field Drift Compensation", text=f"You have Field Drift Compensation enabled for {field} field, \
+                        waitForMessageBox(title="Field Drift Compensation", text=f"You have Field Drift Compensation enabled for {field} field, \
                                         but you do not have Supreme Saturator as your sprinkler type in configs.\n\
                                         Color-based Field Drift Compensation requires the Supreme Saturator.\n\
                                         Enable 'Use Sprinkler Model For Field Drift Compensation' in Config to use AI detection with any sprinkler, \
@@ -3768,7 +3807,7 @@ if __name__ == "__main__":
                 if setdat[f"blender_item_{i}"] != "none" and (setdat[f"blender_repeat_{i}"] or setdat[f"blender_repeat_inf_{i}"]):
                     validBlender = True
             if not validBlender:
-                messageBox.msgBox(title="Blender", text=f"You have blender enabled, \
+                waitForMessageBox(title="Blender", text=f"You have blender enabled, \
                                     but there are no more items left to craft.\n\
 				                    Check the 'repeat' setting on your blender items and reset blender data.")
             #macro proc

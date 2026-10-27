@@ -14,6 +14,8 @@ import time
 import threading
 import plistlib
 import platform
+import re
+import tempfile
 from bottle import route, static_file
 from modules.submacros.autoGiftedBasicBee import AutoGiftedBasicBeeRunner
 import modules.controls.keyboard as keyboardModule
@@ -530,7 +532,7 @@ def openPrivacySettings(kind):
 
 # Windows reads game text best with its English OCR engine, but Korean Windows often
 # ships only the Korean one. The guide offers to add it (Beolkkuri-Setup.exe doesn't).
-_englishOcr = {"installed": None, "installing": False}
+_englishOcr = {"installed": None, "installing": False, "step": None, "error": None, "log": [], "startedAt": None}
 _ENGLISH_OCR_CHECK = ("from winrt.windows.globalization import Language\n"
                       "from winrt.windows.media.ocr import OcrEngine\n"
                       "print(any(OcrEngine.is_language_supported(Language(t)) for t in ('en-US', 'en')))")
@@ -552,9 +554,9 @@ def _hasEnglishOcr(fresh=False):
         return None
     return {"True": True, "False": False}.get(result.stdout.strip())
 
-def _runElevated(exe, params):
-    """Run exe as administrator, hidden, and wait for it. Windows asks the user first.
-    Returns the exit code, or None when the user said no."""
+def _runElevated(exe, params, onStarted=None):
+    """Run exe as administrator, hidden, and wait for it. Windows asks the user first;
+    onStarted runs once they said yes. Returns the exit code, or None when they said no."""
     import ctypes
     from ctypes import wintypes
 
@@ -579,20 +581,45 @@ def _runElevated(exe, params):
     info.hwnd = user32.GetForegroundWindow()
     if not shell32.ShellExecuteExW(ctypes.byref(info)):
         return None
+    if onStarted:
+        onStarted()
     kernel32.WaitForSingleObject(info.hProcess, 0xFFFFFFFF)
     code = wintypes.DWORD()
     kernel32.GetExitCodeProcess(info.hProcess, ctypes.byref(code))
     kernel32.CloseHandle(info.hProcess)
     return code.value
 
+_OCR_LOG = os.path.join(tempfile.gettempdir(), "Beolkkuri-ocr-install.log")
+_PERCENT = re.compile(r"(\d{1,3}(?:\.\d)?)%")
+
+def _readOcrInstallLog():
+    """DISM's progress so far: the last percentage it printed and its last few text lines."""
+    try:
+        with open(_OCR_LOG, "rb") as f:
+            text = f.read().decode("utf-8", "replace")
+    except OSError:
+        return None, []
+    # The progress bar redraws itself with carriage returns, so split on those too.
+    pieces = [p.strip() for p in re.split(r"[\r\n]+", text)]
+    percents = [float(m) for m in _PERCENT.findall(text)]
+    lines = [p for p in pieces if p and not p.startswith("[") and "%" not in p]
+    return (min(percents[-1], 100.0) if percents else None), lines[-3:]
+
 @eel.expose
 def getOcrStatus():
-    """Windows only: whether English OCR is installed (None when it can't be checked) and whether it is being added."""
+    """Windows only: whether English OCR is installed (None when it can't be checked), whether it is
+    being added, and while it is: the step, DISM's percentage and last lines, and the seconds so far."""
     if sys.platform != "win32":
         return None
     if _englishOcr["installed"] is None and not _englishOcr["installing"]:
         _englishOcr["installed"] = _hasEnglishOcr()
-    return dict(_englishOcr)
+    status = dict(_englishOcr)
+    if status.get("step") == "download":
+        status["percent"], status["log"] = _readOcrInstallLog()
+    startedAt = status.pop("startedAt", None)
+    if startedAt:
+        status["elapsed"] = int(time.time() - startedAt)
+    return status
 
 @eel.expose
 def installEnglishOcr():
@@ -601,11 +628,27 @@ def installEnglishOcr():
         return
 
     def install():
-        _runElevated("powershell.exe", "-NoProfile -Command Add-WindowsCapability -Online -Name Language.OCR~~~en-US~0.0.1.0")
+        try:
+            os.remove(_OCR_LOG)
+        except OSError:
+            pass
+        # DISM instead of Add-WindowsCapability: it prints a percentage, which goes to a
+        # file the UI reads, so a download of a few minutes doesn't look stuck.
+        dism = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "dism.exe")
+        code = _runElevated("cmd.exe", f'/c {dism} /Online /Add-Capability /CapabilityName:Language.OCR~~~en-US~0.0.1.0 '
+                                       f'/NoRestart /English > "{_OCR_LOG}" 2>&1',
+                            onStarted=lambda: _englishOcr.update(step="download"))
+        _englishOcr["step"] = "check"
         _englishOcr["installed"] = _hasEnglishOcr(fresh=True)
-        _englishOcr["installing"] = False
+        if code is None:
+            _englishOcr["error"] = "cancelled"
+        elif not _englishOcr["installed"]:
+            _englishOcr["error"] = "failed"
+            _englishOcr["log"] = _readOcrInstallLog()[1]
+        _englishOcr.update(installing=False, step=None, startedAt=None)
 
-    _englishOcr["installing"] = True
+    # "approve" until the administrator prompt is answered
+    _englishOcr.update(installing=True, step="approve", error=None, log=[], startedAt=time.time())
     # A thread, not an eel call that waits: eel runs on gevent without monkey patching,
     # so a long wait here would freeze the window.
     threading.Thread(target=install, daemon=True).start()
@@ -1076,6 +1119,14 @@ def exportDebugZip(profile_name=None):
             except Exception as e:
                 zf.writestr("system_info.txt", f"Failed to gather system info: {e}".encode("utf-8"))
 
+            # Stack dumps main.py writes when its loop stops ticking
+            try:
+                hang_report = settingsManager.getUserDataPath("hang_report.txt")
+                if os.path.exists(hang_report):
+                    zf.write(hang_report, "hang_report.txt")
+            except Exception:
+                pass
+
         mem.seek(0)
         b64 = base64.b64encode(mem.read()).decode("ascii")
         filename = f"beolkkuri_debug_{int(time.time())}.zip"
@@ -1500,6 +1551,23 @@ def getRunState():
 eel.expose(getRunState)
 eel.expose(setRunState)
 
+# Keybind fields capturing keys right now. The window reports them, so the hotkey listener
+# can ignore its own hotkeys meanwhile without asking the window from its thread.
+# A field that never reported stopping (the window closed or reloaded meanwhile) stops
+# counting after a minute, so the hotkeys can't stay off for good.
+_recording_keybinds = {}
+
+@eel.expose
+def setKeybindRecording(fieldId, recording):
+    if recording:
+        _recording_keybinds[fieldId] = time.monotonic()
+    else:
+        _recording_keybinds.pop(fieldId, None)
+
+def isRecordingKeybind():
+    now = time.monotonic()
+    return any(now - since < 60 for since in list(_recording_keybinds.values()))
+
 def setRecentLogs(logs):
     global _recent_logs
     _recent_logs = logs
@@ -1584,3 +1652,18 @@ def launch():
         except EnvironmentError:
             print("Chrome/Chromium could not be found. Opening in default browser...")
             openInDefaultBrowser()
+    _minimizeLauncherConsole()
+
+def _minimizeLauncherConsole():
+    # Beolkkuri.exe's console opened first and would cover the app window (and the guide
+    # on first launch). It stays open in the taskbar; the launcher brings it back on an error.
+    # Only for the launchers, not a terminal someone started main.py from.
+    if sys.platform != "win32" or not os.environ.get("BEOLKKURI_LAUNCHER"):
+        return
+    try:
+        import ctypes
+        console = ctypes.windll.kernel32.GetConsoleWindow()
+        if console:
+            ctypes.windll.user32.ShowWindow(console, 7)  # SW_SHOWMINNOACTIVE
+    except Exception:
+        pass

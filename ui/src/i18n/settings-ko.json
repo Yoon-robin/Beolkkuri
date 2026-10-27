@@ -987,6 +987,14 @@
     "autoclicker_stop": {
       "title": "오토 클릭 정지",
       "desc": "모든 자동 클릭을 멈춰요."
+    },
+    "overlay_enabled": {
+      "title": "게임 위에 진행 상황 띄우기",
+      "desc": "매크로가 도는 동안 로블록스 위에 지금 하는 일, 실행 시간, 최근 기록을 띄워요."
+    },
+    "overlay_position": {
+      "title": "오버레이 위치",
+      "desc": "로블록스 창의 어느 모서리에 띄울지 골라요."
     }
   },
   "sections": {
@@ -1196,6 +1204,10 @@
     "Auto Clicker": {
       "title": "오토 클릭",
       "desc": "설정한 간격마다 왼쪽 클릭을 반복해요."
+    },
+    "Game Overlay": {
+      "title": "게임 오버레이",
+      "desc": "로블록스 창 위에 작은 카드로 매크로가 하는 일을 보여 줘요. 클릭은 그대로 게임에 가고, 매크로가 찍는 화면에는 안 보여요."
     }
   },
   "options": {
@@ -1356,6 +1368,10 @@
     "Replace": "교체",
     "Stop": "정지",
     "Wait for command": "명령 대기",
-    "No Override": "기본 설정대로"
+    "No Override": "기본 설정대로",
+    "Bottom Left": "왼쪽 아래",
+    "Top Left": "왼쪽 위",
+    "Top Right": "오른쪽 위",
+    "Bottom Right": "오른쪽 아래"
   }
 }

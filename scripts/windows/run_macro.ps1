@@ -55,6 +55,11 @@ do {
 
 if ($code -ne 0) {
 	# Keep the error on screen; a double-clicked window would otherwise close at once.
+	# The macro minimized this window when the app opened (gui.py), so bring it back first.
+	try {
+		Add-Type -Namespace Beolkkuri -Name Console -MemberDefinition '[DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow(); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);'
+		[void][Beolkkuri.Console]::ShowWindow([Beolkkuri.Console]::GetConsoleWindow(), 9)
+	} catch {}
 	Write-Host ""
 	Write-Host "벌꿀이가 오류로 멈췄어요 (코드 $code). 위 내용을 GitHub Issues에 올려 주세요." -ForegroundColor Red
 	Write-Host "Beolkkuri stopped with an error (code $code). Please report the text above on GitHub Issues." -ForegroundColor Red

@@ -6,6 +6,7 @@ import {
   GamepadIcon,
   HomeIcon,
   KeyboardIcon,
+  LanguagesIcon,
   LifeBuoyIcon,
   Loader2Icon,
   MonitorIcon,
@@ -28,6 +29,7 @@ import { py, type OcrStatus, type PermissionKind } from "@/lib/py"
 import type { PageId } from "@/lib/route"
 import { cn } from "@/lib/utils"
 import { useOcrStatus } from "@/state/ocr"
+import { formatDuration } from "@/state/run-state"
 import { usePermissions } from "@/state/permissions"
 import { useSettings, useSetting } from "@/state/settings"
 
@@ -60,6 +62,16 @@ const strings: PageStrings<
   | "ocr.installing"
   | "ocr.note"
   | "ocr.failed"
+  | "ocr.cancelled"
+  | "ocr.step.approve"
+  | "ocr.step.approveSlow"
+  | "ocr.step.preparing"
+  | "ocr.step.download"
+  | "ocr.step.check"
+  | "ocr.slowNote"
+  | "lang.title"
+  | "lang.body"
+  | "lang.how"
   | "display.title"
   | "display.body"
   | "game.title"
@@ -113,6 +125,16 @@ const strings: PageStrings<
     "ocr.installing": "설치하는 중",
     "ocr.note": "설치하기를 누르면 관리자 확인 창이 한 번 떠요. '예'를 누르면 윈도우가 내려받아 설치해요. 몇 분 걸릴 수 있어요.",
     "ocr.failed": "설치되지 않았어요. 다시 눌러 보세요. 영어 글자 인식이 없어도 숫자와 영어는 대부분 읽어요.",
+    "ocr.cancelled": "관리자 확인 창에서 '아니요'를 눌러서 설치하지 않았어요. 설치하기를 다시 누르면 돼요.",
+    "ocr.step.approve": "관리자 확인 창에서 '예'를 눌러 주세요",
+    "ocr.step.approveSlow": "확인 창이 안 보이면 작업 표시줄에서 깜박이는 방패 아이콘을 눌러 보세요.",
+    "ocr.step.preparing": "윈도우가 설치를 준비하는 중",
+    "ocr.step.download": "내려받아 설치하는 중",
+    "ocr.step.check": "잘 설치됐는지 확인하는 중",
+    "ocr.slowNote": "숫자가 한동안 그대로여도 정상이에요. 인터넷 속도에 따라 몇 분 걸려요. 끝나면 저절로 바뀌어요.",
+    "lang.title": "로블록스 언어를 영어로 바꾸기",
+    "lang.body": "매크로는 게임 속 영어 글자와 버튼 모양을 보고 상황을 알아봐요. 로블록스가 한국어로 보이면 꿀 만들기 버튼이나 벌집을 못 찾아서 멈춰요.",
+    "lang.how": "로블록스 웹사이트 → 설정 → 계정 정보 → 언어를 English로 바꾸고 게임에 다시 들어가요. 게임 안 Esc 메뉴 → 설정에 언어 항목이 있으면 거기서 바꿔도 돼요.",
     "display.title": "화면 설정 확인",
     "display.body": isMac
       ? "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요."
@@ -169,6 +191,16 @@ const strings: PageStrings<
     "ocr.installing": "Installing",
     "ocr.note": "Install asks for administrator approval once. Click Yes and Windows downloads it, which can take a few minutes.",
     "ocr.failed": "It wasn't installed. Try again. Without it, Beolkkuri still reads most numbers and English text.",
+    "ocr.cancelled": "The administrator prompt was declined, so nothing was installed. Press Install to try again.",
+    "ocr.step.approve": "Click Yes in the administrator prompt",
+    "ocr.step.approveSlow": "Can't see the prompt? Click the flashing shield icon in the taskbar.",
+    "ocr.step.preparing": "Windows is getting ready",
+    "ocr.step.download": "Downloading and installing",
+    "ocr.step.check": "Checking that it worked",
+    "ocr.slowNote": "The number can sit still for a while; that's normal. It takes a few minutes depending on your connection and updates by itself when done.",
+    "lang.title": "Set Roblox to English",
+    "lang.body": "The macro finds its way by the game's English text and buttons. If Roblox shows another language, it can't find the Make Honey button or your hive and gets stuck.",
+    "lang.how": "On the Roblox website, open Settings → Account Info → Language, choose English, then rejoin the game. If the in-game Esc menu → Settings has a Language option, that works too.",
     "display.title": "Check display settings",
     "display.body": isMac
       ? "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor."
@@ -312,7 +344,10 @@ function OcrRow({ status, onInstall }: { status: OcrStatus | undefined; onInstal
       <StatusDot value={busy ? undefined : value} />
       <span className="flex-1 text-foreground">{s("ocr.label")}</span>
       {status?.installing ? (
-        <span className="text-xs text-muted-foreground animate-in fade-in-0 duration-300">{s("ocr.installing")}</span>
+        <span className="text-xs text-muted-foreground tabular-nums animate-in fade-in-0 duration-300">
+          {s("ocr.installing")}
+          {status.elapsed !== undefined && ` · ${formatDuration(status.elapsed * 1000)}`}
+        </span>
       ) : value === false ? (
         <Button size="sm" onClick={onInstall}>
           {s("ocr.install")}
@@ -324,6 +359,45 @@ function OcrRow({ status, onInstall }: { status: OcrStatus | undefined; onInstal
           </span>
         )
       )}
+    </div>
+  )
+}
+
+/** What the install is doing right now, so a few quiet minutes don't look stuck. */
+function OcrProgress({ status }: { status: OcrStatus }) {
+  const s = useStrings(strings)
+  const { step, percent } = status
+  const known = typeof percent === "number"
+  // Older apps only say "installing"; they get the spinner and the timer above.
+  if (!step) return null
+  const label =
+    step === "approve" ? s("ocr.step.approve") : step === "check" ? s("ocr.step.check") : known ? s("ocr.step.download") : s("ocr.step.preparing")
+  return (
+    <div className="space-y-2 rounded-lg border bg-muted/20 px-3 py-2.5 animate-in fade-in-0 duration-300">
+      <div className="flex items-baseline gap-2 text-foreground">
+        <span key={label} className="flex-1 bk-swap">
+          {label}
+        </span>
+        {step === "download" && known && <span className="text-xs tabular-nums text-muted-foreground">{percent.toFixed(1)}%</span>}
+      </div>
+      {step === "download" && known && <Progress value={percent} className="h-1.5 [&>*]:duration-700" aria-label={label} />}
+      {step === "approve" && (status.elapsed ?? 0) >= 15 && <p className="text-xs">{s("ocr.step.approveSlow")}</p>}
+      {step === "download" && <p className="text-xs">{s("ocr.slowNote")}</p>}
+      <OcrLog lines={status.log} />
+    </div>
+  )
+}
+
+/** DISM's last few lines, as it printed them (English). */
+function OcrLog({ lines }: { lines?: string[] }) {
+  if (!lines?.length) return null
+  return (
+    <div className="space-y-0.5 font-mono text-[0.7rem] leading-relaxed text-muted-foreground/80">
+      {lines.map((line, i) => (
+        <p key={`${i}:${line}`} className="truncate" title={line}>
+          {line}
+        </p>
+      ))}
     </div>
   )
 }
@@ -343,7 +417,7 @@ export default function GuidePage() {
   const s = useStrings(strings)
   const { settings, fields, saveGeneral } = useSettings()
   const { status: perms, refresh: refreshPerms } = usePermissions()
-  const { status: ocr, install: installOcr, failed: ocrFailed } = useOcrStatus()
+  const { status: ocr, install: installOcr, error: ocrError } = useOcrStatus()
   const permsOk = !!perms && perms.accessibility !== false && perms.screenRecording !== false && !perms.fullKeyboardAccess
 
   const hiveSlot = String(useSetting<number | string>("preferred_hive_slot", 1) ?? 1)
@@ -402,16 +476,30 @@ export default function GuidePage() {
             <Step n={1} icon={<ScanTextIcon />} title={s("ocr.title")} done={ocrKnown ? ocr.installed === true : undefined}>
               <p>{s("ocr.body")}</p>
               <OcrRow status={ocr} onInstall={() => void installOcr()} />
-              {ocr?.installed !== true && <p className={cn("text-xs", ocrFailed && "text-amber-700 dark:text-amber-300")}>{s(ocrFailed ? "ocr.failed" : "ocr.note")}</p>}
+              {ocr?.installing && <OcrProgress status={ocr} />}
+              {ocr && !ocr.installing && ocr.installed !== true && (
+                <>
+                  <p className={cn("text-xs", ocrError && "text-amber-700 dark:text-amber-300")}>
+                    {s(ocrError === "cancelled" ? "ocr.cancelled" : ocrError ? "ocr.failed" : "ocr.note")}
+                  </p>
+                  {ocrError === "failed" && <OcrLog lines={ocr.log} />}
+                </>
+              )}
             </Step>
           )}
 
-          <Step n={first + 1} icon={<MonitorIcon />} title={s("display.title")}>
+          <Step n={first + 1} icon={<LanguagesIcon />} title={s("lang.title")}>
+            <p>{s("lang.body")}</p>
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-amber-700 dark:text-amber-300">{s("lang.how")}</p>
+            <DocLink doc="display-settings" />
+          </Step>
+
+          <Step n={first + 2} icon={<MonitorIcon />} title={s("display.title")}>
             <p>{s("display.body")}</p>
             <DocLink doc="display-settings" />
           </Step>
 
-          <Step n={first + 2} icon={<GamepadIcon />} title={s("game.title")} done={!!privateServer}>
+          <Step n={first + 3} icon={<GamepadIcon />} title={s("game.title")} done={!!privateServer}>
             <p>{s("game.body")}</p>
             {privateServer ? (
               <p className="text-emerald-600 dark:text-emerald-400">{s("game.psSet")}</p>
@@ -422,7 +510,7 @@ export default function GuidePage() {
             )}
           </Step>
 
-          <Step n={first + 3} icon={<HomeIcon />} title={s("hive.title")}>
+          <Step n={first + 4} icon={<HomeIcon />} title={s("hive.title")}>
             <p>{s("hive.body")}</p>
             <div className="flex items-center gap-3">
               <span className="text-foreground">{s("hive.slot")}</span>
@@ -441,7 +529,7 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step n={first + 4} icon={<FlowerIcon />} title={s("fields.title")} done={enabledFields > 0}>
+          <Step n={first + 5} icon={<FlowerIcon />} title={s("fields.title")} done={enabledFields > 0}>
             <p>{s("fields.body")}</p>
             <div className="flex flex-wrap items-center gap-3">
               <span className={cn(enabledFields > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
@@ -453,7 +541,7 @@ export default function GuidePage() {
             </div>
           </Step>
 
-          <Step n={first + 5} icon={<KeyboardIcon />} title={s("start.title")}>
+          <Step n={first + 6} icon={<KeyboardIcon />} title={s("start.title")}>
             <p>{s("start.body")}</p>
             <div className="flex flex-wrap items-center gap-4">
               <RunButton size="lg" />

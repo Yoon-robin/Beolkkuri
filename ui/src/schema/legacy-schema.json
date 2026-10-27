@@ -2407,6 +2407,51 @@
   {
     "tab": "config",
     "panel": "other",
+    "title": "Game Overlay",
+    "desc": "A small card over the Roblox window shows what the macro is doing. Clicks pass through it, and the macro's own screenshots don't see it.",
+    "platform": "windows",
+    "settings": [
+      {
+        "id": "overlay_enabled",
+        "title": "Show progress over the game",
+        "desc": "While the macro runs, show the current task, run time and latest log lines over Roblox.",
+        "type": {
+          "name": "checkbox",
+          "triggerFunction": "saveSetting(this, 'general')"
+        }
+      },
+      {
+        "id": "overlay_position",
+        "title": "Overlay position",
+        "desc": "The corner of the Roblox window the card sits in.",
+        "type": {
+          "name": "dropdown",
+          "data": [
+            {
+              "label": "Bottom Left",
+              "value": "bottom_left"
+            },
+            {
+              "label": "Top Left",
+              "value": "top_left"
+            },
+            {
+              "label": "Top Right",
+              "value": "top_right"
+            },
+            {
+              "label": "Bottom Right",
+              "value": "bottom_right"
+            }
+          ],
+          "triggerFunction": "saveSetting(this, 'general')"
+        }
+      }
+    ]
+  },
+  {
+    "tab": "config",
+    "panel": "other",
     "title": "Hourly / Session Reports",
     "desc": "",
     "settings": [

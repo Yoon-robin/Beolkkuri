@@ -3,6 +3,8 @@
 // mounted React listener.
 import { useEffect, useRef } from "react"
 
+import { callPyQuiet } from "@/lib/py"
+
 type Listener = (...args: never[]) => unknown
 
 function bridge() {
@@ -57,4 +59,6 @@ export function usePythonEvent<F extends Listener>(name: PythonEvent, handler: F
 /** Tell the macro a keybind field is capturing keys, so it ignores its own hotkeys meanwhile. */
 export function setKeybindRecording(id: string, recording: boolean) {
   bridge().recording[id] = recording
+  // Python's hotkey listener reads this; it can't ask the window from its own thread.
+  void callPyQuiet("setKeybindRecording", id, recording)
 }

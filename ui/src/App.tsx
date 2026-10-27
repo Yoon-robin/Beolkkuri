@@ -65,10 +65,28 @@ function usePersistedPreferences() {
   }, [theme]) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
+/**
+ * The first time Beolkkuri opens, start on the guide instead of Home. Someone who already
+ * set a private server (an install from before this setting) has been through it.
+ */
+function useFirstRunGuide(setPage: (page: PageId) => void) {
+  const { settings, saveGeneral } = useSettings()
+  const checked = useRef(false)
+
+  useEffect(() => {
+    if (!settings || checked.current) return
+    checked.current = true
+    if (settings.guide_shown) return
+    if (!settings.private_server_link) setPage("guide")
+    void saveGeneral("guide_shown", true)
+  }, [settings, setPage, saveGeneral])
+}
+
 function Shell() {
   usePersistedPreferences()
   const { t } = useI18n()
   const [page, setPage] = usePage()
+  useFirstRunGuide(setPage)
   const { settings, loadError, refresh } = useSettings()
   const Current = PAGE_COMPONENTS[page]
   const label = NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label

@@ -2,7 +2,9 @@ import hashlib
 import os
 import platform
 import shutil
+import sys
 import tempfile
+import time
 import zipfile
 from io import BytesIO
 
@@ -182,14 +184,43 @@ def _local_matches_remote(local_root, remote_files, remote_root_path):
     return True
 
 
-def _download_file(url, destination):
+def _show_progress(label, done, total, final=False):
+    """One console line per file, redrawn in place, so a long download doesn't look stuck."""
+    out = sys.stdout
+    if out is None:
+        return
+    interactive = getattr(out, "isatty", lambda: False)()
+    if not final and not interactive:
+        return
+    mb = 1024 * 1024
+    if total:
+        text = f"   {label}  {done / mb:.1f} / {total / mb:.1f} MB ({min(100, done * 100 // total)}%)"
+    else:
+        text = f"   {label}  {done / mb:.1f} MB"
+    try:
+        out.write(("\r" if interactive else "") + text.ljust(72) + ("\n" if final else ""))
+        out.flush()
+    except Exception:
+        pass
+
+
+def _download_file(url, destination, label=None):
     os.makedirs(os.path.dirname(destination), exist_ok=True)
     with requests.get(url, timeout=60, stream=True) as response:
         response.raise_for_status()
+        total = int(response.headers.get("Content-Length") or 0)
+        done = 0
+        shown = 0.0
         with open(destination, "wb") as fh:
             for chunk in response.iter_content(chunk_size=1024 * 256):
                 if chunk:
                     fh.write(chunk)
+                    done += len(chunk)
+                    if label and time.monotonic() - shown >= 0.5:
+                        shown = time.monotonic()
+                        _show_progress(label, done, total)
+        if label:
+            _show_progress(label, done, total, final=True)
 
 
 def _download_remote_tree(remote_files, remote_root_path, destination_root):
@@ -197,7 +228,7 @@ def _download_remote_tree(remote_files, remote_root_path, destination_root):
     try:
         if len(remote_files) == 1 and remote_files[0].get("path") == remote_root_path:
             tmp_file = os.path.join(tmp_root, remote_root_path)
-            _download_file(remote_files[0]["download_url"], tmp_file)
+            _download_file(remote_files[0]["download_url"], tmp_file, label=remote_root_path)
             if not _local_matches_remote(tmp_file, remote_files, remote_root_path):
                 raise ValueError(f"Downloaded model failed hash check: {remote_root_path}")
             if os.path.exists(destination_root):
@@ -210,7 +241,10 @@ def _download_remote_tree(remote_files, remote_root_path, destination_root):
             return
         for remote_file in remote_files:
             rel_path = os.path.relpath(remote_file["path"], remote_root_path)
-            _download_file(remote_file["download_url"], os.path.join(tmp_root, rel_path))
+            # a model folder has many small files; only the big ones are worth a line
+            big = (remote_file.get("size") or 0) >= 5 * 1024 * 1024
+            _download_file(remote_file["download_url"], os.path.join(tmp_root, rel_path),
+                           label=f"{remote_root_path}/{rel_path}" if big else None)
         if not _local_matches_remote(tmp_root, remote_files, remote_root_path):
             raise ValueError(f"Downloaded model failed hash check: {remote_root_path}")
         if os.path.exists(destination_root):
@@ -301,10 +335,20 @@ def ensure_supported_models():
     return {"downloaded": downloaded, "skipped": skipped, "model_dir": MODEL_DIR}
 
 
+def _announce_first_download(missing):
+    print()
+    print(f"AI 채집에 쓰는 모델 {len(missing)}개를 처음 한 번 내려받아요. 인터넷 속도에 따라 몇 분 걸려요.")
+    print(f"Downloading {len(missing)} AI gather model(s) once. This can take a few minutes.")
+    print("다 받으면 앱 창이 열려요. / The app window opens when it's done.")
+
+
 def ensure_missing_supported_models():
     os.makedirs(MODEL_DIR, exist_ok=True)
     downloaded = []
     skipped = []
+    missing = [name for name in _supported_model_names() if not os.path.exists(os.path.join(MODEL_DIR, name))]
+    if missing:
+        _announce_first_download(missing)
     for model_name in _supported_model_names():
         local_path = os.path.join(MODEL_DIR, model_name)
         if os.path.exists(local_path):
@@ -319,6 +363,9 @@ def ensure_missing_supported_models():
             print(f"[models] Checking repository zip for {model_name}...")
             _copy_from_repo_zip(model_name, local_path)
         downloaded.append(model_name)
+    if missing:
+        print("AI 모델을 모두 받았어요. / AI models are ready.")
+        print()
     cleanup_unused_models()
     return {"downloaded": downloaded, "skipped": skipped, "model_dir": MODEL_DIR}
 

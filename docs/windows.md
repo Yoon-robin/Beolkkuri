@@ -36,12 +36,16 @@ irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | ie
 
 ## 2. 실행하기
 
-1. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요.
-2. 시작 메뉴나 바탕화면의 **벌꿀이**를 열어요.
-3. **벌꿀이 명령 창**(검은 창)이 먼저 뜨고, 이어서 매크로 화면이 열려요. 크롬이 있으면 크롬 앱 창으로, 없으면 엣지로 열려요.
-   - 명령 창은 매크로가 켜져 있는 동안 **닫으면 안 돼요**. 최소화는 괜찮아요.
+1. 로블록스 언어를 **영어(English)** 로 해 둬요 (웹사이트 → 설정 → 계정 정보 → 언어). 매크로가 게임 속 영어 글자와 버튼을 보고 움직여요.
+2. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요.
+3. 시작 메뉴나 바탕화면의 **벌꿀이**를 열어요.
+4. **벌꿀이 명령 창**(검은 창)이 먼저 뜨고, 이어서 매크로 화면이 열려요. 크롬이 있으면 크롬 앱 창으로, 없으면 엣지로 열려요.
+   - 처음 켤 때는 라이브러리를 준비하고 AI 모델을 내려받느라 몇 분 걸려요. 명령 창에 진행 상황이 나와요.
+   - 매크로 화면이 열리면 명령 창은 작업 표시줄로 내려가요. 매크로가 켜져 있는 동안 **닫으면 안 돼요**.
    - 벌꿀이를 다시 열면 이전에 켜 둔 벌꿀이는 알아서 꺼져요.
-4. 왼쪽의 **시작 가이드** 를 따라 하면 돼요.
+5. 처음 켜면 **시작 가이드** 가 열려요. 차례대로 따라 하면 돼요.
+
+매크로가 도는 동안에는 로블록스 창 구석에 지금 하는 일, 실행 시간, 최근 기록이 작은 카드로 떠요. 클릭은 그대로 게임에 가고, 매크로가 찍는 화면에는 안 보여요. **설정 → 기타 설정 → 게임 오버레이** 에서 끄거나 위치를 바꿀 수 있어요.
 
 ## 3. 업데이트
 
@@ -67,7 +71,8 @@ irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | ie
 한국어 윈도우에는 보통 한국어 OCR만 들어 있어요. 숫자와 영어도 대부분 읽지만, 영어 OCR을 추가하는 걸 추천해요.
 
 - 벌꿀이의 **시작 가이드 → 1. 영어 글자 인식 추가하기** 에서 **설치하기** 를 눌러요. 관리자 확인 창이 한 번 뜨면 **예** 를 눌러요. 윈도우가 내려받아 설치하느라 몇 분 걸릴 수 있어요.
-- 확인 창이 안 보이면 작업 표시줄에서 깜빡이는 아이콘을 눌러 보세요.
+- 설치하는 동안 가이드에 지금 단계, 걸린 시간, 진행률과 윈도우가 남긴 기록이 나와요. 진행률이 한동안 그대로여도 정상이에요.
+- 확인 창이 안 보이면 작업 표시줄에서 깜빡이는 방패 아이콘을 눌러 보세요.
 - 직접 설치하려면 **관리자 권한 터미널**에서 아래를 실행해요.
 
   ```powershell
@@ -91,4 +96,4 @@ irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | ie
 
 ---
 
-**English:** 벌꿀이 (Beolkkuri) runs on 64-bit Windows 10 (1809 or later) and Windows 11, and needs no permissions there. Download [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) and open it; if "Windows protected your PC" appears, click More info → Run anyway (the app isn't code-signed). It installs for your account only, without administrator rights, into `%LOCALAPPDATA%\Programs\Beolkkuri` with Python included, adds a Start menu entry (and a Desktop shortcut if checked), and brings over profiles from an old `%USERPROFILE%\Beolkkuri` install. `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` in PowerShell runs the same installer. Beolkkuri updates itself and restarts when you open it, never while the macro runs; turn that off under Settings → Other. Keep the 벌꿀이 console window open while it runs. For the most accurate text reading, add English OCR from step 1 of Getting Started (one administrator prompt). Use 100% display scaling, turn off Night light and HDR, run Roblox maximised on the main monitor, and don't run Roblox as administrator. Uninstall it under Settings → Apps → Installed apps; your settings stay unless you tick the box. The installer log is `%TEMP%\Beolkkuri-Setup.log`. To work on the code instead, download the ZIP and run `install_dependencies.bat`.
+**English:** 벌꿀이 (Beolkkuri) runs on 64-bit Windows 10 (1809 or later) and Windows 11, and needs no permissions there. Download [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) and open it; if "Windows protected your PC" appears, click More info → Run anyway (the app isn't code-signed). It installs for your account only, without administrator rights, into `%LOCALAPPDATA%\Programs\Beolkkuri` with Python included, adds a Start menu entry (and a Desktop shortcut if checked), and brings over profiles from an old `%USERPROFILE%\Beolkkuri` install. `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` in PowerShell runs the same installer. Beolkkuri updates itself and restarts when you open it, never while the macro runs; turn that off under Settings → Other. Set Roblox to English (roblox.com → Settings → Account Info → Language), since the macro reads the game's English text. The first launch takes a few minutes while libraries are prepared and AI models download; the console window shows the progress, then moves to the taskbar once the app opens. Keep it open while the macro runs. While the macro runs, a small card in a corner of the Roblox window shows the current task, run time and latest logs; clicks pass through it and the macro's screenshots don't see it (Settings → Other → Game Overlay). For the most accurate text reading, add English OCR from step 1 of Getting Started (one administrator prompt). Use 100% display scaling, turn off Night light and HDR, run Roblox maximised on the main monitor, and don't run Roblox as administrator. Uninstall it under Settings → Apps → Installed apps; your settings stay unless you tick the box. The installer log is `%TEMP%\Beolkkuri-Setup.log`. To work on the code instead, download the ZIP and run `install_dependencies.bat`.

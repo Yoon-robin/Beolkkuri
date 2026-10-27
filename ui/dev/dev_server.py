@@ -22,17 +22,37 @@ import settingsManager  # noqa: E402
 # "opening" its settings pane turns it on.
 DEV_PERMISSIONS = {"accessibility": True, "screenRecording": False, "fullKeyboardAccess": False}
 # Windows: English OCR starts missing, and "installing" it takes a few seconds.
-DEV_OCR = {"installed": False, "installing": False}
+DEV_OCR = {"installed": False, "installing": False, "step": None, "error": None, "log": []}
 
 
 def dev_install_ocr():
-    DEV_OCR["installing"] = True
+    # Walks through the real steps (gui.installEnglishOcr) in about 12 seconds.
+    started = time.time()
+    DEV_OCR.update(installing=True, step="approve", error=None, log=[], percent=None, startedAt=started)
 
     def finish():
-        time.sleep(4)
-        DEV_OCR.update(installed=True, installing=False)
+        time.sleep(2)
+        DEV_OCR.update(step="download", log=["Deployment Image Servicing and Management tool", "Version: 10.0.26100.1"])
+        time.sleep(1.5)
+        DEV_OCR["log"] = DEV_OCR["log"] + ["Image Version: 10.0.26200.6584"]
+        for percent in range(0, 101, 10):
+            DEV_OCR["percent"] = float(percent)
+            time.sleep(0.6)
+        DEV_OCR.update(step="check", log=DEV_OCR["log"] + ["The operation completed successfully."])
+        time.sleep(1.5)
+        DEV_OCR.update(installed=True, installing=False, step=None, percent=None, startedAt=None)
 
     threading.Thread(target=finish, daemon=True).start()
+
+
+def dev_ocr_status():
+    if sys.platform != "win32":
+        return None
+    status = dict(DEV_OCR)
+    started = status.pop("startedAt", None)
+    if started:
+        status["elapsed"] = int(time.time() - started)
+    return status
 
 RUN_STATE = {"value": 3}  # 0 stopping, 2 running, 3 stopped, 6 paused
 LOGS = [
@@ -69,9 +89,10 @@ STUBS = {
     "getRunState": lambda: RUN_STATE["value"],
     "getPermissionStatus": lambda: dict(DEV_PERMISSIONS),
     "openPrivacySettings": lambda kind: DEV_PERMISSIONS.update({kind: True}),
-    "getOcrStatus": lambda: dict(DEV_OCR) if sys.platform == "win32" else None,
+    "getOcrStatus": dev_ocr_status,
     "installEnglishOcr": dev_install_ocr,
     "setRunState": lambda v: RUN_STATE.update(value=v),
+    "setKeybindRecording": lambda *a: None,
     "getRecentLogs": lambda: LOGS,
     "clearRecentLogs": lambda: LOGS.clear(),
     "getMacroVersion": settingsManager.getMacroVersion,

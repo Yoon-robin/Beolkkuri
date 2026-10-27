@@ -45,7 +45,18 @@ pnpm --dir ui dev               # http://localhost:5173 (proxies /__py to the de
 
 - JS → Python: `callPy(name, ...args)` in `ui/src/lib/py.ts` calls `eel.name(...)()` in the app, or POSTs to `/__py/name` in dev. Typed shortcuts live in `py`.
 - Python → JS: `ui/public/bridge.js` is a plain, unbundled script that defines and `eel.expose`s global functions (`log`, `loadInputs`, `toggleStartStop`, `getElementProperty`, ...). They forward to React handlers registered with `usePythonEvent` (`ui/src/lib/bridge.ts`). Add new Python-callable functions there.
-- The app window is Chrome `--incognito`, so localStorage does not survive restarts. Persistent UI prefs go into general settings (`ui_language`, `ui_theme`).
+- The app window is Chrome `--incognito`, so localStorage does not survive restarts. Persistent UI prefs go into general settings (`ui_language`, `ui_theme`, `guide_shown`).
+
+## Keeping the app responsive
+
+- **Main loop:** `main.py`'s loop runs eel on the main thread with gevent and no monkey patching. Anything that blocks there freezes the app window: a message box, a long `subprocess.run`, a big download. The UI shows "응답 없음" when Python hasn't answered for 6 s (`state/run-state.tsx`). Use `waitForMessageBox` (main.py), a thread, or `eel.sleep` while waiting. The updater's pip step reports pip's latest line every 0.25 s; each report waits for the window, which lets it answer in between.
+- **Hotkeys:** pynput calls `on_press` inside Windows' low-level keyboard hook. Every key press on the PC waits for it, and Windows drops a slow hook. So it makes no eel calls, file reads or message boxes:
+  - settings come from a cache that a thread refreshes every second;
+  - the window reports keybind recording (`setKeybindRecording` → `gui.isRecordingKeybind`);
+  - messages go through `tell()`, which shows them on a thread;
+  - start/stop/pause only set `run.value`, and the window polls it.
+- **Hang report:** `src/data/user/hang_report.txt`. faulthandler dumps every thread's stack when the main loop stalls for 30 s. Export Debug includes it.
+- **Startup output:** `main.py` prints a "loading" line before its slow imports (the first launch compiles every library). The first-run model download prints one progress line per file (`modelManager._show_progress`).
 
 ## Platforms (macOS and Windows)
 
@@ -53,6 +64,7 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 
 - **Roblox window:** `modules/misc/appManager.py` imports `appManagerMac.py` (AppKit, AppleScript, Accessibility) or `appManagerWindows.py` (ctypes user32/kernel32: process list, client rect, focus, close). Both export the same functions plus `FULLSCREEN_HOTKEY`.
 - **Keys:** Roblox ignores pyautogui's Windows key events (virtual-key codes only). `modules/controls/winInput.py` swaps pyautogui's `_keyDown`/`_keyUp` for `SendInput` with scan codes. `keyboard.py` installs it at import, so spawned processes get it too.
+- **Roblox language must be English.** The macro reads the game's English text and matches image templates with English words on them (claim hive, blender, disconnect). The guide has a step for it (roblox.com → Settings → Account Info → Language), and so do the README and `docs/display-settings.md`.
 - **OCR:** Apple Vision (`ocrmac`) on macOS. On Windows, `modules/screen/winOcr.py` uses the built-in Windows.Media.Ocr through `winocr`. It upscales 4x because the engine misses small text otherwise. It prefers en-US and falls back to the user's languages; Korean Windows often has only `ko`, which still reads digits and most English.
 - **Image matching:** the compiled `bitmap_matcher` `.so` is macOS only. Elsewhere `bitmap_matcher/numpy_matcher.py` provides the same three functions in NumPy.
 - **Screen:** Windows coordinates are physical pixels (pyautogui makes the process DPI aware), so `screenData` reports a `built-in` display with no Retina factor. `screenshot.pillowGrab` uses `ImageGrab` instead of Quartz.
@@ -62,6 +74,12 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
   - the notch scaling check;
   - `caffeinate` (Windows uses `SetThreadExecutionState`).
 - **App window:** `gui.launch` opens Chrome in app mode; on Windows it falls back to Edge (`mode="edge"`) when Chrome is missing.
+- **Console window:** `Beolkkuri.exe` and `run_macro.ps1` open a console first, which used to cover the app window. `gui._minimizeLauncherConsole` minimizes it once the app window opens, only when `BEOLKKURI_LAUNCHER` is set. The launchers bring it back when the macro exits with an error.
+- **Game overlay:** `modules/misc/overlay.py`, Windows only, a thread that `main.py` starts after the window opens. While the macro runs and Roblox is the active window, it draws a card in a corner of the Roblox client area:
+  - what the macro is doing (`task_text` turns the status key into Korean or English), the run time without pauses, the last three log lines and the pause/stop keys;
+  - a layered `WS_EX_TRANSPARENT | WS_EX_NOACTIVATE` window, so clicks pass through and it never takes focus;
+  - `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` keeps it out of the macro's screenshots, OCR and the stream. If that call fails (Windows 10 before 2004), the overlay stays off.
+  - Settings `overlay_enabled` (default on) and `overlay_position` (`bottom_left`, `top_left`, `top_right`, `bottom_right`) in Settings → Other → Game Overlay. That schema section has `"platform": "windows"`, so the Mac never shows it.
 - **UI:** `ui/src/lib/platform.ts` exports `isMac` / `isWindows`. Strings that differ per OS pick their text inside the string tables (`isMac ? … : …`), so ko/en keys stay the same.
 
 macOS install script (`install_dependencies.command`):
@@ -82,7 +100,10 @@ Windows install scripts (the source install; most users get Beolkkuri-Setup.exe,
 - **Installer switches:** `-Quiet` never prompts (the updater uses it after an update), plus `-NoShortcut` and `-NoLaunch`.
 - **`run_macro.ps1`:** sets `PYTHONUTF8=1`, because Korean Windows defaults to CP949. Before starting, it closes an older Beolkkuri window from the same venv. It also sets `BEOLKKURI_LAUNCHER=1` and starts `main.py` again when it exits with code 75 (see "Updates").
 - **Testing on Windows:** point `BEOLKKURI_VENV` at a test venv and run `run_macro.bat`. Or run `python main.py` in `src/` with `PYTHONUTF8=1`. The PowerShell tool is non-interactive, so test the installer with `-Quiet -NoShortcut`.
-- **English OCR:** the source installer offers to add it. For Setup.exe installs, the first step of the Windows guide does it: `getOcrStatus` / `installEnglishOcr` in `gui.py` run `Add-WindowsCapability` elevated (one UAC prompt) on a thread, and the UI polls (`ui/src/state/ocr.ts`).
+- **English OCR:** the source installer offers to add it. For Setup.exe installs, the first step of the Windows guide does it:
+  - `installEnglishOcr` in `gui.py` runs `dism /Online /Add-Capability … /English` elevated (one UAC prompt) on a thread, with its output redirected to `%TEMP%\Beolkkuri-ocr-install.log`.
+  - `getOcrStatus` reports the step (`approve` while the UAC prompt is open, `download`, `check`), DISM's last percentage and lines from that log, the seconds so far, and `error` (`cancelled` / `failed`).
+  - The UI polls it every second while installing (`ui/src/state/ocr.ts`) and shows all of it in the guide (`OcrProgress`).
 
 ### Windows installer (Beolkkuri-Setup.exe)
 
@@ -111,6 +132,7 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
 - `saveTargetOf(def)` decides profile / general / field / custom saving. Dropdown values are saved lower-cased like the legacy UI; numeric text boxes save strings (0 when empty). **Never change setting ids or value formats**, because Python reads them.
 - Korean text for the schema: `ui/src/i18n/settings-ko.json` (settings by id; sections and options by English label; id-less separators as `sep:<title>`).
 - Pages render schema sections with `SchemaSections` and customise them with `overrides` (`ui/src/components/settings/schema-section.tsx`).
+- A section with `"platform": "windows"` or `"mac"` exists only on that OS (`ui/src/schema/index.ts` filters `sections`, which the search palette uses too).
 
 ## UI conventions
 
@@ -124,7 +146,9 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
   - There is a global `prefers-reduced-motion` override.
   - Theme switching uses a view-transition circle (`ui/src/lib/theme.tsx`).
 - **Search palette** (Ctrl/⌘+K, `components/command-palette.tsx`): it jumps with `goToTarget` (`lib/focus.ts`). Pages with sub-tabs call `useTabRequest(page, setTab)`, and rows call `useFocusTarget`. Sub-tab labels live in `ui.ts` as `subtab.<page>.<tab value>`; the page and the palette both read them, so a new sub-tab needs that key plus the same hooks. A custom row needs `useFocusTarget`.
-- **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts.
+- **Run state:** `state/run-state.tsx` handles polling, the session timer and the start/stop toasts. It also flags Python as unresponsive after 6 s without an answer: a "응답 없음" badge and a toast pointing at the console window.
+- **First launch:** `useFirstRunGuide` in `App.tsx` opens the 시작 가이드 once and saves `guide_shown`. It skips that when a private server link is already set (an install from before the setting).
+- **Updates in Korean:** `update-panel.tsx` maps the updater's English step messages to Korean (`KO_STEPS`).
 - **Permissions:** `state/permissions.ts` polls `getPermissionStatus` in `gui.py`.
 - **Components:** use the shadcn components in `ui/src/components/ui` and Tailwind. Don't add dependencies casually.
 
@@ -196,6 +220,14 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 ## Status and next steps (as of 2026-10-27)
 
 Done:
+- v1.0.1 follow-ups:
+  - the first-run guide;
+  - the console moving out of the way;
+  - the Roblox-English step;
+  - English OCR install progress;
+  - model download, update and startup progress;
+  - the "응답 없음" warning, the hang report and a keyboard hook with no slow work;
+  - the Windows game overlay.
 - Rebrand.
 - The React UI, with every page ported from the old jQuery UI.
 - The Korean translation.
@@ -230,7 +262,7 @@ Not yet verified on a real Mac, so test these first:
    Also the upgrade from an old install: `install.sh` moving `~/RobinMacro`, the `~/robin-macro-env` fallback, and the old launcher and alias being removed.
    Since the installer was trimmed: that Apple Silicon installs everything without the Command Line Tools, that AI gathering loads its Core ML models without torch, that the app opens at the end, and that an in-app update doesn't open a second window.
 2. `getPermissionStatus` / `openPrivacySettings` in `gui.py` (ctypes `AXIsProcessTrusted`, `CGPreflightScreenCaptureAccess`).
-3. Keybind recording versus the hotkeys. `main.py`'s pynput `on_press` asks `eel.getElementProperty(...)()` synchronously whether a keybind field is recording. On Windows, `ui/dev/eel_harness.py` asks the same way from a plain thread and gets `'true'` while a field records, in a few ms, so the eel round trip works. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
+3. Keybind recording versus the hotkeys. The window now tells Python when a keybind field records (`setKeybindRecording`), and `on_press` reads `gui.isRecordingKeybind()` instead of asking the window. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
 4. The real macro run, start/stop hotkeys and the hourly report with the new UI.
 5. Automatic updates: the update and the `os.execv` restart after it.
 6. `main.py` had a SyntaxError (a raw line break inside the missing-dependencies message) from 1.0.0 until the Windows work fixed it, so no 1.0 build could start. Confirm the Mac launcher now starts the app.
@@ -245,6 +277,9 @@ Not yet verified on Windows with Roblox, so test these first:
 4. The English OCR step in the guide on a PC without it: that the UAC prompt comes to the front, and that `Add-WindowsCapability` finishes. Also the Edge fallback without Chrome.
 5. The source install (`install_dependencies.bat`) on a PC without Python.
 6. The Microsoft Store build of Roblox (`appManagerWindows` finds it only by its window title).
+7. The game overlay over a real Roblox window: the position at other display scales, Roblox fullscreen (F11), and that the macro's captures stay clean. Away from Roblox it was checked that both mss and ImageGrab captures leave it out, that clicks pass through and that it doesn't take focus.
+8. The English OCR install's progress: whether DISM writes its percentage into the redirected log. The steps, timer and log lines work either way.
+9. The first-launch console minimizing under Windows Terminal as the default terminal, and the "응답 없음" warning during an in-app update's model download (that step still blocks the main loop).
 
 Open items:
 - **Releases:** the first one is v1.0.0 (see "Releasing"). Its Setup.exe closes without a word when opened (see "WinForms order"), so it needs a fixed release. The updater, `install.sh`, `install.ps1` and the website's Windows download all use the latest release.

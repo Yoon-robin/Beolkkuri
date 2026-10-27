@@ -70,8 +70,21 @@ export const py = {
   installEnglishOcr: () => callPy("installEnglishOcr"),
 }
 
-/** Windows only (null elsewhere). installed is null when it can't be checked. */
-export type OcrStatus = { installed: boolean | null; installing: boolean }
+/**
+ * Windows only (null elsewhere). installed is null when it can't be checked. While installing:
+ * step "approve" waits for the administrator prompt, "download" is DISM working (percent and its
+ * last lines once it prints them), "check" asks Windows whether it worked; elapsed is in seconds.
+ * Older apps send only installed and installing.
+ */
+export type OcrStatus = {
+  installed: boolean | null
+  installing: boolean
+  step?: "approve" | "download" | "check" | null
+  percent?: number | null
+  log?: string[]
+  elapsed?: number
+  error?: "cancelled" | "failed" | null
+}
 
 /** null means the check is not available on this macOS version. */
 export type PermissionStatus = { accessibility: boolean | null; screenRecording: boolean | null; fullKeyboardAccess: boolean | null }

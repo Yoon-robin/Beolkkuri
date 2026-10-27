@@ -12,6 +12,8 @@ const RULES: Record<string, (get: Getter) => boolean> = {
   rejoin_every: (get) => (lower(get("rejoin_schedule_type")) || "hours") !== "daily",
   rejoin_at_time: (get) => lower(get("rejoin_schedule_type")) === "daily",
   rejoin_timezone: (get) => lower(get("rejoin_schedule_type")) === "daily",
+  // where the game overlay sits only matters while it is on
+  overlay_position: (get) => get("overlay_enabled") !== false,
 }
 
 export function isVisible(id: string, get: Getter) {

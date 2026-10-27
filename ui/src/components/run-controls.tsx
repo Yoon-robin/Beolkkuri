@@ -12,18 +12,20 @@ import { keybindDisplay } from "./settings/keybind"
 
 export function RunStatusBadge({ className }: { className?: string }) {
   const { t } = useI18n()
-  const { status } = useRun()
+  const { status, unresponsive } = useRun()
   const elapsed = useElapsed()
+  const shown = unresponsive ? "unresponsive" : status
   const tone = {
     running: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
     paused: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
     stopping: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30",
     stopped: "bg-muted text-muted-foreground",
-  }[status]
+    unresponsive: "bg-destructive/15 text-destructive border-destructive/30",
+  }[shown]
   return (
-    <Badge variant="outline" className={cn("gap-1.5", tone, className)}>
-      <span className={cn("size-1.5 rounded-full bg-current", status === "running" && "animate-pulse")} />
-      {t(`run.status.${status}`)}
+    <Badge variant="outline" className={cn("gap-1.5", tone, className)} title={unresponsive ? t("run.unresponsiveDesc") : undefined}>
+      <span className={cn("size-1.5 rounded-full bg-current", shown === "running" && "animate-pulse")} />
+      {t(`run.status.${shown}`)}
       {elapsed !== null && (
         <span className="tabular-nums opacity-75" title={t("run.elapsed")}>
           · {formatDuration(elapsed)}

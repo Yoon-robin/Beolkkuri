@@ -23,9 +23,45 @@ import { callPy, callPyQuiet, isDesktopApp, py, RunState } from "@/lib/py"
 
 type UpdateInfo = { available?: boolean; current_version?: string; latest_version?: string }
 
+// The updater (update.py) reports its steps in English. In Korean they are shown in Korean;
+// a step not listed here stays as sent. pip's own line after "Installing libraries:" is kept,
+// because it shows the update is still moving during the longest step.
+const KO_STEPS: [RegExp, (m: RegExpMatchArray) => string][] = [
+  [/^Starting update/, () => "업데이트를 시작하는 중"],
+  [/^Refreshing updater/, () => "업데이트 도구를 새로 고치는 중"],
+  [/^Checking latest version/, () => "최신 버전을 확인하는 중"],
+  [/^Creating backup/, () => "지금 버전을 백업하는 중"],
+  [/^Downloaded update/, () => "다 내려받았어요"],
+  [/^Downloading/, () => "새 버전을 내려받는 중"],
+  [/^Extracting update/, () => "압축을 푸는 중"],
+  [/^Locating extracted files/, () => "받은 파일을 확인하는 중"],
+  [/^(Applying update files|Hashing)/, () => "바뀐 파일을 찾는 중"],
+  [/^Copying changed files/, () => "바뀐 파일을 바꿔 넣는 중"],
+  [/^Removed obsolete file (\d+) of (\d+)/, (m) => `안 쓰는 파일을 지우는 중 (${m[1]}/${m[2]})`],
+  [/^Removing obsolete files/, () => "안 쓰는 파일을 지우는 중"],
+  [/^Checking AI models/, () => "AI 모델을 확인하는 중"],
+  [/^Merging patterns/, () => "채집 패턴을 합치는 중"],
+  [/^Cleaning up/, () => "정리하는 중"],
+  [/^Finishing update/, () => "마무리하는 중"],
+  [/^Installing libraries:\s*(.+)/, (m) => `라이브러리를 설치하는 중 · ${m[1]}`],
+  [/^Installing libraries/, () => "라이브러리를 설치하는 중 (몇 분 걸릴 수 있어요)"],
+  [/^Update complete/, () => "업데이트를 마쳤어요"],
+  [/^No update available/, () => "이미 최신 버전이에요"],
+  [/^Update failed/, () => "업데이트하지 못했어요"],
+]
+
+function stepText(message: string, lang: string) {
+  if (lang !== "ko") return message
+  for (const [pattern, text] of KO_STEPS) {
+    const m = message.match(pattern)
+    if (m) return text(m)
+  }
+  return message
+}
+
 /** Version label, update button/progress, the "update available" prompt, and the install dialog. */
 export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const [version, setVersion] = useState<string>("")
   const [progress, setProgress] = useState<{ percent: number; message: string } | null>(null)
   const [offer, setOffer] = useState<UpdateInfo | null>(null)
@@ -74,7 +110,7 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   usePythonEvent("updateProgress", (percent: number, message: string) => {
-    const text = message === "Restarting" ? t("update.restarting") : message || t("update.updating")
+    const text = message === "Restarting" ? t("update.restarting") : message ? stepText(message, lang) : t("update.updating")
     setProgress({ percent: Math.max(0, Math.min(100, Number(percent) || 0)), message: text })
   })
   usePythonEvent("updateButtonReset", () => {
@@ -155,7 +191,9 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
             </div>
             <Progress value={progress?.percent ?? 0} />
             <div className="flex justify-between gap-3 text-xs text-muted-foreground">
-              <span className="truncate">{progress?.message}</span>
+              <span className="truncate" title={progress?.message}>
+                {progress?.message}
+              </span>
               <span className="tabular-nums">{Math.round(progress?.percent ?? 0)}%</span>
             </div>
           </div>

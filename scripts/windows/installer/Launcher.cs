@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 static class Launcher
@@ -34,6 +35,7 @@ static class Launcher
 
         Say(ConsoleColor.Green, "벌꿀이 실행 중... 이 창은 매크로가 켜져 있는 동안 열어 두세요.");
         Say(ConsoleColor.Green, "Starting Beolkkuri. Keep this window open while the macro runs.");
+        Say(ConsoleColor.DarkGray, "앱 창이 열리면 이 창은 작업 표시줄로 내려가요. / This window moves to the taskbar once the app opens.");
         while (true)
         {
             int code = Run(python, src);
@@ -113,9 +115,23 @@ static class Launcher
         Console.ResetColor();
     }
 
+    [DllImport("kernel32.dll")]
+    static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")]
+    static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    static extern bool SetForegroundWindow(IntPtr hWnd);
+
     // Keep the message on screen; the window would otherwise close at once.
     static void Fail(string korean, string english)
     {
+        // The macro minimizes this window once the app window is open (gui.py).
+        IntPtr console = GetConsoleWindow();
+        if (console != IntPtr.Zero)
+        {
+            ShowWindow(console, 9); // SW_RESTORE
+            SetForegroundWindow(console);
+        }
         Console.WriteLine();
         Say(ConsoleColor.Red, korean);
         Say(ConsoleColor.Red, english);
