@@ -2,8 +2,11 @@
 #
 #   irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex
 #
-# It downloads the latest release into %USERPROFILE%\Beolkkuri (keeping your
-# settings if it is already there) and then runs the dependency installer.
+# It downloads and opens Beolkkuri-Setup.exe from the latest release, the same
+# installer as the website's download button (a PowerShell download skips the
+# SmartScreen prompt). If that fails, it falls back to the source install: the
+# release files go into %USERPROFILE%\Beolkkuri (keeping your settings if it is
+# already there) and the dependency installer sets up Python.
 # The macOS version of this script is install.sh.
 
 # Everything runs inside a script block so nothing leaks into the user's
@@ -23,6 +26,20 @@
 	if (-not [Environment]::Is64BitOperatingSystem) {
 		Fail "벌꿀이는 64비트 Windows에서만 쓸 수 있어요. / Beolkkuri needs 64-bit Windows."
 		return
+	}
+
+	$setup = Join-Path ([IO.Path]::GetTempPath()) "Beolkkuri-Setup.exe"
+	try {
+		Write-Host "🐝 벌꿀이 설치 파일 내려받는 중... / Downloading the Beolkkuri installer..." -ForegroundColor Yellow
+		Invoke-WebRequest -UseBasicParsing "https://github.com/$Repo/releases/latest/download/Beolkkuri-Setup.exe" -OutFile $setup
+		Write-Host "설치 창이 열려요. / The installer window is opening." -ForegroundColor Green
+		# Not Start-Process -Wait: that also waits for Beolkkuri when the installer opens it.
+		(Start-Process -FilePath $setup -PassThru).WaitForExit()
+		return
+	} catch {
+		Write-Host "설치 파일을 받지 못해서 소스로 설치할게요. / Could not get the installer; installing from source instead." -ForegroundColor Yellow
+	} finally {
+		Remove-Item $setup -Force -ErrorAction SilentlyContinue
 	}
 
 	Write-Host "🐝 벌꿀이 내려받는 중... / Downloading Beolkkuri..." -ForegroundColor Yellow

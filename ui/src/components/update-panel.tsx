@@ -1,5 +1,6 @@
 import { DownloadIcon, Loader2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import {
   AlertDialog,
@@ -18,17 +19,26 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useI18n } from "@/i18n"
 import { usePythonEvent } from "@/lib/bridge"
-import { callPy, callPyQuiet, isDesktopApp } from "@/lib/py"
+import { callPy, callPyQuiet, isDesktopApp, py, RunState } from "@/lib/py"
 
 type UpdateInfo = { available?: boolean; current_version?: string; latest_version?: string }
 
-/** Version label, update button/progress, and the "update available" prompt. */
+/** Version label, update button/progress, the "update available" prompt, and the install dialog. */
 export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
   const { t } = useI18n()
   const [version, setVersion] = useState<string>("")
   const [progress, setProgress] = useState<{ percent: number; message: string } | null>(null)
   const [offer, setOffer] = useState<UpdateInfo | null>(null)
   const [dontShow, setDontShow] = useState(false)
+  // the update being installed; the macro restarts when it's done
+  const [installing, setInstalling] = useState<{ info: UpdateInfo; auto: boolean } | null>(null)
+
+  const install = (info: UpdateInfo, auto: boolean) => {
+    setOffer(null)
+    setInstalling({ info, auto })
+    setProgress({ percent: 0, message: t("update.updating") })
+    void callPyQuiet("update", auto)
+  }
 
   useEffect(() => {
     void (async () => {
@@ -42,31 +52,46 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
         setVersion("v?")
       }
     })()
-    // offer updates on launch unless the user opted out
+    // On launch: update by itself when auto update is on, otherwise offer it (unless opted out)
     const timer = setTimeout(async () => {
       if (!isDesktopApp()) return
       try {
-        if (await callPy<boolean>("getAutoUpdateCheckDisabled")) return
+        const [auto, offerDisabled] = await Promise.all([
+          callPy<boolean>("getAutoUpdate"),
+          callPy<boolean>("getAutoUpdateCheckDisabled"),
+        ])
+        if (!auto && offerDisabled) return
         const info = await callPy<UpdateInfo>("checkForUpdates")
-        if (info?.available) setOffer(info)
+        if (!info?.available) return
+        // never interrupt a macro that is already running (Python checks again)
+        if (auto && (await py.getRunState()) === RunState.Stopped) install(info, true)
+        else if (!offerDisabled) setOffer(info)
       } catch (err) {
         console.error("update check failed", err)
       }
     }, 1000)
     return () => clearTimeout(timer)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   usePythonEvent("updateProgress", (percent: number, message: string) => {
-    setProgress({ percent: Math.max(0, Math.min(100, Number(percent) || 0)), message: message || t("update.updating") })
+    const text = message === "Restarting" ? t("update.restarting") : message || t("update.updating")
+    setProgress({ percent: Math.max(0, Math.min(100, Number(percent) || 0)), message: text })
   })
-  usePythonEvent("updateButtonReset", () => setProgress(null))
+  usePythonEvent("updateButtonReset", () => {
+    setProgress(null)
+    setInstalling(null)
+  })
 
-  const runUpdate = () => {
-    setProgress({ percent: 0, message: t("update.updating") })
-    void callPyQuiet("update")
+  const checkAndUpdate = async () => {
+    setProgress({ percent: 0, message: t("update.checking") })
+    const info = (await callPyQuiet("checkForUpdates")) as UpdateInfo | null
+    if (info?.available) return install(info, false)
+    setProgress(null)
+    if (info) toast(t("update.latest"), { description: version })
+    else toast.error(t("update.checkFailed"))
   }
 
-  const label = progress ? t("update.updating") : t("update.check")
+  const label = progress ? (installing ? t("update.updating") : t("update.checking")) : t("update.check")
 
   return (
     <div className="space-y-2 px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:px-0">
@@ -77,7 +102,7 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
             <Button
               variant="ghost"
               size="xs"
-              onClick={runUpdate}
+              onClick={() => void checkAndUpdate()}
               disabled={!!progress}
               aria-label={iconOnly ? label : undefined}
               className="group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0 [&_svg]:transition-transform hover:[&_svg]:translate-y-px"
@@ -87,19 +112,10 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right" hidden={!iconOnly}>
-            {progress ? `${label} · ${Math.round(progress.percent)}%` : `${label} · ${version}`}
+            {progress && installing ? `${label} · ${Math.round(progress.percent)}%` : `${label} · ${version}`}
           </TooltipContent>
         </Tooltip>
       </div>
-      {progress && (
-        <div className="space-y-1 animate-in fade-in-0 slide-in-from-bottom-1 duration-300 group-data-[collapsible=icon]:hidden" aria-live="polite">
-          <div className="flex justify-between">
-            <span className="truncate">{progress.message}</span>
-            <span className="tabular-nums">{Math.round(progress.percent)}%</span>
-          </div>
-          <Progress value={progress.percent} />
-        </div>
-      )}
 
       <AlertDialog open={!!offer} onOpenChange={(open) => !open && setOffer(null)}>
         <AlertDialogContent>
@@ -121,8 +137,29 @@ export function UpdatePanel({ iconOnly = false }: { iconOnly?: boolean }) {
             >
               {t("common.close")}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={runUpdate}>{t("update.now")}</AlertDialogAction>
+            <AlertDialogAction onClick={() => offer && install(offer, false)}>{t("update.now")}</AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Files are being replaced, so this can't be dismissed; the window closes and reopens when it's done. */}
+      <AlertDialog open={!!installing}>
+        <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("update.progressTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("update.progressDesc")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2" aria-live="polite">
+            <div className="font-mono text-sm">
+              v{installing?.info.current_version ?? "?"} → v{installing?.info.latest_version ?? "?"}
+            </div>
+            <Progress value={progress?.percent ?? 0} />
+            <div className="flex justify-between gap-3 text-xs text-muted-foreground">
+              <span className="truncate">{progress?.message}</span>
+              <span className="tabular-nums">{Math.round(progress?.percent ?? 0)}%</span>
+            </div>
+          </div>
+          {installing?.auto && <p className="text-xs text-muted-foreground">{t("update.autoNote")}</p>}
         </AlertDialogContent>
       </AlertDialog>
     </div>

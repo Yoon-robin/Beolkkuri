@@ -331,6 +331,13 @@ kbd { font-family: ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px;
 .install .cmd { margin-top: 26px; border-color: var(--on-ink); box-shadow: 5px 5px 0 var(--honey); }
 .alt-link { display: inline-flex; margin-top: 20px; color: var(--on-ink-muted); font-size: 15px; font-weight: 600; border-bottom: 2px dashed currentColor; }
 .alt-link:hover { color: var(--honey); }
+.btn-honey { background: var(--honey); color: var(--ink); }
+.install .btn-honey { margin-top: 26px; border-color: var(--on-ink); box-shadow: 5px 5px 0 var(--on-ink); }
+.install .btn-honey:hover { box-shadow: 7px 7px 0 var(--on-ink); }
+.install .btn-honey:active { box-shadow: 1px 1px 0 var(--on-ink); }
+.dl-meta { display: block; margin-top: 14px; color: var(--on-ink-muted); font-size: 14px; }
+.setup-shot { margin: 0; }
+.setup-shot img { display: block; width: 100%; height: auto; box-shadow: 10px 10px 0 var(--honey); rotate: -1.5deg; }
 .terminal { border-radius: 20px; overflow: hidden; background: #0b0805; border: 3px solid var(--on-ink); box-shadow: 10px 10px 0 var(--honey); }
 .terminal .frame-bar { background: #241b10; border-bottom: 3px solid var(--on-ink); }
 .term-body { height: 400px; padding: 18px 20px; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.75; color: #ece4d4; }
@@ -690,7 +697,7 @@ footer a:hover { color: var(--honey); }
   <section class="install" id="install">
     <div class="wrap install-grid">
       <div class="reveal">
-        <h2 data-i18n-html="ins.title">설치는<br />터미널에 한 줄</h2>
+        <h2><span data-os-only="mac" data-i18n-html="ins.title">설치는<br />터미널에 한 줄</span><span data-os-only="win" hidden data-i18n-html="ins.wtitle">설치는<br />파일 하나로</span></h2>
         <div class="os-tabs" role="tablist" aria-label="OS">
           <button type="button" class="os-tab" role="tab" data-os="mac" aria-selected="true">macOS</button>
           <button type="button" class="os-tab" role="tab" data-os="win" aria-selected="false">Windows</button>
@@ -702,22 +709,34 @@ footer a:hover { color: var(--honey); }
           <li><span data-i18n-html="ins.4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
         </ol>
         <ol class="steps" data-os-only="win" hidden>
-          <li><span data-i18n-html="ins.w1"><b>시작</b> 버튼을 마우스 오른쪽으로 누르고 <b>터미널</b>을 열어요. (Windows PowerShell도 돼요)</span></li>
-          <li><span data-i18n-html="ins.w2">아래 명령어를 <b>붙여 넣고 엔터</b>. 파이썬이 없으면 같이 설치돼요.</span></li>
-          <li><span data-i18n-html="ins.w3">윈도우는 <b>권한을 따로 줄 필요가 없어요</b>. 디스플레이 배율은 100%를 추천해요.</span></li>
-          <li><span data-i18n-html="ins.w4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요.</span></li>
+          <li><span data-i18n-html="ins.w1">아래 버튼으로 <b>Beolkkuri-Setup.exe</b>를 내려받아 열어요.</span></li>
+          <li><span data-i18n-html="ins.w2"><b>Windows의 PC 보호</b> 창이 뜨면 <b>추가 정보</b> → <b>실행</b>을 눌러요. 코드 서명을 하지 않은 무료 프로그램이라 뜨는 창이에요.</span></li>
+          <li><span data-i18n-html="ins.w3"><b>설치하기</b>를 누르면 끝이에요. 파이썬까지 다 들어 있고, 관리자 권한도 필요 없어요.</span></li>
+          <li><span data-i18n-html="ins.w4">바탕화면의 <b>벌꿀이</b>를 열고, 로블록스에서 비 스웜에 들어가 시작을 눌러요. 디스플레이 배율은 100%를 추천해요.</span></li>
         </ol>
-        <div class="cmd">
+        <div data-os-only="win" hidden>
+          <a class="btn btn-honey" href="https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+            <span data-i18n="ins.wdl">Beolkkuri-Setup.exe 내려받기</span>
+          </a>
+          <span class="dl-meta" data-i18n="ins.wmeta">윈도우 10·11 (64비트) · 자동 업데이트 포함</span>
+        </div>
+        <div class="cmd" data-os-only="mac">
           <span class="prompt">$</span>
           <code id="cmd2">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash</code>
           <button class="copy" type="button" data-copy="cmd2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
         </div>
         <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri#-설치하기" target="_blank" rel="noopener" data-os-only="mac" data-i18n="ins.alt">터미널이 어렵다면 ZIP으로 설치하는 방법 →</a>
-        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/windows.md" target="_blank" rel="noopener" data-os-only="win" hidden data-i18n="ins.walt">ZIP 설치와 윈도우 도움말 →</a>
+        <a class="alt-link" href="https://github.com/Yoon-robin/Beolkkuri/blob/main/docs/windows.md" target="_blank" rel="noopener" data-os-only="win" hidden data-i18n="ins.walt">PowerShell 한 줄 설치와 윈도우 도움말 →</a>
       </div>
-      <div class="terminal reveal" style="--d:.12s">
-        <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · 벌꿀이 설치</span></div>
-        <div class="term-body" id="term" aria-hidden="true"></div>
+      <div class="reveal" style="--d:.12s">
+        <div class="terminal" data-os-only="mac">
+          <div class="frame-bar"><i></i><i></i><i></i><span data-i18n="ins.term">터미널 · 벌꿀이 설치</span></div>
+          <div class="term-body" id="term" aria-hidden="true"></div>
+        </div>
+        <figure class="setup-shot" data-os-only="win" hidden>
+          <img id="setupShot" src="assets/setup-ko.webp" width="1280" height="920" loading="lazy" alt="벌꿀이 설치 프로그램: 설치할 곳, 바탕화면 바로가기, 설치하기 버튼" data-i18n-alt="alt.setup" />
+        </figure>
       </div>
     </div>
   </section>
@@ -732,8 +751,8 @@ footer a:hover { color: var(--honey); }
         <details class="reveal"><summary><span data-i18n="q1">돈 내야 하나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a1">아니요, 무료예요. 코드도 GitHub에 전부 공개돼 있어요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q2">어떤 컴퓨터에서 돌아가요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a2">맥과 윈도우 둘 다 돼요. 맥은 애플 실리콘(M1 이상)이면 macOS 13 Ventura 이상, 인텔 맥이면 macOS 10.12 이상이 필요해요. 윈도우는 64비트 윈도우 10(1809 이상)이나 윈도우 11이면 돼요. 윈도우 버전은 새로 나와서, 이상한 점이 있으면 알려 주세요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q3">시작을 눌러도 캐릭터가 안 움직여요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a3">맥이라면 거의 항상 권한 문제예요. 앱의 <b>시작 가이드</b>에서 손쉬운 사용과 화면 기록에 초록 체크가 있는지 보고, 켠 다음에는 터미널을 완전히 껐다가(⌘Q) 다시 열어 주세요. 윈도우라면 디스플레이 배율이 100%인지, 로블록스를 관리자 권한으로 실행하지 않았는지 확인해 주세요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">앱 왼쪽 아래의 <b>업데이트 확인</b>을 누르거나, 설치 명령을 한 번 더 붙여 넣으면 돼요. 설정은 그대로 남아요.</div></div></details>
-        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">매크로 전용 환경을 지운 다음 설치 명령을 다시 붙여 넣으면 돼요.<br />맥: <code>rm -rf ~/beolkkuri-env</code><br />윈도우: <code>Remove-Item -Recurse -Force $HOME\beolkkuri-env</code></div></div></details>
+        <details class="reveal"><summary><span data-i18n="q4">업데이트는 어떻게 해요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a4">따로 할 일이 없어요. 새 버전이 나오면 벌꿀이를 켤 때 알아서 업데이트하고 다시 켜져요. 매크로가 돌아가는 중에는 하지 않고, 설정은 그대로 남아요. 자동 업데이트는 <b>설정 → 기타 설정</b>에서 끌 수 있고, 앱 왼쪽 아래의 <b>업데이트 확인</b>으로 직접 할 수도 있어요.</div></div></details>
+        <details class="reveal"><summary><span data-i18n="q5">처음부터 다시 설치하고 싶어요</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n-html="a5">맥은 매크로 전용 환경을 지운 다음 설치 명령을 다시 붙여 넣으면 돼요: <code>rm -rf ~/beolkkuri-env</code><br />윈도우는 <b>Beolkkuri-Setup.exe</b>를 다시 실행하면 파이썬까지 새로 깔려요. 지우려면 <b>설정 → 앱 → 설치된 앱</b>에서 벌꿀이를 제거해요.</div></div></details>
         <details class="reveal"><summary><span data-i18n="q6">매크로 써도 괜찮나요?</span><span class="plus"></span></summary><div class="faq-body"><div data-i18n="a6">매크로 사용에 대한 책임은 사용자에게 있어요. 게임 규칙을 확인하고 본인 판단으로 사용해 주세요. 벌꿀이는 Onett, 비 스웜 시뮬레이터, Roblox와 관련이 없어요.</div></div></details>
       </div>
     </div>
@@ -745,7 +764,7 @@ footer a:hover { color: var(--honey); }
     <div class="wrap">
       <img class="logo-big" src="assets/logo.png" alt="" />
       <h2 class="fill-text" id="fillText" data-i18n-html="end.title">오늘 밤엔<br />켜 두고 자요</h2>
-      <p class="sub" data-i18n="end.sub">설치는 한 줄이면 되고, 나머지는 시작 가이드가 알려 줘요.</p>
+      <p class="sub" data-i18n="end.sub">설치하고 나면 나머지는 시작 가이드가 알려 줘요.</p>
       <div class="hero-cta">
         <a class="btn btn-ink" href="#install"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg><span data-i18n="hero.cta">설치하기</span></a>
         <a class="btn btn-white" href="https://github.com/Yoon-robin/Beolkkuri/issues" target="_blank" rel="noopener"><span data-i18n="end.help">도움이 필요해요</span></a>
@@ -813,19 +832,22 @@ footer a:hover { color: var(--honey); }
     "ins.2": "<b>Paste the command and press Enter.</b> If an installer window opens, click <b>Continue</b> and <b>Install</b>.",
     "ins.3": "Turn on Terminal under <b>Accessibility</b> and <b>Screen Recording</b>. The app shows a green check when they're on.",
     "ins.4": "Open <b>Beolkkuri</b> from your Desktop, join Bee Swarm in Roblox and press Start.",
-    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.walt": "ZIP install and Windows help →",
-    "ins.w1": "Right-click the <b>Start</b> button and open <b>Terminal</b> (Windows PowerShell works too).",
-    "ins.w2": "<b>Paste the command and press Enter.</b> Python is installed too if you don't have it.",
-    "ins.w3": "Windows <b>needs no permissions</b>. 100% display scaling is recommended.",
-    "ins.w4": "Open <b>벌꿀이 (Beolkkuri)</b> from your Desktop, join Bee Swarm in Roblox and press Start.", "ins.term": "Terminal · Installing Beolkkuri",
+    "ins.alt": "Rather not use Terminal? Install from a ZIP →", "ins.walt": "One-line PowerShell install and Windows help →",
+    "ins.wtitle": "Install with<br />one file",
+    "ins.w1": "Download <b>Beolkkuri-Setup.exe</b> with the button below and open it.",
+    "ins.w2": "If <b>Windows protected your PC</b> appears, click <b>More info</b> → <b>Run anyway</b>. It shows up because this free app isn't code-signed.",
+    "ins.w3": "Click <b>Install</b> and you're done. Python comes included, and no administrator rights are needed.",
+    "ins.w4": "Open <b>벌꿀이 (Beolkkuri)</b> from your Desktop, join Bee Swarm in Roblox and press Start. 100% display scaling is recommended.",
+    "ins.wdl": "Download Beolkkuri-Setup.exe", "ins.wmeta": "Windows 10 and 11 (64-bit) · updates itself",
+    "alt.setup": "Beolkkuri installer: install location, desktop shortcut and the Install button", "ins.term": "Terminal · Installing Beolkkuri",
     "faq.title": "Questions",
     q1: "Does it cost anything?", a1: "No, it's free, and all the code is on GitHub.",
     q2: "What computers does it run on?", a2: "Both Mac and Windows. Apple Silicon Macs need macOS 13 Ventura or later, Intel Macs need macOS 10.12 or later. On Windows you need 64-bit Windows 10 (1809 or later) or Windows 11. The Windows version is new, so please report anything odd.",
     q3: "I pressed Start but nothing moves", a3: "On a Mac it's almost always permissions. Check that Accessibility and Screen Recording show a green check in the app's <b>Getting Started</b> page, then quit Terminal (⌘Q) and open it again. On Windows, check that display scaling is 100% and that Roblox isn't running as administrator.",
-    q4: "How do I update?", a4: "Press <b>Check for updates</b> at the bottom left of the app, or paste the install command again. Your settings are kept.",
-    q5: "I want a clean reinstall", a5: "Delete the macro's environment, then paste the install command again.<br />Mac: <code>rm -rf ~/beolkkuri-env</code><br />Windows: <code>Remove-Item -Recurse -Force $HOME\\beolkkuri-env</code>",
+    q4: "How do I update?", a4: "You don't have to. When a new version is out, Beolkkuri updates itself and restarts when you open it. It never updates while the macro is running, and your settings are kept. You can turn automatic updates off under <b>Settings → Other</b>, or update yourself with <b>Check for updates</b> at the bottom left of the app.",
+    q5: "I want a clean reinstall", a5: "On a Mac, delete the macro's environment, then paste the install command again: <code>rm -rf ~/beolkkuri-env</code><br />On Windows, run <b>Beolkkuri-Setup.exe</b> again; it puts in a fresh Python too. To remove Beolkkuri, uninstall it under <b>Settings → Apps → Installed apps</b>.",
     q6: "Is using a macro OK?", a6: "You use macros at your own risk, so check the game's rules first. Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox.",
-    "end.title": "Leave it running<br />tonight", "end.sub": "Install takes one line. Getting Started walks you through the rest.", "end.help": "Get help",
+    "end.title": "Leave it running<br />tonight", "end.sub": "Once it's installed, Getting Started walks you through the rest.", "end.help": "Get help",
     "foot.legal": "Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox. See LICENSE for the licenses of included code. This product includes software developed by exihs (Existance Macro).",
     "foot.perm": "Mac permissions help", "foot.win": "Windows help", "foot.issues": "Report a problem", copied: "Copied. Paste it into Terminal",
     "alt.home": "Beolkkuri Home screen with the start button, task list and live log",
@@ -841,6 +863,8 @@ footer a:hover { color: var(--honey); }
   const KO = {}
   $$("[data-i18n]").forEach((el) => (KO[el.dataset.i18n] = el.textContent))
   $$("[data-i18n-html]").forEach((el) => (KO[el.dataset.i18nHtml] = el.innerHTML))
+  const KO_ALT = {}
+  $$("[data-i18n-alt]").forEach((el) => (KO_ALT[el.dataset.i18nAlt] = el.alt))
   let lang = "ko"
   try { lang = localStorage.getItem("beolkkuri_site_lang") || localStorage.getItem("rm_site_lang") || (navigator.language.startsWith("ko") ? "ko" : "en") } catch {}
 
@@ -850,7 +874,8 @@ footer a:hover { color: var(--honey); }
     document.documentElement.lang = next
     $$("[data-i18n]").forEach((el) => { const v = dict[el.dataset.i18n]; if (v != null) el.textContent = v })
     $$("[data-i18n-html]").forEach((el) => { const v = dict[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v })
-    $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? "벌꿀이 홈 화면: 시작/정지 버튼, 할 일 목록, 실시간 기록" : EN[el.dataset.i18nAlt] })
+    $$("[data-i18n-alt]").forEach((el) => { el.alt = next === "ko" ? KO_ALT[el.dataset.i18nAlt] : EN[el.dataset.i18nAlt] })
+    $("#setupShot").src = `assets/setup-${next}.webp`
     $("#langLabel").textContent = next === "ko" ? "English" : "한국어"
     document.title = next === "ko" ? "벌꿀이 · 맥·윈도우용 비 스웜 시뮬레이터 매크로" : "Beolkkuri · Bee Swarm Simulator macro for Mac and Windows"
     // the headline pops in again in the new language
@@ -1072,7 +1097,8 @@ footer a:hover { color: var(--honey); }
   auto = setInterval(() => show((current + 1) % tabs.length), 6000)
 
   /* ---------------- macOS / Windows ---------------- */
-  // the install commands and steps follow the visitor's OS; the tabs in #install switch them
+  // the install commands and steps follow the visitor's OS; the tabs in #install switch them.
+  // Windows installs with Beolkkuri-Setup.exe, so the demo terminal is macOS only.
   const CMD = {
     mac: "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash",
     win: "irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex",
@@ -1084,7 +1110,7 @@ footer a:hover { color: var(--honey); }
     $$(".cmd .prompt").forEach((p) => (p.textContent = os === "win" ? "PS>" : "$"))
     $$("[data-os-only]").forEach((el) => (el.hidden = el.dataset.osOnly !== os))
     $$(".os-tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.os === os)))
-    if (termStarted) runTerminal()
+    if (termStarted && os === "mac") runTerminal()
   }
   $$(".os-tab").forEach((b) => b.addEventListener("click", () => os !== b.dataset.os && setOS(b.dataset.os)))
 
@@ -1107,25 +1133,7 @@ footer a:hover { color: var(--honey); }
     ["ln", lang === "ko" ? "바탕화면에 벌꿀이 앱을 만들었어요." : "Created the Beolkkuri app on your Desktop.", "t-green"],
     ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
   ]
-  // what scripts/windows/install_dependencies.ps1 prints, shortened
-  const WIN_SCRIPT = () => [
-    ["", "PS> ", "t-amber"], ["type", CMD.win],
-    ["ln", lang === "ko" ? "🐝 벌꿀이 내려받는 중..." : "🐝 Downloading Beolkkuri...", "t-amber"],
-    ["ln", lang === "ko" ? "C:\\Users\\me\\Beolkkuri 에 내려받았어요." : "Downloaded to C:\\Users\\me\\Beolkkuri", "t-green"],
-    ["ln", "==============================================", "t-amber"],
-    ["ln", "   벌꿀이 설치 / Beolkkuri installer", "t-amber"],
-    ["ln", "==============================================", "t-amber"],
-    ["ln", lang === "ko" ? "[1/5] Windows 버전 확인" : "[1/5] Checking Windows", "t-cyan"],
-    ["ln", lang === "ko" ? "쓸 수 있는 PC예요 / Your PC is compatible" : "Your PC is compatible", "t-green"],
-    ["ln", lang === "ko" ? "[2/5] 파이썬 확인" : "[2/5] Checking Python", "t-cyan"],
-    ["ln", lang === "ko" ? "[3/5] 글자 인식(OCR) 확인" : "[3/5] Checking text recognition (OCR)", "t-cyan"],
-    ["ln", lang === "ko" ? "[4/5] 매크로 전용 환경과 라이브러리 설치 (가장 오래 걸려요)" : "[4/5] Installing libraries (this takes the longest)", "t-cyan"],
-    ["pkg", "numpy<2"], ["pkg", "opencv-python-headless<4.11"], ["pkg", "pyautogui"], ["pkg", "mss"], ["pkg", "discord.py"], ["pkg", "eel"], ["pkg", "winocr"],
-    ["ln", lang === "ko" ? "[5/5] 바로가기 만들기" : "[5/5] Creating shortcuts", "t-cyan"],
-    ["ln", lang === "ko" ? "바탕화면과 시작 메뉴에 벌꿀이 바로가기를 만들었어요." : "Created 벌꿀이 (Beolkkuri) shortcuts on your Desktop and in the Start menu.", "t-green"],
-    ["ln", lang === "ko" ? "설치가 끝났어요! / Installation complete!" : "Installation complete!", "t-green"],
-  ]
-  // each run gets an id; switching OS starts a new run and the old one stops at its next step
+  // each run gets an id; switching OS or language starts a new run and the old one stops at its next step
   let termRun = 0, termStarted = false
   async function runTerminal() {
     termStarted = true
@@ -1133,7 +1141,7 @@ footer a:hover { color: var(--honey); }
     const alive = () => id === termRun
     for (;;) {
       term.innerHTML = ""
-      const script = os === "win" ? WIN_SCRIPT() : MAC_SCRIPT()
+      const script = MAC_SCRIPT()
       let line
       for (const [kind, text, cls] of script) {
         if (!alive()) return
@@ -1149,7 +1157,7 @@ footer a:hover { color: var(--honey); }
         term.scrollTop = term.scrollHeight
       }
       if (!alive()) return
-      const end = document.createElement("div"); end.className = "ln"; end.innerHTML = `<span class="t-amber">${os === "win" ? "PS> " : "$ "}</span><span class="cursor"></span>`; term.append(end)
+      const end = document.createElement("div"); end.className = "ln"; end.innerHTML = `<span class="t-amber">$ </span><span class="cursor"></span>`; term.append(end)
       term.scrollTop = term.scrollHeight
       await sleep(5000)
     }

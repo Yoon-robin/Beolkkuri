@@ -9,6 +9,7 @@ import {
   LifeBuoyIcon,
   Loader2Icon,
   MonitorIcon,
+  ScanTextIcon,
   ShieldCheckIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
@@ -22,10 +23,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n, useStrings, type PageStrings } from "@/i18n"
-import { isMac } from "@/lib/platform"
-import { py, type PermissionKind } from "@/lib/py"
+import { isMac, isWindows } from "@/lib/platform"
+import { py, type OcrStatus, type PermissionKind } from "@/lib/py"
 import type { PageId } from "@/lib/route"
 import { cn } from "@/lib/utils"
+import { useOcrStatus } from "@/state/ocr"
 import { usePermissions } from "@/state/permissions"
 import { useSettings, useSetting } from "@/state/settings"
 
@@ -50,6 +52,14 @@ const strings: PageStrings<
   | "perm.turnOn"
   | "perm.keyboardOn"
   | "perm.restart"
+  | "ocr.title"
+  | "ocr.body"
+  | "ocr.label"
+  | "ocr.install"
+  | "ocr.installed"
+  | "ocr.installing"
+  | "ocr.note"
+  | "ocr.failed"
   | "display.title"
   | "display.body"
   | "game.title"
@@ -95,6 +105,14 @@ const strings: PageStrings<
     "perm.turnOn": "켜기",
     "perm.keyboardOn": "끄러 가기",
     "perm.restart": "설정에서 켠 뒤에는 터미널을 완전히 껐다가(⌘Q) 벌꿀이를 다시 열어야 적용돼요.",
+    "ocr.title": "영어 글자 인식 추가하기",
+    "ocr.body": "벌꿀이는 윈도우에 들어 있는 글자 인식(OCR)으로 꿀 양이나 퀘스트 같은 게임 글자를 읽어요. 게임 글자가 영어라서 영어 글자 인식이 있으면 가장 정확해요.",
+    "ocr.label": "영어 글자 인식 (OCR)",
+    "ocr.install": "설치하기",
+    "ocr.installed": "설치됨",
+    "ocr.installing": "설치하는 중",
+    "ocr.note": "설치하기를 누르면 관리자 확인 창이 한 번 떠요. '예'를 누르면 윈도우가 내려받아 설치해요. 몇 분 걸릴 수 있어요.",
+    "ocr.failed": "설치되지 않았어요. 다시 눌러 보세요. 영어 글자 인식이 없어도 숫자와 영어는 대부분 읽어요.",
     "display.title": "화면 설정 확인",
     "display.body": isMac
       ? "디스플레이 배율은 '기본값'으로, 밤 시프트·트루 톤은 꺼 주세요. 로블록스는 주 모니터에서 최대화해서 띄워요."
@@ -143,6 +161,14 @@ const strings: PageStrings<
     "perm.turnOn": "Turn on",
     "perm.keyboardOn": "Turn off",
     "perm.restart": "After turning them on, quit Terminal (⌘Q) and open Beolkkuri again for it to take effect.",
+    "ocr.title": "Add English text recognition",
+    "ocr.body": "Beolkkuri reads game text such as honey and quests with the text recognition (OCR) built into Windows. The game is in English, so English OCR reads it best.",
+    "ocr.label": "English text recognition (OCR)",
+    "ocr.install": "Install",
+    "ocr.installed": "Installed",
+    "ocr.installing": "Installing",
+    "ocr.note": "Install asks for administrator approval once. Click Yes and Windows downloads it, which can take a few minutes.",
+    "ocr.failed": "It wasn't installed. Try again. Without it, Beolkkuri still reads most numbers and English text.",
     "display.title": "Check display settings",
     "display.body": isMac
       ? "Keep display scaling at Default and turn off Night Shift and True Tone. Run Roblox maximised on your main monitor."
@@ -223,6 +249,28 @@ function Step({
   )
 }
 
+function StatusDot({ value }: { value: boolean | null | undefined }) {
+  const loading = value === undefined
+  return (
+    <span
+      className={cn(
+        "flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+        value === true && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+        value === false && "bg-destructive/15 text-destructive",
+        (value === null || loading) && "bg-muted text-muted-foreground",
+      )}
+    >
+      {loading ? (
+        <Loader2Icon className="size-3.5 animate-spin" />
+      ) : (
+        <span key={String(value)} className={cn("inline-flex", value && "bk-pop")}>
+          {value ? <CheckCircle2Icon className="size-3.5" /> : <CircleIcon className="size-3.5" />}
+        </span>
+      )}
+    </span>
+  )
+}
+
 function PermissionRow({
   label,
   value,
@@ -238,22 +286,7 @@ function PermissionRow({
   const loading = value === undefined
   return (
     <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5">
-      <span
-        className={cn(
-          "flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
-          value === true && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-          value === false && "bg-destructive/15 text-destructive",
-          (value === null || loading) && "bg-muted text-muted-foreground",
-        )}
-      >
-        {loading ? (
-          <Loader2Icon className="size-3.5 animate-spin" />
-        ) : (
-          <span key={String(value)} className={cn("inline-flex", value && "bk-pop")}>
-            {value ? <CheckCircle2Icon className="size-3.5" /> : <CircleIcon className="size-3.5" />}
-          </span>
-        )}
-      </span>
+      <StatusDot value={value} />
       <span className="flex-1 text-foreground">{label}</span>
       {value === false ? (
         <Button size="sm" onClick={() => void py.openPrivacySettings(kind).finally(onOpened)}>
@@ -263,6 +296,31 @@ function PermissionRow({
         !loading && (
           <span className={cn("text-xs animate-in fade-in-0 duration-300", value ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
             {value ? s("perm.on") : s("perm.unknown")}
+          </span>
+        )
+      )}
+    </div>
+  )
+}
+
+function OcrRow({ status, onInstall }: { status: OcrStatus | undefined; onInstall: () => void }) {
+  const s = useStrings(strings)
+  const value = status?.installed
+  const busy = !status || status.installing
+  return (
+    <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2.5">
+      <StatusDot value={busy ? undefined : value} />
+      <span className="flex-1 text-foreground">{s("ocr.label")}</span>
+      {status?.installing ? (
+        <span className="text-xs text-muted-foreground animate-in fade-in-0 duration-300">{s("ocr.installing")}</span>
+      ) : value === false ? (
+        <Button size="sm" onClick={onInstall}>
+          {s("ocr.install")}
+        </Button>
+      ) : (
+        !busy && (
+          <span className={cn("text-xs animate-in fade-in-0 duration-300", value ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+            {value ? s("ocr.installed") : s("perm.unknown")}
           </span>
         )
       )}
@@ -285,6 +343,7 @@ export default function GuidePage() {
   const s = useStrings(strings)
   const { settings, fields, saveGeneral } = useSettings()
   const { status: perms, refresh: refreshPerms } = usePermissions()
+  const { status: ocr, install: installOcr, failed: ocrFailed } = useOcrStatus()
   const permsOk = !!perms && perms.accessibility !== false && perms.screenRecording !== false && !perms.fullKeyboardAccess
 
   const hiveSlot = String(useSetting<number | string>("preferred_hive_slot", 1) ?? 1)
@@ -294,9 +353,12 @@ export default function GuidePage() {
   const pauseKey = keybindDisplay(useSetting<string>("pause_keybind", "F2") || "F2")
   const stopKey = keybindDisplay(useSetting<string>("stop_keybind", "F3") || "F3")
 
-  // Windows needs no permissions, so its guide starts at the display step.
-  const checks = [...(isMac ? [permsOk] : []), !!privateServer, enabledFields > 0]
-  const first = isMac ? 1 : 0
+  // Windows needs no permissions; its first step adds English OCR instead (unless the
+  // app is too old to check it). A check that can't run doesn't count as a step to do.
+  const showOcr = isWindows && ocr !== null
+  const ocrKnown = !!ocr && !ocr.installing && ocr.installed !== null
+  const checks = [...(isMac ? [permsOk] : []), ...(showOcr && ocrKnown ? [ocr.installed === true] : []), !!privateServer, enabledFields > 0]
+  const first = isMac || showOcr ? 1 : 0
   const doneCount = checks.filter(Boolean).length
 
   return (
@@ -333,6 +395,14 @@ export default function GuidePage() {
               </div>
               <p className="text-xs">{s("perm.restart")}</p>
               <DocLink doc="permissions" />
+            </Step>
+          )}
+
+          {showOcr && (
+            <Step n={1} icon={<ScanTextIcon />} title={s("ocr.title")} done={ocrKnown ? ocr.installed === true : undefined}>
+              <p>{s("ocr.body")}</p>
+              <OcrRow status={ocr} onInstall={() => void installOcr()} />
+              {ocr?.installed !== true && <p className={cn("text-xs", ocrFailed && "text-amber-700 dark:text-amber-300")}>{s(ocrFailed ? "ocr.failed" : "ocr.note")}</p>}
             </Step>
           )}
 

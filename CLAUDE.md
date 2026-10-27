@@ -14,9 +14,9 @@ ui/               React 19 + Vite 6 + TypeScript + Tailwind v4 + shadcn/ui (radi
 paths/, settings/ movement paths and gather patterns used by the macro
 install.sh        one-line installer: downloads latest release (or main) into ~/Beolkkuri, runs install_dependencies.command
 install_dependencies.command / run_macro.command   macOS installer and launcher (bash, LF, must stay executable)
-install.ps1       Windows one-line installer (`irm … | iex`): same job as install.sh, into %USERPROFILE%\Beolkkuri
-install_dependencies.bat / run_macro.bat   Windows double-click wrappers for scripts/windows/*.ps1
-scripts/windows/  install_dependencies.ps1 and run_macro.ps1 (the Windows installer and launcher)
+install.ps1       Windows one-liner (`irm … | iex`): downloads and opens the latest Beolkkuri-Setup.exe; falls back to the source install below
+install_dependencies.bat / run_macro.bat   Windows source install: double-click wrappers for scripts/windows/*.ps1
+scripts/windows/  install_dependencies.ps1 and run_macro.ps1 (source install and launcher), build_installer.ps1 + installer/ (Beolkkuri-Setup.exe, see "Windows installer")
 requirements-windows.txt   Python packages for Windows (macOS pins its own in install_dependencies.command)
 docs/             Korean help pages linked from the app and README
 site/             landing page (GitHub Pages): one static index.html + assets/. Deployed by .github/workflows/pages.yml
@@ -64,7 +64,7 @@ The Python code branches on `sys.platform` (`"darwin"` / `"win32"`). When adding
 - **App window:** `gui.launch` opens Chrome in app mode; on Windows it falls back to Edge (`mode="edge"`) when Chrome is missing.
 - **UI:** `ui/src/lib/platform.ts` exports `isMac` / `isWindows`. Strings that differ per OS pick their text inside the string tables (`isMac ? … : …`), so ko/en keys stay the same.
 
-Windows install scripts:
+Windows install scripts (the source install; most users get Beolkkuri-Setup.exe, next section):
 - **`install.ps1`** must be UTF-8 **without** a BOM, because `irm | iex` fails on a leading BOM.
 - **`scripts/windows/*.ps1`** need UTF-8 **with** a BOM. Windows PowerShell 5.1 reads BOM-less files as ANSI, which breaks the Korean text.
 - **`.bat` files** are CRLF (`.gitattributes`). Keep the launcher on one line, because cmd re-reads a .bat while it runs and the updater may replace it.
@@ -74,12 +74,31 @@ Windows install scripts:
   - Packages come from `requirements-windows.txt`, which is also passed to pip as a constraints file to keep `numpy<2`.
   - Log: `%USERPROFILE%\Beolkkuri-install.log`.
 - **Installer switches:** `-Quiet` never prompts (the updater uses it after an update), plus `-NoShortcut` and `-NoLaunch`.
-- **`run_macro.ps1`:** sets `PYTHONUTF8=1`, because Korean Windows defaults to CP949. Before starting, it closes an older Beolkkuri window from the same venv.
+- **`run_macro.ps1`:** sets `PYTHONUTF8=1`, because Korean Windows defaults to CP949. Before starting, it closes an older Beolkkuri window from the same venv. It also sets `BEOLKKURI_LAUNCHER=1` and starts `main.py` again when it exits with code 75 (see "Updates").
 - **Testing on Windows:** point `BEOLKKURI_VENV` at a test venv and run `run_macro.bat`. Or run `python main.py` in `src/` with `PYTHONUTF8=1`. The PowerShell tool is non-interactive, so test the installer with `-Quiet -NoShortcut`.
+- **English OCR:** the source installer offers to add it. For Setup.exe installs, the first step of the Windows guide does it: `getOcrStatus` / `installEnglishOcr` in `gui.py` run `Add-WindowsCapability` elevated (one UAC prompt) on a thread, and the UI polls (`ui/src/state/ocr.ts`).
+
+### Windows installer (Beolkkuri-Setup.exe)
+
+Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ships with .NET Framework 4 (`C:\Windows\Microsoft.NET\Framework64\v4.0.30319`), so **C# 5 only** (no `$""`, `?.`, `nameof`, expression bodies).
+- `scripts/windows/installer/Setup.cs` is the installer and uninstaller window; `Launcher.cs` becomes `Beolkkuri.exe`; `app.manifest` (asInvoker, DPI aware).
+- `scripts/windows/build_installer.ps1 [-Ref HEAD] [-Test]`:
+  1. `git archive` of the ref (commit first, or pass `git stash create` as `-Ref`);
+  2. the python.org NuGet package (Python 3.12, cached in `build/cache`) as `runtime/`;
+  3. pip installs `requirements-windows.txt` into it;
+  4. compiles both exes;
+  5. writes `dist/Beolkkuri-Setup.exe` = stub exe + zip + 8-byte zip length + `BKPAYLD1`.
+  `-Test` silent-installs to `build/installer/test-install` and import-checks it. Run csc from PowerShell, not Git Bash (Korean paths break).
+- Install: per user, no admin, default `%LOCALAPPDATA%\Programs\Beolkkuri`. Start menu (and optional Desktop) shortcut `벌꿀이.lnk` → `Beolkkuri.exe`, uninstall entry under `HKCU\…\Uninstall\Beolkkuri`, `uninstall.exe` is a copy of the stub. Upgrades keep `settings/profiles`, `settings/patterns` and `src/data/user`; a first install imports them from an old `%USERPROFILE%\Beolkkuri`. Log: `%TEMP%\Beolkkuri-Setup.log`.
+- Switches: `/S` silent, `/D=<folder>`, `/NoDesktop`, `/uninstall`, `/RemoveSettings`, `/lang=ko|en`, `/shot=<dir>` (renders every page to PNG at 2x; `site/assets/setup-ko.webp` / `setup-en.webp` come from these).
+- `Beolkkuri.exe` runs `runtime\python.exe src\main.py` with `PYTHONUTF8=1`, `PYTHONNOUSERSITE=1`, `BEOLKKURI_LAUNCHER=1`, and starts it again on exit code 75.
+- `runtime/`, `Beolkkuri.exe` and `uninstall.exe` are in `.gitignore`, and the updater never touches gitignored or protected folders, so in-app updates leave them alone.
+- Look: the website's honey poster style, drawn by hand in GDI+ (Black Han Sans embedded as `title.ttf`, Malgun Gothic text, Segoe UI for paths because Malgun Gothic draws `\` as `₩`). Korean or English follows the Windows UI language.
+- CI: `.github/workflows/windows-installer.yml` builds and tests it on every published release and uploads `Beolkkuri-Setup.exe` to that release (or run it by hand with a tag).
 
 ## Settings schema
 
-- `ui/src/schema/legacy-schema.json` (65 sections / 246 settings) describes every standard setting row: id, type, options, save target. It was extracted once from the old jQuery UI with `ui/scripts/extract-schema.mjs` and then **edited by hand** (rebrand wording). Edit the JSON directly; don't re-run the extractor.
+- `ui/src/schema/legacy-schema.json` (65 sections / 247 settings) describes every standard setting row: id, type, options, save target. It was extracted once from the old jQuery UI with `ui/scripts/extract-schema.mjs` and then **edited by hand** (rebrand wording). Edit the JSON directly; don't re-run the extractor.
 - `saveTargetOf(def)` decides profile / general / field / custom saving. Dropdown values are saved lower-cased like the legacy UI; numeric text boxes save strings (0 when empty). **Never change setting ids or value formats**, because Python reads them.
 - Korean text for the schema: `ui/src/i18n/settings-ko.json` (settings by id; sections and options by English label; id-less separators as `sep:<title>`).
 - Pages render schema sections with `SchemaSections` and customise them with `overrides` (`ui/src/components/settings/schema-section.tsx`).
@@ -116,7 +135,7 @@ Windows install scripts:
   - Gallery screenshots change with a circle wipe.
   - The final headline fills with ink as you scroll.
   - The copy buttons give off honey sparks.
-- macOS and Windows: the install commands (hero and `#install`), steps and help link follow the visitor's OS (`navigator.platform`), and the `#install` tabs switch them. The demo terminal plays `MAC_SCRIPT` or `WIN_SCRIPT`, shortened from what `install_dependencies.command` / `scripts/windows/install_dependencies.ps1` print; keep them in step with the installers.
+- macOS and Windows: the install commands (hero and `#install`), steps and help link follow the visitor's OS (`navigator.platform`), and the `#install` tabs switch them. On macOS, `#install` shows the curl command and a demo terminal playing `MAC_SCRIPT`, shortened from what `install_dependencies.command` prints; keep it in step with the installer. On Windows, it shows a download button for `releases/latest/download/Beolkkuri-Setup.exe` and the installer screenshot `site/assets/setup-<lang>.webp` (made with Setup.exe `/shot`, see "Windows installer").
 - Preview: `python -m http.server 8790 --directory site` (`beolkkuri-site` in `.claude/launch.json`).
 - Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
 - Refresh the app screenshots:
@@ -160,7 +179,9 @@ The Discord bot prefix is `bee!` (`robin!` still works). Discord Rich Presence i
 
 - `.gitattributes` forces LF, except CRLF for `*.bat`. Windows has `core.autocrlf=true`, so expect CRLF warnings; they are harmless.
 - `*.command` files must keep mode 100755. When adding one from Windows: `git update-index --chmod=+x <file>`.
-- Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/Beolkkuri`. `install.sh` and `install.ps1` install the latest release zipball, or `main` if there are no releases.
+- Version: `ui/public/version.txt`, copied to `src/webapp/version.txt` by the build. `src/modules/misc/update.py` compares it with GitHub releases of `Yoon-robin/Beolkkuri` (tags like `v1.0.0`; the leading `v` is ignored). `install.sh` installs the latest release zipball, or `main` if there are no releases.
+- **Releasing:** bump `ui/public/version.txt`, rebuild the UI, commit and push, then publish a GitHub release whose tag matches (`v1.0.1`). The windows-installer workflow attaches `Beolkkuri-Setup.exe` to it a few minutes later; the website's Windows button and `install.ps1` download that file from the latest release.
+- **Updates:** `update.py` downloads the release zip, swaps the files (keeping gitignored and protected paths such as profiles, `runtime/` and the exes), and on Windows installs new requirements with the bundled Python (`runtime\python.exe`) or the venv. When the app opens, `update-panel.tsx` checks for a new release and, with `auto_update` on (default) and the macro stopped, installs it and calls `restart_app()`. That exits with code **75** when `BEOLKKURI_LAUNCHER` is set (`Beolkkuri.exe`, `run_macro.ps1` start it again), uses `os.execv` on macOS, and on older Windows launchers starts `run_macro.bat` itself. With `auto_update` off it offers the update instead. Git checkouts never auto-update.
 - Commit messages end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Status and next steps (as of 2026-10-27)
@@ -186,6 +207,14 @@ Done:
   - Windows OCR on sample text;
   - SendInput scan codes;
   - the NumPy matcher against brute force.
+- The Windows installer (Beolkkuri-Setup.exe) and automatic updates. Checked on that PC:
+  - the build;
+  - a silent install;
+  - an upgrade that keeps user patterns;
+  - uninstalling with and without settings;
+  - the launcher's restart loop;
+  - `restart_app()` in the real app;
+  - the update dialogs in the dev UI.
 
 Not yet verified on a real Mac, so test these first:
 1. `install.sh` and `install_dependencies.command` end to end, on Apple Silicon and Intel. This includes the Python pkg download into a temp dir and the creation of `~/Applications/벌꿀이.app` with its Desktop alias.
@@ -193,16 +222,21 @@ Not yet verified on a real Mac, so test these first:
 2. `getPermissionStatus` / `openPrivacySettings` in `gui.py` (ctypes `AXIsProcessTrusted`, `CGPreflightScreenCaptureAccess`).
 3. Keybind recording versus the hotkeys. `main.py`'s pynput `on_press` asks `eel.getElementProperty(...)()` synchronously whether a keybind field is recording. On Windows, `ui/dev/eel_harness.py` asks the same way from a plain thread and gets `'true'` while a field records, in a few ms, so the eel round trip works. On the Mac, check that pressing F1 while recording a keybind doesn't start the macro.
 4. The real macro run, start/stop hotkeys and the hourly report with the new UI.
-5. `main.py` had a SyntaxError (a raw line break inside the missing-dependencies message) from 1.0.0 until the Windows work fixed it, so no 1.0 build could start. Confirm the Mac launcher now starts the app.
+5. Automatic updates: the update and the `os.execv` restart after it.
+6. `main.py` had a SyntaxError (a raw line break inside the missing-dependencies message) from 1.0.0 until the Windows work fixed it, so no 1.0 build could start. Confirm the Mac launcher now starts the app.
 
 Not yet verified on Windows with Roblox, so test these first:
 1. A real macro run: Roblox window focus, movement keys through `winInput`, fullscreen with F11, reconnect via deeplink.
 2. Image templates at Windows scaling (100% and others) and OCR on real game frames, with the `ko` and the `en-US` engine.
-3. `install.ps1` from GitHub once `main` (or a release) has the Windows files. Also: the Python download path on a PC without Python, the English OCR install prompt, and the Edge fallback without Chrome.
-4. The Microsoft Store build of Roblox (`appManagerWindows` finds it only by its window title).
+3. A real release:
+   - the workflow attaching `Beolkkuri-Setup.exe`;
+   - downloading it from the website (SmartScreen) and through `install.ps1`;
+   - a real in-app update. Install it, lower `src/webapp/version.txt`, and open Beolkkuri.
+4. The English OCR step in the guide on a PC without it: that the UAC prompt comes to the front, and that `Add-WindowsCapability` finishes. Also the Edge fallback without Chrome.
+5. The source install (`install_dependencies.bat`) on a PC without Python.
+6. The Microsoft Store build of Roblox (`appManagerWindows` finds it only by its window title).
 
 Open items:
-- **Releases:** none exist yet. Create v1.0.0 once the Mac test passes; the updater and `install.sh` use releases.
-- **Repo rename:** the code already points at `Yoon-robin/Beolkkuri`. Rename the GitHub repo when the rename is pushed, so the updater's API calls don't 404 (GitHub redirects the old URLs).
+- **Releases:** the first one is v1.0.0 (see "Releasing"). The updater, `install.sh`, `install.ps1` and the website's Windows download all use the latest release.
 - **Small UI leftover:** some buff names stay English in Korean mode, because they are game names.
 - **Old UI for reference:** the original UI code is in the upstream repo (https://github.com/Fuzzy-Team/Fuzzy-Macro, `src/webapp`), if a legacy behaviour needs checking. Don't copy branding from it.

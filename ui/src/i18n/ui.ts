@@ -99,6 +99,12 @@ export const ko = {
   "update.now": "지금 업데이트",
   "update.dontShow": "다시 보지 않기",
   "update.latest": "최신 버전이에요",
+  "update.checking": "확인 중",
+  "update.checkFailed": "업데이트를 확인하지 못했어요. 인터넷 연결을 확인해 주세요.",
+  "update.progressTitle": "새 버전으로 업데이트하고 있어요",
+  "update.progressDesc": "끝나면 벌꿀이가 저절로 다시 켜져요. 그때까지 창을 닫지 말고 기다려 주세요.",
+  "update.restarting": "다시 켜는 중…",
+  "update.autoNote": "자동 업데이트는 설정 > 기타 설정에서 끌 수 있어요.",
   "devBanner": "개발 모드 · 매크로 동작은 흉내만 내요",
 } as const
 
@@ -199,5 +205,11 @@ export const en: Record<UiKey, string> = {
   "update.now": "Update now",
   "update.dontShow": "Don't show again",
   "update.latest": "You're on the latest version",
+  "update.checking": "Checking",
+  "update.checkFailed": "Couldn't check for updates. Check your internet connection.",
+  "update.progressTitle": "Updating to the new version",
+  "update.progressDesc": "Beolkkuri restarts by itself when it's done. Keep it open until then.",
+  "update.restarting": "Restarting…",
+  "update.autoNote": "You can turn off automatic updates in Settings > Other.",
   "devBanner": "Dev mode · macro actions are simulated",
 }

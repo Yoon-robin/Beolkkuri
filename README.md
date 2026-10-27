@@ -78,29 +78,23 @@ curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.s
 
 ### 🪟 윈도우에 설치하기
 
-> **필요한 것:** 64비트 윈도우 10(1809 이상) 또는 윈도우 11, 로블록스, 약 1.5GB의 저장 공간
+> **필요한 것:** 64비트 윈도우 10(1809 이상) 또는 윈도우 11, 로블록스, 약 500MB의 저장 공간
 > 윈도우 버전은 새로 추가돼서 실제 게임에서 아직 충분히 확인되지 않았어요. 이상한 점은 [Issues](https://github.com/Yoon-robin/Beolkkuri/issues)로 알려 주세요.
 
-1. **시작 버튼을 마우스 오른쪽 클릭 → 터미널**을 열어요. (윈도우 10은 **Windows PowerShell**)
-2. 아래 한 줄을 **복사해서 붙여넣고(Ctrl+V) 엔터**를 눌러요.
+1. **[Beolkkuri-Setup.exe 내려받기](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe)** 를 눌러 받은 파일을 열어요.
+2. **"Windows의 PC 보호"** 창이 뜨면 **추가 정보 → 실행** 을 눌러요. (코드 서명을 하지 않은 무료 프로그램이라 뜨는 창이에요)
+3. **설치하기** 를 누르면 끝이에요. 파이썬까지 다 들어 있고, 관리자 권한도 필요 없어요.
+4. **시작 메뉴**(체크하면 바탕화면에도)에 **벌꿀이** 가 생겨요. 설치 위치는 `%LOCALAPPDATA%\Programs\Beolkkuri` 예요.
 
-```powershell
-irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex
-```
-
-3. **5~10분** 정도 기다려요. 파이썬이 없으면 알아서 받아서 내 계정에만 설치해요(관리자 권한 필요 없음).
-   - 영어 글자 인식(OCR)을 설치할지 물으면 엔터를 눌러요. 관리자 확인 창이 뜨면 **예** 를 눌러요.
-4. 끝나면 **바탕화면과 시작 메뉴에 벌꿀이 바로가기**가 생겨요. 설치 위치는 `내 사용자 폴더\Beolkkuri` 예요.
-
-ZIP으로 설치하려면 ZIP을 받아 **압축 풀기**를 한 뒤 폴더 안의 **`install_dependencies.bat`** 을 더블클릭하세요. ("Windows의 PC 보호" 창이 뜨면 **추가 정보 → 실행**)
-윈도우는 **권한을 따로 줄 필요가 없어요.** 디스플레이 배율은 **100%** 를 추천해요. 자세한 설명: [docs/windows.md](docs/windows.md)
+PowerShell을 쓴다면 `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` 로도 같은 설치 파일을 열 수 있어요.
+윈도우는 **권한을 따로 줄 필요가 없어요.** 디스플레이 배율은 **100%** 를 추천하고, 시작 가이드에서 **영어 글자 인식**을 추가하면 게임 글자를 더 정확하게 읽어요. 자세한 설명: [docs/windows.md](docs/windows.md)
 
 ---
 
 ## ▶️ 처음 실행하기
 
 1. 로블록스에서 **비 스웜 시뮬레이터**에 들어가요.
-2. 바탕화면의 **벌꿀이**를 더블클릭해요. (또는 폴더 안의 `run_macro.command`, 윈도우는 `run_macro.bat`)
+2. 바탕화면의 **벌꿀이**를 더블클릭해요. (윈도우는 시작 메뉴에도 있어요. 맥은 폴더 안의 `run_macro.command` 로도 열 수 있어요)
 3. 매크로 화면이 열리면 왼쪽의 **시작 가이드** 를 따라 해요.
    - **설정 → 게임 설정** 에서 내 **벌집 번호**를 맞추고,
    - **채집** 에서 갈 필드를 켜고,
@@ -110,7 +104,7 @@ ZIP으로 설치하려면 ZIP을 받아 **압축 풀기**를 한 뒤 폴더 안�
 > 매크로가 도는 동안 로블록스 창을 가리거나 움직이지 마세요. 터미널 창(윈도우는 벌꿀이 명령 창)은 닫으면 안 돼요(최소화는 괜찮아요).
 
 ### 업데이트
-왼쪽 아래 **업데이트 확인** 을 누르면 최신 버전으로 알아서 바꿔 줘요. 내 설정은 그대로 남아요.
+새 버전이 나오면 벌꿀이를 켤 때 알아서 업데이트하고 다시 켜져요. 매크로가 돌아가는 중에는 하지 않고, 내 설정은 그대로 남아요. 자동 업데이트는 **설정 → 기타 설정** 에서 끌 수 있고, 왼쪽 아래 **업데이트 확인** 으로 바로 할 수도 있어요.
 
 ---
 
@@ -148,7 +142,7 @@ ZIP으로 설치하려면 ZIP을 받아 **압축 풀기**를 한 뒤 폴더 안�
 
 터미널에서 `rm -rf ~/beolkkuri-env ~/robin-macro-env` 를 실행한 뒤, [한 줄 설치](#1-한-줄로-설치하기-추천) 명령을 다시 붙여넣으세요.
 
-윈도우는 터미널에서 `Remove-Item -Recurse -Force $HOMEeolkkuri-env` 를 실행한 뒤 [윈도우 한 줄 설치](#-윈도우에-설치하기)를 다시 하면 돼요.
+윈도우는 [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) 를 다시 실행하면 파이썬까지 새로 깔려요. 지우려면 **설정 → 앱 → 설치된 앱** 에서 벌꿀이를 제거해요.
 </details>
 
 ---
@@ -160,7 +154,7 @@ Beolkkuri/
 ├── src/            파이썬 매크로 (main.py, gui.py, modules/)
 │   └── webapp/     빌드된 화면 (ui/ 에서 자동 생성, 직접 고치지 마세요)
 ├── ui/             React + TypeScript + Tailwind + shadcn/ui 화면 소스
-├── scripts/windows/ 윈도우 설치·실행 스크립트 (install.ps1, *.bat 이 부르는 것)
+├── scripts/windows/ 윈도우 설치 파일(installer/, build_installer.ps1)과 소스 설치·실행 스크립트
 ├── paths/          이동 경로 스크립트
 ├── settings/       기본 설정과 채집 패턴
 └── docs/           도움말 문서
@@ -185,8 +179,9 @@ pnpm build                 # src/webapp 으로 빌드 (커밋에 포함해야 �
 **Beolkkuri** (벌꿀이) is a Bee Swarm Simulator macro for macOS and Windows with a React + shadcn/ui interface in Korean and English.
 
 **Install:** Open Terminal and paste `curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash`, then wait 10-20 minutes. (Or download the ZIP, right-click `install_dependencies.command` and choose *Open*.) When it finishes, allow **Terminal** under *System Settings → Privacy & Security → Accessibility* and *Screen Recording*.
-**Install on Windows:** Open Terminal (or Windows PowerShell) and paste `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex`. (Or extract the ZIP and double-click `install_dependencies.bat`.) Windows needs no permissions; 100% display scaling is recommended. Windows support is new, so please report anything odd. See [docs/windows.md](docs/windows.md).
-**Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer put on your Desktop (or run `run_macro.command` on macOS, `run_macro.bat` on Windows). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
+**Install on Windows:** Download [Beolkkuri-Setup.exe](https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe) and open it (if "Windows protected your PC" appears, click *More info → Run anyway*). It installs for your account with Python included and needs no administrator rights. In PowerShell, `irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex` opens the same installer. Windows needs no permissions; 100% display scaling is recommended. Windows support is new, so please report anything odd. See [docs/windows.md](docs/windows.md).
+**Run:** Open Bee Swarm Simulator in Roblox, then open the **벌꿀이** (Beolkkuri) app or shortcut the installer made (on Windows it's in the Start menu too). Follow *Getting Started* in the sidebar. Default hotkeys: F1 start, F2 pause, F3 stop.
+**Updates:** Beolkkuri updates itself and restarts when you open it, never while the macro runs. You can turn this off under *Settings → Other*.
 
 Features: field gathering with patterns and AI token gathering, dispensers/collectibles, mob and boss runs, quests, manual and auto planters, hotbar and field boosts, rejoining, death recovery, profiles, Discord webhooks, a bot and streaming, and hourly reports.
 
@@ -197,5 +192,6 @@ Features: field gathering with patterns and AI token gathering, dispensers/colle
 - Movement patterns and paths by Existance, NatroTeam, tvojamamkajenic, sev, dully176, chillketchup and Electro.
 - Inspired by [Natro Macro](https://github.com/NatroTeam/NatroMacro), [Stumpy Macro](https://github.com/alaninnovates/bss-macro) and [Existance Macro](https://github.com/existancepy/bss-macro-py).
 - This product includes software developed by exihs (Existance Macro).
+- The Windows installer uses the [Black Han Sans](https://fonts.google.com/specimen/Black+Han+Sans) font by Zess Type (SIL Open Font License 1.1).
 
 Beolkkuri is not affiliated with Onett, Bee Swarm Simulator or Roblox. Using macros is at your own risk. See [LICENSE](LICENSE) for the licenses of included code.

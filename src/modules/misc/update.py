@@ -21,6 +21,12 @@ INSTALLED_FILES_MANIFEST = os.path.join("src", "data", "user", "installed_files.
 # Users add their own files next to the shipped ones in these folders. Only
 # remove a file here when a previous update installed it and it is unedited.
 USER_EXTENSIBLE_FOLDERS = {"paths"}
+# Beolkkuri-Setup.exe installs its own Python here (Windows). Updates leave it
+# alone; installing a newer Beolkkuri-Setup.exe replaces it.
+BUNDLED_RUNTIME_FOLDER = "runtime"
+# Launchers that set BEOLKKURI_LAUNCHER start the macro again when it exits
+# with this code (Beolkkuri.exe and run_macro.ps1).
+RESTART_EXIT_CODE = 75
 
 # Preserve this flag across importlib.reload().  It prevents the freshly
 # loaded updater from handing off to itself a second time.
@@ -656,6 +662,8 @@ def _create_backup(destination, backup_path, protected_folders, protected_files)
     excluded_folders.update({
         ".git",
         os.path.join("src", "data", "user", "robin_ai_recordings"),
+        # The bundled Python is hundreds of megabytes and updates never change it.
+        BUNDLED_RUNTIME_FOLDER,
     })
     backup_abs = os.path.abspath(backup_path)
 
@@ -805,8 +813,87 @@ def _start_windows_dependency_install(destination):
         pass
 
 
-def update(t="main", update_channel="stable", progress_callback=None):
-    """Install the latest release from the selected update channel."""
+def _bundled_python(destination):
+    """The Python that Beolkkuri-Setup.exe installed, or None for script installs."""
+    python = os.path.join(destination, BUNDLED_RUNTIME_FOLDER, "python.exe")
+    return python if sys.platform == "win32" and os.path.isfile(python) else None
+
+
+def _install_windows_dependencies(destination, progress_callback=None):
+    """Add the packages a new version needs before the macro starts again."""
+    python = _bundled_python(destination)
+    if not python and sys.prefix != sys.base_prefix:
+        # A script install runs from its own virtual environment (beolkkuri-env).
+        python = sys.executable
+    requirements = os.path.join(destination, "requirements-windows.txt")
+    if not python or not os.path.isfile(requirements):
+        _start_windows_dependency_install(destination)
+        return
+    # Wait for pip here: the macro restarts right after the update and must not
+    # import a library while pip is still replacing it.
+    _report_update_progress(progress_callback, 97, "Installing libraries")
+    try:
+        import subprocess
+        subprocess.run([python, "-m", "pip", "install", "--prefer-binary", "--disable-pip-version-check",
+                        "--no-warn-script-location", "-r", requirements, "-c", requirements],
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL,
+                       stdin=subprocess.DEVNULL,
+                       creationflags=subprocess.CREATE_NO_WINDOW,
+                       timeout=900,
+                       check=False)
+    except Exception as exc:
+        print(f"[updater] Could not install libraries: {exc}")
+
+
+def _record_windows_version(destination, version):
+    """Show the new version in Windows' installed apps list (installer builds)."""
+    if not _bundled_python(destination):
+        return
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Uninstall\Beolkkuri",
+                            0, winreg.KEY_SET_VALUE) as key:
+            winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, version)
+    except OSError:
+        pass
+
+
+def restart_app():
+    """End this macro and start the installed (just updated) version."""
+    import atexit
+    import subprocess
+    # Stop the macro processes and release inputs the way a normal exit does.
+    try:
+        atexit._run_exitfuncs()
+    except Exception as exc:
+        print(f"[updater] Cleanup before restart failed: {exc}")
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.flush()
+        except Exception:
+            pass
+    if sys.platform != "win32":
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    if not os.environ.get("BEOLKKURI_LAUNCHER"):
+        # Started by a launcher that cannot restart it: open a new window with
+        # the updated launcher, then let this one close.
+        try:
+            launcher = os.path.join(_installation_root(), "run_macro.bat")
+            subprocess.Popen(["cmd", "/c", "start", "", launcher],
+                             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, close_fds=True)
+        except Exception as exc:
+            print(f"[updater] Could not start the updated macro: {exc}")
+        os._exit(0)
+    os._exit(RESTART_EXIT_CODE)
+
+
+def update(t="main", update_channel="stable", progress_callback=None, notify=True):
+    """Install the latest release from the selected update channel.
+
+    ``notify=False`` skips the start and success dialogs (automatic updates
+    restart the macro instead); failures still show a dialog.
+    """
     _report_update_progress(progress_callback, 0, "Starting update")
     # Don't show the blocking "Updating..." dialog while merely checking
     # for updates. Show it only after we've determined that a newer
@@ -820,6 +907,7 @@ def update(t="main", update_channel="stable", progress_callback=None):
         os.path.join("src", "data", "models"),
         os.path.join("settings", "profiles"),
         os.path.join("settings", "patterns"),
+        BUNDLED_RUNTIME_FOLDER,
     ]
     protected_files = [".git"]
     pattern_overwrite_exceptions = PATTERN_OVERWRITE_EXCEPTIONS
@@ -836,6 +924,7 @@ def update(t="main", update_channel="stable", progress_callback=None):
         t=t,
         update_channel=update_channel,
         progress_callback=progress_callback,
+        notify=notify,
     )
     if refreshed_result is not None:
         return refreshed_result[1]
@@ -867,45 +956,50 @@ def update(t="main", update_channel="stable", progress_callback=None):
     }
     
     remote_version = None
+    remote_tag = None
     try:
         _report_update_progress(progress_callback, 25, "Checking latest version")
         r = requests.get(github_releases_api, timeout=10, headers=headers)
         r.raise_for_status()
         releases = r.json()
-        
+
         if releases:
             # Filter releases based on channel preference
             if update_channel == "beta":
                 # Beta channel: accept any release (prerelease or stable)
                 # Get the first one (most recent)
                 if releases[0].get("tag_name"):
-                    remote_version = releases[0].get("tag_name").lstrip("v")
+                    remote_tag = releases[0].get("tag_name")
             else:
                 # Stable channel: only non-prerelease versions
                 for rel in releases:
                     if not rel.get("prerelease") and rel.get("tag_name"):
-                        remote_version = rel.get("tag_name").lstrip("v")
+                        remote_tag = rel.get("tag_name")
                         break
+            if remote_tag:
+                remote_version = remote_tag.lstrip("v")
     except Exception:
         pass
-    
+
     if not remote_version:
         _report_update_progress(progress_callback, 100, "Update failed: could not fetch remote version")
         msgBox("Update failed", "Could not fetch remote version. Update aborted.")
         return False
 
-    # Construct zip link using the fetched remote_version
-    zip_link = f"https://github.com/Yoon-robin/Beolkkuri/archive/refs/tags/{remote_version}.zip"
+    # The tag itself, which may be "v1.2.3" or "1.2.3".
+    zip_link = f"https://github.com/Yoon-robin/Beolkkuri/archive/refs/tags/{remote_tag}.zip"
 
     if not _is_remote_newer(local_version, remote_version):
         _report_update_progress(progress_callback, 100, "No update available")
-        msgBox("Up to date", "No update available. Remote version is not newer.")
+        if notify:
+            msgBox("Up to date", "No update available. Remote version is not newer.")
         return False
 
     # At this point we know an update is available — prompt the user to
     # start the update. This is intentionally shown after checking so
     # the dialog doesn't appear during the version check.
-    msgBox("Update in progress", "Updating... Do not close terminal, press ok to start update.")
+    if notify:
+        msgBox("Update in progress", "Updating... Do not close terminal, press ok to start update.")
 
     # create a silent backup (overwrite previous backup) only after confirming
     # that an update will be applied.
@@ -1029,7 +1123,8 @@ def update(t="main", update_channel="stable", progress_callback=None):
     try:
         _report_update_progress(progress_callback, 96, "Finishing update")
         if sys.platform == "win32":
-            _start_windows_dependency_install(destination)
+            _install_windows_dependencies(destination, progress_callback)
+            _record_windows_version(destination, remote_version)
         install_script = os.path.join(destination, "install_dependencies.command")
         if sys.platform == "darwin" and os.path.exists(install_script):
             try:
@@ -1053,7 +1148,8 @@ def update(t="main", update_channel="stable", progress_callback=None):
         pass
 
     _report_update_progress(progress_callback, 100, "Update complete")
-    msgBox("Update success", "Update complete. You can now relaunch the macro")
+    if notify:
+        msgBox("Update success", "Update complete. You can now relaunch the macro")
     return True
 
 
@@ -1065,6 +1161,7 @@ def update_from_commit(commit_hash, progress_callback=None):
         os.path.join("src", "data", "models"),
         os.path.join("settings", "profiles"),
         os.path.join("settings", "patterns"),
+        BUNDLED_RUNTIME_FOLDER,
     ]
     protected_files = [".git"]
     pattern_overwrite_exceptions = PATTERN_OVERWRITE_EXCEPTIONS
@@ -1205,7 +1302,7 @@ def update_from_commit(commit_hash, progress_callback=None):
     try:
         _report_update_progress(progress_callback, 96, "Finishing update")
         if sys.platform == "win32":
-            _start_windows_dependency_install(destination)
+            _install_windows_dependencies(destination, progress_callback)
         install_script = os.path.join(destination, "install_dependencies.command")
         if sys.platform == "darwin" and os.path.exists(install_script):
             try:

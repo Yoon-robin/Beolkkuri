@@ -528,6 +528,88 @@ def openPrivacySettings(kind):
     if pane and sys.platform == "darwin":
         subprocess.run(["open", pane])
 
+# Windows reads game text best with its English OCR engine, but Korean Windows often
+# ships only the Korean one. The guide offers to add it (Beolkkuri-Setup.exe doesn't).
+_englishOcr = {"installed": None, "installing": False}
+_ENGLISH_OCR_CHECK = ("from winrt.windows.globalization import Language\n"
+                      "from winrt.windows.media.ocr import OcrEngine\n"
+                      "print(any(OcrEngine.is_language_supported(Language(t)) for t in ('en-US', 'en')))")
+
+def _hasEnglishOcr(fresh=False):
+    if not fresh:
+        try:
+            from winrt.windows.globalization import Language
+            from winrt.windows.media.ocr import OcrEngine
+            return any(OcrEngine.is_language_supported(Language(t)) for t in ("en-US", "en"))
+        except Exception:
+            return None
+    import subprocess
+    # A process caches the engine list, so only a new one sees a language added just now.
+    try:
+        result = subprocess.run([sys.executable, "-c", _ENGLISH_OCR_CHECK], capture_output=True, text=True,
+                                timeout=60, creationflags=subprocess.CREATE_NO_WINDOW)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return {"True": True, "False": False}.get(result.stdout.strip())
+
+def _runElevated(exe, params):
+    """Run exe as administrator, hidden, and wait for it. Windows asks the user first.
+    Returns the exit code, or None when the user said no."""
+    import ctypes
+    from ctypes import wintypes
+
+    class SHELLEXECUTEINFOW(ctypes.Structure):
+        _fields_ = [("cbSize", wintypes.DWORD), ("fMask", ctypes.c_ulong), ("hwnd", wintypes.HWND),
+                    ("lpVerb", wintypes.LPCWSTR), ("lpFile", wintypes.LPCWSTR), ("lpParameters", wintypes.LPCWSTR),
+                    ("lpDirectory", wintypes.LPCWSTR), ("nShow", ctypes.c_int), ("hInstApp", wintypes.HINSTANCE),
+                    ("lpIDList", ctypes.c_void_p), ("lpClass", wintypes.LPCWSTR), ("hkeyClass", wintypes.HKEY),
+                    ("dwHotKey", wintypes.DWORD), ("hIconOrMonitor", wintypes.HANDLE), ("hProcess", wintypes.HANDLE)]
+
+    user32, shell32, kernel32 = ctypes.windll.user32, ctypes.windll.shell32, ctypes.windll.kernel32
+    user32.GetForegroundWindow.restype = wintypes.HWND
+    shell32.ShellExecuteExW.argtypes = [ctypes.POINTER(SHELLEXECUTEINFOW)]
+    kernel32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    kernel32.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+
+    info = SHELLEXECUTEINFOW(cbSize=ctypes.sizeof(SHELLEXECUTEINFOW), fMask=0x40,  # SEE_MASK_NOCLOSEPROCESS
+                             lpVerb="runas", lpFile=exe, lpParameters=params, nShow=0)
+    # Owned by the app window the user just clicked in, so the prompt opens in front
+    # instead of blinking in the taskbar.
+    info.hwnd = user32.GetForegroundWindow()
+    if not shell32.ShellExecuteExW(ctypes.byref(info)):
+        return None
+    kernel32.WaitForSingleObject(info.hProcess, 0xFFFFFFFF)
+    code = wintypes.DWORD()
+    kernel32.GetExitCodeProcess(info.hProcess, ctypes.byref(code))
+    kernel32.CloseHandle(info.hProcess)
+    return code.value
+
+@eel.expose
+def getOcrStatus():
+    """Windows only: whether English OCR is installed (None when it can't be checked) and whether it is being added."""
+    if sys.platform != "win32":
+        return None
+    if _englishOcr["installed"] is None and not _englishOcr["installing"]:
+        _englishOcr["installed"] = _hasEnglishOcr()
+    return dict(_englishOcr)
+
+@eel.expose
+def installEnglishOcr():
+    """Add English OCR in the background; the UI polls getOcrStatus until it is done."""
+    if sys.platform != "win32" or _englishOcr["installing"]:
+        return
+
+    def install():
+        _runElevated("powershell.exe", "-NoProfile -Command Add-WindowsCapability -Online -Name Language.OCR~~~en-US~0.0.1.0")
+        _englishOcr["installed"] = _hasEnglishOcr(fresh=True)
+        _englishOcr["installing"] = False
+
+    _englishOcr["installing"] = True
+    # A thread, not an eel call that waits: eel runs on gevent without monkey patching,
+    # so a long wait here would freeze the window.
+    threading.Thread(target=install, daemon=True).start()
+
 @eel.expose
 def start():
     if run.value != 3:
@@ -1225,25 +1307,36 @@ def syncToolSession(session_id):
     }
 
 @eel.expose
-def update():
+def update(auto=False):
+    """Install the latest release, then restart into it.
+
+    The window shows the progress, so the updater's own dialogs are skipped
+    (failures still show one). ``auto`` is the on-launch update, which never
+    interrupts a running macro.
+    """
     def send_update_progress(percent, message):
         try:
             eel.updateProgress(percent, message)()
         except Exception:
             pass
 
-    try:
-        # Get the update channel preference
-        generalsettings_path = os.path.join(settingsManager.getProfilePath(), "generalsettings.txt")
-        settings = settingsManager.readSettingsFile(generalsettings_path)
-        update_channel = settings.get("update_channel", "stable")
-        
-        updated = updateModule.update(update_channel=update_channel, progress_callback=send_update_progress)
-    except Exception:
+    if auto and getRunState() != 3:
         updated = False
+    else:
+        try:
+            # Get the update channel preference
+            generalsettings_path = os.path.join(settingsManager.getProfilePath(), "generalsettings.txt")
+            settings = settingsManager.readSettingsFile(generalsettings_path)
+            update_channel = settings.get("update_channel", "stable")
+
+            updated = updateModule.update(update_channel=update_channel, progress_callback=send_update_progress, notify=False)
+        except Exception:
+            updated = False
     if updated:
+        send_update_progress(100, "Restarting")
         eel.closeWindow()
-        sys.exit()
+        eel.sleep(0.5)
+        updateModule.restart_app()
     else:
         try:
             eel.updateButtonReset()()
@@ -1306,6 +1399,18 @@ def getAutoUpdateCheckDisabled():
         generalsettings_path = os.path.join(settingsManager.getProfilePath(), "generalsettings.txt")
         settings = settingsManager.readSettingsFile(generalsettings_path)
         return settings.get("auto_update_check_disabled", False)
+    except Exception:
+        return False
+
+@eel.expose
+def getAutoUpdate():
+    """Whether to install updates on launch without asking (never in a git checkout)."""
+    try:
+        if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".git")):
+            return False
+        generalsettings_path = os.path.join(settingsManager.getProfilePath(), "generalsettings.txt")
+        settings = settingsManager.readSettingsFile(generalsettings_path)
+        return bool(settings.get("auto_update", True))
     except Exception:
         return False
 

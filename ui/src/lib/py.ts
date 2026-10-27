@@ -66,7 +66,12 @@ export const py = {
   getCurrentProfile: () => callPy<string>("getCurrentProfile"),
   getPermissionStatus: () => callPy<PermissionStatus>("getPermissionStatus"),
   openPrivacySettings: (kind: PermissionKind) => callPy("openPrivacySettings", kind),
+  getOcrStatus: () => callPy<OcrStatus | null>("getOcrStatus"),
+  installEnglishOcr: () => callPy("installEnglishOcr"),
 }
+
+/** Windows only (null elsewhere). installed is null when it can't be checked. */
+export type OcrStatus = { installed: boolean | null; installing: boolean }
 
 /** null means the check is not available on this macOS version. */
 export type PermissionStatus = { accessibility: boolean | null; screenRecording: boolean | null; fullKeyboardAccess: boolean | null }

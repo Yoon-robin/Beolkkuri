@@ -2358,6 +2358,15 @@
     "desc": "",
     "settings": [
       {
+        "id": "auto_update",
+        "title": "Update automatically",
+        "desc": "When a new version is out, update and restart by itself when the macro opens. It never updates while the macro is running. When off, it asks first.",
+        "type": {
+          "name": "checkbox",
+          "triggerFunction": "saveSetting(this, 'general')"
+        }
+      },
+      {
         "id": "update_channel",
         "title": "Update Channel",
         "desc": "Stable: Only stable releases | Beta: Includes pre-release versions for testing",

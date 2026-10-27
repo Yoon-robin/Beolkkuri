@@ -8,6 +8,10 @@ macroLogs.log
 /include
 /lib
 /share
+# Added by Beolkkuri-Setup.exe on Windows; the in-app updater must never remove them.
+/runtime/
+/Beolkkuri.exe
+/uninstall.exe
 /src/node_modules
 src/webapp/test.html
 src/webapp/updated_commit.txt

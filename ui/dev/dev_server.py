@@ -9,6 +9,7 @@ usage: python ui/dev/dev_server.py   (listens on 127.0.0.1:8765)
 import json
 import os
 import sys
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -20,6 +21,19 @@ import settingsManager  # noqa: E402
 # Pretend screen recording is still off so the permission UI can be exercised;
 # "opening" its settings pane turns it on.
 DEV_PERMISSIONS = {"accessibility": True, "screenRecording": False, "fullKeyboardAccess": False}
+# Windows: English OCR starts missing, and "installing" it takes a few seconds.
+DEV_OCR = {"installed": False, "installing": False}
+
+
+def dev_install_ocr():
+    DEV_OCR["installing"] = True
+
+    def finish():
+        time.sleep(4)
+        DEV_OCR.update(installed=True, installing=False)
+
+    threading.Thread(target=finish, daemon=True).start()
+
 RUN_STATE = {"value": 3}  # 0 stopping, 2 running, 3 stopped, 6 paused
 LOGS = [
     {"time": time.strftime("%H:%M:%S"), "title": "Dev server", "desc": "Settings are live; macro calls are stubbed.", "color": "7289da"},
@@ -55,12 +69,15 @@ STUBS = {
     "getRunState": lambda: RUN_STATE["value"],
     "getPermissionStatus": lambda: dict(DEV_PERMISSIONS),
     "openPrivacySettings": lambda kind: DEV_PERMISSIONS.update({kind: True}),
+    "getOcrStatus": lambda: dict(DEV_OCR) if sys.platform == "win32" else None,
+    "installEnglishOcr": dev_install_ocr,
     "setRunState": lambda v: RUN_STATE.update(value=v),
     "getRecentLogs": lambda: LOGS,
     "clearRecentLogs": lambda: LOGS.clear(),
     "getMacroVersion": settingsManager.getMacroVersion,
     "checkForUpdates": lambda: {"available": False},
     "getAutoUpdateCheckDisabled": lambda: True,
+    "getAutoUpdate": lambda: False,
     "getPatterns": lambda: sorted(
         os.path.splitext(f)[0] for f in os.listdir(os.path.join(ROOT, "settings", "patterns")) if f.endswith(".py")
     ),

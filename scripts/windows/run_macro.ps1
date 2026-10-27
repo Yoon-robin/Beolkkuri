@@ -37,12 +37,21 @@ if (-not (Test-Path $VenvPython)) {
 
 # Read and write files as UTF-8 regardless of the Windows language (Korean Windows defaults to CP949).
 $env:PYTHONUTF8 = "1"
+# Tells the macro that this window starts it again when it exits with code 75 after an update.
+$env:BEOLKKURI_LAUNCHER = "1"
 Set-Location (Join-Path $MacroDir "src")
 Write-Host "벌꿀이 실행 중... 이 창은 매크로가 켜져 있는 동안 열어 두세요." -ForegroundColor Green
 Write-Host "Starting Beolkkuri. Keep this window open while the macro runs." -ForegroundColor Green
 & $VenvPython --version
-& $VenvPython main.py
-$code = $LASTEXITCODE
+do {
+	& $VenvPython main.py
+	$code = $LASTEXITCODE
+	if ($code -eq 75) {
+		Write-Host ""
+		Write-Host "업데이트를 마쳤어요. 벌꿀이를 다시 켜요..." -ForegroundColor Green
+		Write-Host "Update installed. Restarting Beolkkuri..." -ForegroundColor Green
+	}
+} while ($code -eq 75)
 
 if ($code -ne 0) {
 	# Keep the error on screen; a double-clicked window would otherwise close at once.
