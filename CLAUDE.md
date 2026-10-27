@@ -135,7 +135,7 @@ Written from scratch in C# (no NSIS/Inno), compiled with the `csc.exe` that ship
   - Gallery screenshots change with a circle wipe.
   - The final headline fills with ink as you scroll.
   - The copy buttons give off honey sparks.
-- macOS and Windows: the install commands (hero and `#install`), steps and help link follow the visitor's OS (`navigator.platform`), and the `#install` tabs switch them. On macOS, `#install` shows the curl command and a demo terminal playing `MAC_SCRIPT`, shortened from what `install_dependencies.command` prints; keep it in step with the installer. On Windows, it shows a download button for `releases/latest/download/Beolkkuri-Setup.exe` and the installer screenshot `site/assets/setup-<lang>.webp` (made with Setup.exe `/shot`, see "Windows installer").
+- macOS and Windows: the install commands (hero and `#install`), steps and help link follow the visitor's OS (`navigator.platform`), and the `#install` tabs switch them. On macOS, the hero and `#install` show the curl command, and `#install` has a demo terminal playing `MAC_SCRIPT`, shortened from what `install_dependencies.command` prints; keep it in step with the installer. On Windows, both show a download button for `releases/latest/download/Beolkkuri-Setup.exe`, and `#install` has the installer screenshot `site/assets/setup-<lang>.webp` (made with Setup.exe `/shot`, see "Windows installer").
 - Preview: `python -m http.server 8790 --directory site` (`beolkkuri-site` in `.claude/launch.json`).
 - Check it: `cd scripts/site && npm install && node check-site.mjs out`. This screenshots each section at desktop (1440), mobile (390) and English, and prints horizontal overflow and JS errors. Both should be 0/none.
 - Refresh the app screenshots:

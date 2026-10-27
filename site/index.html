@@ -502,16 +502,20 @@ footer a:hover { color: var(--honey); }
           </h1>
           <p class="lead rise" style="animation-delay:.3s" data-i18n="hero.lead">벌꿀이는 맥과 윈도우에서 비 스웜 시뮬레이터를 대신 돌려 주는 매크로예요. 필드에서 꽃가루를 모으고, 가방이 차면 꿀로 바꾸고, 쿨타임이 돌아온 디스펜서와 몹을 챙겨요.</p>
 
-          <div class="cmd rise" style="animation-delay:.42s">
+          <div class="cmd rise" style="animation-delay:.42s" data-os-only="mac">
             <span class="prompt">$</span>
             <code id="cmd1">curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash</code>
             <button class="copy" type="button" data-copy="cmd1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span data-i18n="copy">복사</span></button>
           </div>
 
           <div class="hero-cta rise" style="animation-delay:.52s">
-            <a class="btn btn-ink" href="#install">
+            <a class="btn btn-ink" href="#install" data-os-only="mac">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
               <span data-i18n="hero.cta">설치하기</span>
+            </a>
+            <a class="btn btn-ink" href="https://github.com/Yoon-robin/Beolkkuri/releases/latest/download/Beolkkuri-Setup.exe" data-os-only="win" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+              <span data-i18n="hero.wcta">설치 파일 내려받기</span>
             </a>
             <a class="btn btn-white" href="https://github.com/Yoon-robin/Beolkkuri" target="_blank" rel="noopener">
               <span data-i18n="hero.gh">GitHub에서 보기</span>
@@ -519,7 +523,8 @@ footer a:hover { color: var(--honey); }
           </div>
           <div class="hero-meta rise" style="animation-delay:.62s">
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.1">macOS · Windows</span></span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 20분 이내</span></span>
+            <span data-os-only="mac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.2">설치 20분 이내</span></span>
+            <span data-os-only="win" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.w2">파일 하나로 설치</span></span>
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="meta.3">코딩 몰라도 돼요</span></span>
           </div>
         </div>
@@ -805,8 +810,8 @@ footer a:hover { color: var(--honey); }
     "nav.hour": "What it does", "nav.features": "Features", "nav.screens": "Screens", "nav.install": "Install", "nav.faq": "FAQ",
     "hero.t1": "Let Beolkkuri", "hero.t2": "farm the honey",
     "hero.lead": "Beolkkuri plays Bee Swarm Simulator for you on Mac and Windows. It gathers pollen, converts it when your bag is full, and stops by dispensers and mobs as their cooldowns come back.",
-    "hero.cta": "Install", "hero.gh": "View on GitHub", copy: "Copy",
-    "meta.1": "macOS & Windows", "meta.2": "Installs in under 20 min", "meta.3": "No coding needed",
+    "hero.cta": "Install", "hero.wcta": "Download the installer", "hero.gh": "View on GitHub", copy: "Copy",
+    "meta.1": "macOS & Windows", "meta.2": "Installs in under 20 min", "meta.w2": "One-file install", "meta.3": "No coding needed",
     "float.1": "Press F1 to start", "float.2": "Running <span class=\"clock\">1:02:13</span>", "float.3": "Search 246 settings",
     "hour.tag": "Example", "hour.title": "What an hour<br />looks like",
     "m1.t": "F1, and off it goes", "m1.d": "Flies from your hive to the first field.",
@@ -1097,17 +1102,12 @@ footer a:hover { color: var(--honey); }
   auto = setInterval(() => show((current + 1) % tabs.length), 6000)
 
   /* ---------------- macOS / Windows ---------------- */
-  // the install commands and steps follow the visitor's OS; the tabs in #install switch them.
-  // Windows installs with Beolkkuri-Setup.exe, so the demo terminal is macOS only.
-  const CMD = {
-    mac: "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash",
-    win: "irm https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.ps1 | iex",
-  }
+  // the install buttons, commands and steps follow the visitor's OS; the tabs in #install switch them.
+  // macOS installs with the curl line (and the demo terminal), Windows with Beolkkuri-Setup.exe.
+  const MAC_CMD = "curl -fsSL https://raw.githubusercontent.com/Yoon-robin/Beolkkuri/main/install.sh | bash"
   let os = /win/i.test(navigator.userAgentData?.platform || navigator.platform || "") ? "win" : "mac"
   function setOS(next) {
     os = next
-    $("#cmd1").textContent = $("#cmd2").textContent = CMD[os]
-    $$(".cmd .prompt").forEach((p) => (p.textContent = os === "win" ? "PS>" : "$"))
     $$("[data-os-only]").forEach((el) => (el.hidden = el.dataset.osOnly !== os))
     $$(".os-tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.os === os)))
     if (termStarted && os === "mac") runTerminal()
@@ -1117,7 +1117,7 @@ footer a:hover { color: var(--honey); }
   /* ---------------- installer terminal ---------------- */
   const term = $("#term")
   const MAC_SCRIPT = () => [
-    ["", "$ ", "t-amber"], ["type", CMD.mac],
+    ["", "$ ", "t-amber"], ["type", MAC_CMD],
     ["ln", lang === "ko" ? "🐝 벌꿀이 내려받는 중..." : "🐝 Downloading Beolkkuri...", "t-amber"],
     ["ln", lang === "ko" ? "~/Beolkkuri 에 내려받았어요." : "Downloaded to ~/Beolkkuri", "t-green"],
     ["ln", "==============================================", "t-amber"],
